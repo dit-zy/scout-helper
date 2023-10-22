@@ -2,3 +2,6 @@
 obj/
 bin/
 *.user
+
+# JetBrains Rider
+.idea/
