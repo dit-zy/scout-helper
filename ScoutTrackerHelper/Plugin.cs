@@ -3,8 +3,12 @@ using Dalamud.Interface.Windowing;
 using Dalamud.IoC;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
+using Lumina.Data;
+using ScoutTrackerHelper.Localization;
+using ScoutTrackerHelper.Managers;
 using ScoutTrackerHelper.Windows;
-using System.IO;
+using System;
+using System.Globalization;
 
 namespace ScoutTrackerHelper;
 
@@ -17,29 +21,39 @@ public sealed class Plugin : IDalamudPlugin {
 
 	public readonly WindowSystem WindowSystem = new("ScoutTrackerHelper");
 
-	private DalamudPluginInterface PluginInterface { get; init; }
-	private ICommandManager CommandManager { get; init; }
-	public Configuration Configuration { get; init; }
+	[PluginService] public static DalamudPluginInterface PluginInterface { get; private set; } = null!;
+	[PluginService] public static IPluginLog Log { get; private set; } = null!;
+	[PluginService] public static Configuration Configuration { get; private set; } = null!;
+	[PluginService] public static IChatGui ChatGui { get; private set; } = null!;
+
+	[PluginService] private ICommandManager CommandManager { get; init; }
+
+	private HuntHelperManager HuntHelperManager { get; init; }
 
 	private ConfigWindow ConfigWindow { get; init; }
 	private MainWindow MainWindow { get; init; }
 
 	public Plugin(
-		[RequiredVersion("1.0")] DalamudPluginInterface pluginInterface,
-		[RequiredVersion("1.0")] ICommandManager commandManager
+		DalamudPluginInterface pluginInterface,
+		IPluginLog log,
+		ICommandManager commandManager,
+		IChatGui chatGui
 	) {
 		PluginInterface = pluginInterface;
+		Log = log;
 		CommandManager = commandManager;
+		ChatGui = chatGui;
 
 		Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
 		Configuration.Initialize(PluginInterface);
 
-		// you might normally want to embed resources and load them from the manifest stream
-		var imagePath = Path.Combine(PluginInterface.AssemblyLocation.Directory?.FullName!, "goat.png");
-		var goatImage = PluginInterface.UiBuilder.LoadImage(imagePath);
+		HuntHelperManager = new HuntHelperManager();
 
-		ConfigWindow = new ConfigWindow(this);
-		MainWindow = new MainWindow(this, goatImage);
+		ConfigWindow = new ConfigWindow();
+		MainWindow = new MainWindow(HuntHelperManager);
+
+		PluginInterface.LanguageChanged += OnLanguageChanged;
+		OnLanguageChanged(PluginInterface.UiLanguage);
 
 		WindowSystem.AddWindow(ConfigWindow);
 		WindowSystem.AddWindow(MainWindow);
@@ -47,7 +61,7 @@ public sealed class Plugin : IDalamudPlugin {
 		CommandManager.AddHandler(
 			CommandName,
 			new CommandInfo(OnCommand) {
-				HelpMessage = "A useful message to display in /xlhelp",
+				HelpMessage = "Opens the main window.",
 			}
 		);
 
@@ -56,16 +70,28 @@ public sealed class Plugin : IDalamudPlugin {
 	}
 
 	public void Dispose() {
+		PluginInterface.LanguageChanged -= OnLanguageChanged;
+		CommandManager.RemoveHandler(CommandName);
+
 		WindowSystem.RemoveAllWindows();
 
 		ConfigWindow.Dispose();
 		MainWindow.Dispose();
 
-		CommandManager.RemoveHandler(CommandName);
+		HuntHelperManager.Dispose();
+	}
+
+	private void OnLanguageChanged(string languageCode) {
+		try {
+			Log.Information($"Loading localization for {languageCode}");
+			Strings.Culture = new CultureInfo(languageCode);
+		}
+		catch (Exception e) {
+			Log.Error(e, "Unable to load localization for language code: {0}", languageCode);
+		}
 	}
 
 	private void OnCommand(string command, string args) {
-		// in response to the slash command, just display our main ui
 		MainWindow.IsOpen = true;
 	}
 
