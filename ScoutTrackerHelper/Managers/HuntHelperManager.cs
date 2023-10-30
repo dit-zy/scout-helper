@@ -1,4 +1,5 @@
-﻿using Dalamud.Plugin.Ipc;
+﻿using CSharpFunctionalExtensions;
+using Dalamud.Plugin.Ipc;
 using Dalamud.Plugin.Ipc.Exceptions;
 using ScoutTrackerHelper.Models;
 using System;
@@ -65,10 +66,10 @@ public class HuntHelperManager : IDisposable {
 		}
 	}
 
-	public List<TrainMob>? GetTrainList() {
+	public Result<List<TrainMob>, string> GetTrainList() {
 
 		if (!Available) {
-			return null;
+			return "Hunt Helper is not currently available ;-;";
 		}
 
 		try {
@@ -77,11 +78,12 @@ public class HuntHelperManager : IDisposable {
 		catch (IpcNotReadyError e) {
 			Plugin.Log.Warning("Hunt Helper appears to have disappeared ;-;. Can't get the train data ;-;. Disabling support until it comes back.");
 			Available = false;
+			return "Hunt Helper has disappeared from my sight ;-;";
 		}
 		catch (IpcError e) {
-			Plugin.Log.Error(e, "Hmm...something unexpected happened while retrieving train data from Hunt Helper.");
+			const string message = "Hmm...something unexpected happened while retrieving train data from Hunt Helper :T";
+			Plugin.Log.Error(e, message);
+			return message;
 		}
-
-		return null;
 	}
 }

@@ -21,4 +21,7 @@
 	<data name="TestButton" xml:space="preserve">
 		<value>Test Button</value>
 	</data>
+	<data name="MainWindowTitle" xml:space="preserve">
+		<value>Scout Helper</value>
+	</data>
 </root>

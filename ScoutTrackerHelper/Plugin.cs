@@ -19,38 +19,30 @@ public sealed class Plugin : IDalamudPlugin {
 
 	private const string CommandName = "/sth";
 
-	public readonly WindowSystem WindowSystem = new("ScoutTrackerHelper");
+	private WindowSystem WindowSystem { get; } = new("ScoutTrackerHelper");
 
+	public static Configuration Conf { get; private set; } = null!;
 	[PluginService] public static DalamudPluginInterface PluginInterface { get; private set; } = null!;
 	[PluginService] public static IPluginLog Log { get; private set; } = null!;
-	[PluginService] public static Configuration Configuration { get; private set; } = null!;
 	[PluginService] public static IChatGui ChatGui { get; private set; } = null!;
-
-	[PluginService] private ICommandManager CommandManager { get; init; }
+	[PluginService] public static ICommandManager CommandManager { get; private set; } = null!;
+	[PluginService] public static IClientState ClientState { get; private set; } = null!;
 
 	private HuntHelperManager HuntHelperManager { get; init; }
+	private BearManager BearManager { get; init; }
 
 	private ConfigWindow ConfigWindow { get; init; }
 	private MainWindow MainWindow { get; init; }
 
-	public Plugin(
-		DalamudPluginInterface pluginInterface,
-		IPluginLog log,
-		ICommandManager commandManager,
-		IChatGui chatGui
-	) {
-		PluginInterface = pluginInterface;
-		Log = log;
-		CommandManager = commandManager;
-		ChatGui = chatGui;
-
-		Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
-		Configuration.Initialize(PluginInterface);
+	public Plugin() {
+		Conf = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
+		Conf.Initialize(PluginInterface);
 
 		HuntHelperManager = new HuntHelperManager();
+		BearManager = new BearManager();
 
 		ConfigWindow = new ConfigWindow();
-		MainWindow = new MainWindow(HuntHelperManager);
+		MainWindow = new MainWindow(HuntHelperManager, BearManager);
 
 		PluginInterface.LanguageChanged += OnLanguageChanged;
 		OnLanguageChanged(PluginInterface.UiLanguage);
@@ -81,7 +73,7 @@ public sealed class Plugin : IDalamudPlugin {
 		HuntHelperManager.Dispose();
 	}
 
-	private void OnLanguageChanged(string languageCode) {
+	private static void OnLanguageChanged(string languageCode) {
 		try {
 			Log.Information($"Loading localization for {languageCode}");
 			Strings.Culture = new CultureInfo(languageCode);

@@ -60,6 +60,15 @@ namespace ScoutTrackerHelper.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Scout Helper.
+        /// </summary>
+        internal static string MainWindowTitle {
+            get {
+                return ResourceManager.GetString("MainWindowTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Test Button.
         /// </summary>
         internal static string TestButton {
