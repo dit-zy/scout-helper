@@ -60,20 +60,20 @@ namespace ScoutTrackerHelper.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Bear Toolkit.
+        /// </summary>
+        internal static string BearButton {
+            get {
+                return ResourceManager.GetString("BearButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Scout Helper.
         /// </summary>
         internal static string MainWindowTitle {
             get {
                 return ResourceManager.GetString("MainWindowTitle", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Test Button.
-        /// </summary>
-        internal static string TestButton {
-            get {
-                return ResourceManager.GetString("TestButton", resourceCulture);
             }
         }
     }

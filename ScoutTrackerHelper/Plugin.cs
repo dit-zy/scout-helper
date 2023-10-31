@@ -39,7 +39,7 @@ public sealed class Plugin : IDalamudPlugin {
 		Conf.Initialize(PluginInterface);
 
 		HuntHelperManager = new HuntHelperManager();
-		BearManager = new BearManager();
+		BearManager = new BearManager(Utils.DataFilePath("Bear.json"));
 
 		ConfigWindow = new ConfigWindow();
 		MainWindow = new MainWindow(HuntHelperManager, BearManager);

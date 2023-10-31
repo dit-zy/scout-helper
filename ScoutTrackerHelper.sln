@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29709.97
@@ -19,10 +19,6 @@ Global
 		{4FEC9558-EB25-419F-B86E-51B8CFDA32B7}.Debug|x64.Build.0 = Debug|x64
 		{4FEC9558-EB25-419F-B86E-51B8CFDA32B7}.Release|x64.ActiveCfg = Release|x64
 		{4FEC9558-EB25-419F-B86E-51B8CFDA32B7}.Release|x64.Build.0 = Release|x64
-		{F35D4AFD-D73D-48AE-8165-FECA62EAA3DB}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{F35D4AFD-D73D-48AE-8165-FECA62EAA3DB}.Debug|x64.Build.0 = Debug|Any CPU
-		{F35D4AFD-D73D-48AE-8165-FECA62EAA3DB}.Release|x64.ActiveCfg = Release|Any CPU
-		{F35D4AFD-D73D-48AE-8165-FECA62EAA3DB}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

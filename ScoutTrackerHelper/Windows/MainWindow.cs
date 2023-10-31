@@ -16,7 +16,7 @@ public class MainWindow : Window, IDisposable {
 
 	public MainWindow(HuntHelperManager huntHelperManager, BearManager bearManager) : base(
 		Strings.MainWindowTitle,
-		ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse
+		ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoResize
 	) {
 		SizeConstraints = new WindowSizeConstraints {
 			MinimumSize = new Vector2(64, 32),
@@ -32,7 +32,7 @@ public class MainWindow : Window, IDisposable {
 	}
 
 	public override void Draw() {
-		if (ImGui.Button(Strings.TestButton)) {
+		if (ImGui.Button(Strings.BearButton)) {
 			GenerateBearLink();
 		}
 	}

@@ -31,4 +31,11 @@
 	<ItemGroup>
 	  <PackageReference Include="CSharpFunctionalExtensions" Version="2.40.3" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <None Remove="Data\Bear.json" />
+	  <Resource Include="Data\Bear.json">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Resource>
+	</ItemGroup>
 </Project>
