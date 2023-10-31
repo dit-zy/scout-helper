@@ -1,5 +1,5 @@
 ﻿// ReSharper disable InconsistentNaming
-namespace ScoutTrackerHelper.Models;
+namespace ScoutHelper.Models;
 
 public enum Patch {
 	ARR,

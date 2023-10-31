@@ -3,7 +3,7 @@ using ImGuiNET;
 using System;
 using System.Numerics;
 
-namespace ScoutTrackerHelper.Windows;
+namespace ScoutHelper.Windows;
 
 public class ConfigWindow : Window, IDisposable {
 	private const ImGuiWindowFlags WindowFlags =

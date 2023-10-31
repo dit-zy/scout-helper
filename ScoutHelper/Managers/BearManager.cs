@@ -1,7 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using ScoutTrackerHelper.Models;
+using ScoutHelper.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -11,7 +11,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ScoutTrackerHelper.Managers;
+namespace ScoutHelper.Managers;
 
 public class BearManager : IDisposable {
 

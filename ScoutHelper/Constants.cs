@@ -1,6 +1,6 @@
 ﻿using System.Net.Http.Headers;
 
-namespace ScoutTrackerHelper;
+namespace ScoutHelper;
 
 public static class Constants {
 

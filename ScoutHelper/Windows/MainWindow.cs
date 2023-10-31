@@ -2,12 +2,12 @@
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
-using ScoutTrackerHelper.Localization;
-using ScoutTrackerHelper.Managers;
+using ScoutHelper.Localization;
+using ScoutHelper.Managers;
 using System;
 using System.Numerics;
 
-namespace ScoutTrackerHelper.Windows;
+namespace ScoutHelper.Windows;
 
 public class MainWindow : Window, IDisposable {
 

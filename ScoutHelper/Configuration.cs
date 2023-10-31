@@ -2,7 +2,7 @@
 using Dalamud.Plugin;
 using System;
 
-namespace ScoutTrackerHelper;
+namespace ScoutHelper;
 
 [Serializable]
 public class Configuration : IPluginConfiguration {

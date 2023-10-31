@@ -4,13 +4,13 @@ using Dalamud.IoC;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Lumina.Data;
-using ScoutTrackerHelper.Localization;
-using ScoutTrackerHelper.Managers;
-using ScoutTrackerHelper.Windows;
+using ScoutHelper.Localization;
+using ScoutHelper.Managers;
+using ScoutHelper.Windows;
 using System;
 using System.Globalization;
 
-namespace ScoutTrackerHelper;
+namespace ScoutHelper;
 
 // ReSharper disable once ClassNeverInstantiated.Global
 public sealed class Plugin : IDalamudPlugin {
@@ -19,7 +19,7 @@ public sealed class Plugin : IDalamudPlugin {
 
 	private const string CommandName = "/sth";
 
-	private WindowSystem WindowSystem { get; } = new("ScoutTrackerHelper");
+	private WindowSystem WindowSystem { get; } = new("ScoutHelper");
 
 	public static Configuration Conf { get; private set; } = null!;
 	[PluginService] public static DalamudPluginInterface PluginInterface { get; private set; } = null!;

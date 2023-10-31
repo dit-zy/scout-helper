@@ -1,7 +1,7 @@
 ﻿using Dalamud.Plugin.Services;
 using System.IO;
 
-namespace ScoutTrackerHelper;
+namespace ScoutHelper;
 
 public static class Utils {
 	public static string WorldName {

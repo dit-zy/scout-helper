@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Numerics;
 
-namespace ScoutTrackerHelper.Models;
+namespace ScoutHelper.Models;
 
 public record struct TrainMob(
 	string Name,

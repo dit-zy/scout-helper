@@ -3,7 +3,7 @@ using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 
-namespace ScoutTrackerHelper.Models;
+namespace ScoutHelper.Models;
 
 public record BearApiTrainRequest {
 	[JsonProperty("worldName")] public string WorldName { get; init; }

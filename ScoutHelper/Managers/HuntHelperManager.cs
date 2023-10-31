@@ -1,12 +1,12 @@
 ﻿using CSharpFunctionalExtensions;
 using Dalamud.Plugin.Ipc;
 using Dalamud.Plugin.Ipc.Exceptions;
-using ScoutTrackerHelper.Models;
+using ScoutHelper.Models;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace ScoutTrackerHelper.Managers;
+namespace ScoutHelper.Managers;
 
 public class HuntHelperManager : IDisposable {
 
