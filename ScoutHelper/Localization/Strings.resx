@@ -24,4 +24,10 @@
 	<data name="MainWindowTitle" xml:space="preserve">
 		<value>Scout Helper</value>
 	</data>
+	<data name="ConfigWindowTitle" xml:space="preserve">
+		<value>Scout Helper Settings</value>
+	</data>
+	<data name="ConfigWindowContent" xml:space="preserve">
+		<value>At this time there are no configurable settings for Scout Helper. Please use command `/sth` to open the Scout Helper window.</value>
+	</data>
 </root>

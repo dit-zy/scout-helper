@@ -91,7 +91,7 @@ public sealed class Plugin : IDalamudPlugin {
 		WindowSystem.Draw();
 	}
 
-	public void DrawConfigUi() {
+	private void DrawConfigUi() {
 		ConfigWindow.IsOpen = true;
 	}
 }

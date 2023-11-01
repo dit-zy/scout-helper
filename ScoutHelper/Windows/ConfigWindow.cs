@@ -1,23 +1,27 @@
-﻿using Dalamud.Interface.Windowing;
+﻿using Dalamud.Interface.Utility;
+using Dalamud.Interface.Windowing;
 using ImGuiNET;
+using ScoutHelper.Localization;
 using System;
 using System.Numerics;
 
 namespace ScoutHelper.Windows;
 
 public class ConfigWindow : Window, IDisposable {
-	private const ImGuiWindowFlags WindowFlags =
-		ImGuiWindowFlags.NoResize |
-		ImGuiWindowFlags.NoCollapse |
-		ImGuiWindowFlags.NoScrollbar |
-		ImGuiWindowFlags.NoScrollWithMouse;
 
-	public ConfigWindow() : base("A Wonderful Configuration Window", WindowFlags) {
-		Size = new Vector2(232, 75);
-		SizeCondition = ImGuiCond.FirstUseEver;
+	public ConfigWindow() : base(
+		Strings.ConfigWindowTitle,
+		ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoScrollbar
+	) {
+		SizeConstraints = new WindowSizeConstraints() {
+			MinimumSize = new Vector2(128 * ImGuiHelpers.GlobalScale, 0),
+			MaximumSize = new Vector2(float.MaxValue, float.MaxValue)
+		};
 	}
 
 	public void Dispose() { }
 
-	public override void Draw() { }
+	public override void Draw() {
+		ImGui.TextWrapped(Strings.ConfigWindowContent);
+	}
 }

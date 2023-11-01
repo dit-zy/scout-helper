@@ -69,6 +69,24 @@ namespace ScoutHelper.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to At this time there are no configurable settings for Scout Helper. Please use command `/sth` to open the Scout Helper window..
+        /// </summary>
+        internal static string ConfigWindowContent {
+            get {
+                return ResourceManager.GetString("ConfigWindowContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Scout Helper Settings.
+        /// </summary>
+        internal static string ConfigWindowTitle {
+            get {
+                return ResourceManager.GetString("ConfigWindowTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Scout Helper.
         /// </summary>
         internal static string MainWindowTitle {
