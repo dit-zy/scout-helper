@@ -1,12 +1,12 @@
 {
 	"Author": "ditzy",
-	"Name": "Scout Tracker Helper",
+	"Name": "Scout Helper",
 	"Punchline": "A helper plugin for pre-populating hunt train scout tracker links",
 	"Description": "A helper for generating scout tracker links for a-rank hunt trains",
 	"ApplicableVersion": "any",
 	"DalamudApiLevel": 9,
 	"LoadPriority": 0,
-	"InternalName": "scoutTrackerHelper",
+	"InternalName": "scoutHelper",
 	"Tags": [
 		"a rank",
 		"hunt",
@@ -15,5 +15,6 @@
 		"the hunt",
 		"train"
 	],
-	"RepoUrl": "https://github.com/im-scared/scout-tracker-helper"
+	"RepoUrl": "https://github.com/im-scared/scout-helper",
+	"IconUrl": "https://raw.githubusercontent.com/im-scared/scout-helper/main/images/icon.png"
 }

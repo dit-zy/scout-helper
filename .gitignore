@@ -2,6 +2,7 @@
 obj/
 bin/
 *.user
+*.xcf
 
 # JetBrains Rider
 .idea/
