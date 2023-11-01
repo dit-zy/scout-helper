@@ -19,15 +19,20 @@ public sealed class Plugin : IDalamudPlugin {
 
 	private const string CommandName = "/sth";
 
-	private WindowSystem WindowSystem { get; } = new("ScoutHelper");
-
 	public static Configuration Conf { get; private set; } = null!;
-	[PluginService] public static DalamudPluginInterface PluginInterface { get; private set; } = null!;
-	[PluginService] public static IPluginLog Log { get; private set; } = null!;
-	[PluginService] public static IChatGui ChatGui { get; private set; } = null!;
-	[PluginService] public static ICommandManager CommandManager { get; private set; } = null!;
-	[PluginService] public static IClientState ClientState { get; private set; } = null!;
+	
+	[RequiredVersion("1.0"), PluginService]
+	public static DalamudPluginInterface PluginInterface { get; private set; } = null!;
+	[RequiredVersion("1.0"), PluginService]
+	public static IPluginLog Log { get; private set; } = null!;
+	[RequiredVersion("1.0"), PluginService]
+	public static IChatGui ChatGui { get; private set; } = null!;
+	[RequiredVersion("1.0"), PluginService]
+	public static ICommandManager CommandManager { get; private set; } = null!;
+	[RequiredVersion("1.0"), PluginService]
+	public static IClientState ClientState { get; private set; } = null!;
 
+	private WindowSystem WindowSystem { get; } = new WindowSystem(Constants.PluginNamespace);
 	private HuntHelperManager HuntHelperManager { get; init; }
 	private BearManager BearManager { get; init; }
 
