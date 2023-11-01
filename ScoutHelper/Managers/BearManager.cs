@@ -82,12 +82,13 @@ public class BearManager : IDisposable {
 		string worldName,
 		IList<TrainMob> trainMobs
 	) {
-		var spawnPoints = trainMobs.Select(CreateRequestSpawnPoint).ToList();
-		var patchName = trainMobs
+		var bearSupportedMobs = trainMobs.Where(mob => MobIdToBearName.ContainsKey(mob.MobId)).ToList();
+		var spawnPoints = bearSupportedMobs.Select(CreateRequestSpawnPoint).ToList();
+		var patchName = bearSupportedMobs
 			.Select(mob => MobIdToBearName[mob.MobId].patch)
 			.Distinct()
 			.Max()
-			.ToString();
+			.BearName();
 
 		var requestPayload = JsonConvert.SerializeObject(
 			new BearApiTrainRequest(worldName, Plugin.Conf.BearTrainName, patchName, spawnPoints)
@@ -130,5 +131,19 @@ public class BearManager : IDisposable {
 			Plugin.Log.Error(e, message);
 			return message;
 		}
+	}
+}
+
+public static class BearExtensions {
+	private static readonly IDictionary<Patch, string> BearPatchNames = new Dictionary<Patch, string> {
+		{Patch.ARR, "ARR"},
+		{Patch.HW, "HW"},
+		{Patch.SB, "SB"},
+		{Patch.SHB, "ShB"},
+		{Patch.EW, "EW"}
+	}.VerifyEnumDictionary();
+	
+	public static string BearName(this Patch patch) {
+		return BearPatchNames[patch];
 	}
 }

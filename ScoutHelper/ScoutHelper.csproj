@@ -34,8 +34,8 @@
 
 	<ItemGroup>
 	  <None Remove="Data\Bear.json" />
-	  <Resource Include="Data\Bear.json">
+	  <EmbeddedResource Include="Data\Bear.json">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Resource>
+	  </EmbeddedResource>
 	</ItemGroup>
 </Project>

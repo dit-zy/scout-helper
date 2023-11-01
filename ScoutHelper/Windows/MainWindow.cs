@@ -16,7 +16,7 @@ public class MainWindow : Window, IDisposable {
 
 	public MainWindow(HuntHelperManager huntHelperManager, BearManager bearManager) : base(
 		Strings.MainWindowTitle,
-		ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoResize
+		ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoScrollbar
 	) {
 		SizeConstraints = new WindowSizeConstraints {
 			MinimumSize = new Vector2(64, 32),
