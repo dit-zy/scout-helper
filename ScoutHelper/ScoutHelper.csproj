@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+	<Import Project="Dalamud.Plugin.Bootstrap.targets"/>
+
+	<PropertyGroup>
+		<Authors></Authors>
+		<Company></Company>
+		<Version>0.0.0.1</Version>
+		<Description>A sample plugin.</Description>
+		<Copyright></Copyright>
+		<PackageProjectUrl>https://github.com/goatcorp/SamplePlugin</PackageProjectUrl>
+		<PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
+		<IsPackable>false</IsPackable>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Update="Localization\Strings.resx">
+	    <Generator>ResXFileCodeGenerator</Generator>
+	    <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+	  </EmbeddedResource>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="Localization\Strings.Designer.cs">
+	    <DesignTime>True</DesignTime>
+	    <AutoGen>True</AutoGen>
+	    <DependentUpon>Strings.resx</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="CSharpFunctionalExtensions" Version="2.40.3" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Remove="Data\Bear.json" />
+	  <EmbeddedResource Include="Data\Bear.json">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </EmbeddedResource>
+	</ItemGroup>
+</Project>

@@ -1,0 +1,77 @@
+{
+	"ARR": {
+		"Forneus": 2936,
+		"Melt": 2937,
+		"Ghede Ti Malice": 2938,
+		"Girtab": 2939,
+		"Alectryon": 2940,
+		"Sabotender Bailarina": 2941,
+		"Maahes": 2942,
+		"Zanigoh": 2943, // apostraphe removed to comply with bear api
+		"Dalvags Final Flame": 2944, // apostraphe removed to comply with bear api
+		"Vogaal Ja": 2945,
+		"Unktehi": 2946,
+		"Hellsclaw": 2947,
+		"Nahn": 2948,
+		"Marberry": 2949,
+		"Cornu": 2950,
+		"Marraco": 2951,
+		"Kurrea": 2952
+	},
+	"HW": {
+		"Mirka": 4362,
+		"Lyuba": 4363,
+		"Pylraster": 4364,
+		"Lord of the Wyverns": 4365,
+		"Bune": 4368,
+		"Agathos": 4369,
+		"Slipkinx Steeljoints": 4366,
+		"Stolas": 4367,
+		"Enkelados": 4370,
+		"Sisiutl": 4371,
+		"Campacti": 4372,
+		"Stench Blossom": 4373
+	},
+	"SB": {
+		"Orcus": 5990,
+		"Erle": 5991,
+		"Vochstein": 5992,
+		"Aqrabuamelu": 5993,
+		"Mahisha": 5994,
+		"Luminare": 5995,
+		"Funa Yurei": 5996,
+		"Oni Yumemi": 5997,
+		"Gajasura": 5998,
+		"Angada": 5999,
+		"Girimekhala": 6000,
+		"Sum": 6001
+	},
+	"SHB": {
+		"Nuckelavee": 8906,
+		"Nariphon": 8907,
+		"Lil Murderer": 8911, // apostraphe removed to comply with bear api
+		"Huracan": 8912,
+		"Maliktender": 8901,
+		"Sugaar": 8902,
+		"The Mudman": 8654,
+		"O Poorest Pauldia": 8655,
+		"Supay": 8891,
+		"Grassman": 8892,
+		"Rusalka": 8896,
+		"Baal": 8897
+	},
+	"EW": {
+		"Hulder": 10624,
+		"Storsie": 10623,
+		"Yilan": 10625,
+		"Sugriva": 10626,
+		"Minerva": 10627,
+		"Aegeiros": 10628,
+		"Mousse Princess": 10630,
+		"Lunatender Queen": 10629,
+		"Petalodus": 10632,
+		"Gurangatch": 10631,
+		"Arch-Eta": 10634,
+		"Fan Ail": 10633
+	}
+}
