@@ -12,9 +12,14 @@
 		"hunt",
 		"mark",
 		"mob",
-		"the hunt",
+		"scout",
+		"scouting",
 		"train"
 	],
 	"RepoUrl": "https://github.com/im-scared/scout-helper",
-	"IconUrl": "https://raw.githubusercontent.com/im-scared/scout-helper/main/images/icon.png"
+	"IconUrl": "https://raw.githubusercontent.com/im-scared/scout-helper/main/images/icon.png",
+	"ImageUrls": [
+		"https://raw.githubusercontent.com/im-scared/scout-helper/main/images/image1.png",
+		"https://raw.githubusercontent.com/im-scared/scout-helper/main/images/image2.png"
+	]
 }
