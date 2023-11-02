@@ -28,6 +28,6 @@
 		<value>Scout Helper Settings</value>
 	</data>
 	<data name="ConfigWindowContent" xml:space="preserve">
-		<value>At this time there are no configurable settings for Scout Helper. Please use command `/sth` to open the Scout Helper window.</value>
+		<value>At this time there are no configurable settings for Scout Helper, but there will be in the future. Please use command `/scouth` to open the Scout Helper window.</value>
 	</data>
 </root>

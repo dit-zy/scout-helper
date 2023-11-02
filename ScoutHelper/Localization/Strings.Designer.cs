@@ -69,7 +69,7 @@ namespace ScoutHelper.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to At this time there are no configurable settings for Scout Helper. Please use command `/sth` to open the Scout Helper window..
+        ///   Looks up a localized string similar to At this time there are no configurable settings for Scout Helper, but there will be in the future. Please use command `/scouth` to open the Scout Helper window..
         /// </summary>
         internal static string ConfigWindowContent {
             get {

@@ -7,6 +7,7 @@ using ScoutHelper.Localization;
 using ScoutHelper.Managers;
 using ScoutHelper.Windows;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 
 namespace ScoutHelper;
@@ -16,10 +17,10 @@ public sealed class Plugin : IDalamudPlugin {
 
 	public const string Name = "Scout Tracker Helper";
 
-	private const string CommandName = "/sth";
+	private static readonly List<string> CommandNames = new List<string>() {"/scouth", "/sch"};
 
 	public static Configuration Conf { get; private set; } = null!;
-	
+
 	[RequiredVersion("1.0"), PluginService]
 	public static DalamudPluginInterface PluginInterface { get; private set; } = null!;
 	[RequiredVersion("1.0"), PluginService]
@@ -54,11 +55,8 @@ public sealed class Plugin : IDalamudPlugin {
 		WindowSystem.AddWindow(ConfigWindow);
 		WindowSystem.AddWindow(MainWindow);
 
-		CommandManager.AddHandler(
-			CommandName,
-			new CommandInfo(OnCommand) {
-				HelpMessage = "Opens the main window.",
-			}
+		CommandNames.ForEach(commandName =>
+			CommandManager.AddHandler(commandName, new CommandInfo(OnCommand) {HelpMessage = "Opens the main window."})
 		);
 
 		PluginInterface.UiBuilder.Draw += DrawUi;
@@ -67,7 +65,7 @@ public sealed class Plugin : IDalamudPlugin {
 
 	public void Dispose() {
 		PluginInterface.LanguageChanged -= OnLanguageChanged;
-		CommandManager.RemoveHandler(CommandName);
+		CommandNames.ForEach(commandName => CommandManager.RemoveHandler(commandName));
 
 		WindowSystem.RemoveAllWindows();
 
