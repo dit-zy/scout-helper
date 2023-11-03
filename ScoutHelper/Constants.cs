@@ -6,7 +6,7 @@ namespace ScoutHelper;
 public static class Constants {
 
 	static Constants() {
-		PluginVersion = Assembly.GetCallingAssembly().GetName().Version?.ToString() ?? "";
+		PluginVersion = Assembly.GetCallingAssembly().GetName().Version?.ToString() ?? "?.?.?.?";
 	}
 
 	#region plugin constants
