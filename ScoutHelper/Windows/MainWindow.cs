@@ -1,10 +1,13 @@
 ﻿using CSharpFunctionalExtensions;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
 using ScoutHelper.Localization;
 using ScoutHelper.Managers;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 
 namespace ScoutHelper.Windows;
@@ -32,10 +35,29 @@ public class MainWindow : Window, IDisposable {
 	}
 
 	public override void Draw() {
-		if (ImGui.Button(Strings.BearButton)) {
+		var buttonSize = new List<string> {
+				Strings.BearButton,
+				Strings.SirenButton
+			}
+			.Select(ImGuiHelpers.GetButtonSize)
+			.MaxBy(size => size.X);
+		buttonSize.X += ImGui.GetFontSize();
+			
+		if (ImGui.Button(Strings.BearButton, buttonSize)) {
 			GenerateBearLink();
 		}
+		if (ImGui.IsItemHovered()) {
+			Utils.CreateTooltip(Strings.BearButtonTooltip);
+		}
+
+		ImGui.BeginDisabled(true);
+		if (ImGui.Button(Strings.SirenButton, buttonSize)) { }
+		ImGui.EndDisabled();
+		if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) {
+			Utils.CreateTooltip(Strings.SirenButtonTooltip);
+		}
 	}
+	
 	private void GenerateBearLink() {
 		Plugin.ChatGui.TaggedPrint("Generating Bear link...");
 

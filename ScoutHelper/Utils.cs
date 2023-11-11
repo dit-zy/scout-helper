@@ -1,4 +1,5 @@
 ﻿using Dalamud.Plugin.Services;
+using ImGuiNET;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -17,6 +18,14 @@ public static class Utils {
 		"Data",
 		dataFilename
 	);
+	
+	public static void CreateTooltip(string text, float width = 12f) {
+		ImGui.BeginTooltip();
+		ImGui.PushTextWrapPos(ImGui.GetFontSize() * width);
+		ImGui.TextUnformatted(text);
+		ImGui.PopTextWrapPos();
+		ImGui.EndTooltip();
+	}
 
 	#region extensions
 	public static void TaggedPrint(this IChatGui chatGui, string message) {
@@ -27,7 +36,7 @@ public static class Utils {
 		chatGui.PrintError(message, Plugin.Name);
 	}
 
-	public static IDictionary<K, V> VerifyEnumDictionary<K, V>(this IDictionary<K,V> enumDict) where K : struct, Enum {
+	public static IDictionary<K, V> VerifyEnumDictionary<K, V>(this IDictionary<K, V> enumDict) where K : struct, Enum {
 		var allEnumsAreInDict = (Enum.GetValuesAsUnderlyingType<K>() as K[])!.All(enumDict.ContainsKey);
 		if (!allEnumsAreInDict) {
 			throw new Exception($"All values of enum [{typeof(K).Name}] must be in the dictionary.");

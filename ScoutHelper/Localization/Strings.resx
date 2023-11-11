@@ -30,4 +30,13 @@
 	<data name="ConfigWindowContent" xml:space="preserve">
 		<value>At this time there are no configurable settings for Scout Helper, but there will be in the future. Please use command `/scouth` to open the Scout Helper window.</value>
 	</data>
+	<data name="BearButtonTooltip" xml:space="preserve">
+		<value>Generate a Bear Toolkit link from the Hunt Helper train recorder.</value>
+	</data>
+	<data name="SirenButton" xml:space="preserve">
+		<value>Siren Hunts</value>
+	</data>
+	<data name="SirenButtonTooltip" xml:space="preserve">
+		<value>Siren Hunts is not yet implemented. Coming soon!</value>
+	</data>
 </root>

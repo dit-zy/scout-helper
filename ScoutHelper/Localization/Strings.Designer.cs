@@ -69,6 +69,15 @@ namespace ScoutHelper.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Generate a Bear Toolkit link from the Hunt Helper train recorder..
+        /// </summary>
+        internal static string BearButtonTooltip {
+            get {
+                return ResourceManager.GetString("BearButtonTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to At this time there are no configurable settings for Scout Helper, but there will be in the future. Please use command `/scouth` to open the Scout Helper window..
         /// </summary>
         internal static string ConfigWindowContent {
@@ -92,6 +101,24 @@ namespace ScoutHelper.Localization {
         internal static string MainWindowTitle {
             get {
                 return ResourceManager.GetString("MainWindowTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Siren Hunts.
+        /// </summary>
+        internal static string SirenButton {
+            get {
+                return ResourceManager.GetString("SirenButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Siren Hunts is not yet implemented. Coming soon!.
+        /// </summary>
+        internal static string SirenButtonTooltip {
+            get {
+                return ResourceManager.GetString("SirenButtonTooltip", resourceCulture);
             }
         }
     }
