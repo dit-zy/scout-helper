@@ -16,13 +16,23 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 7.0.x
+      
+      - name: Download Dalamud
+        run: |
+          wget https://goatcorp.github.io/dalamud-distrib/stg/latest.zip
+          unzip latest.zip -d dalamud/
+          echo "DALAMUD_HOME=$PWD/dalamud" >> $GITHUB_ENV
+          
       - name: Restore dependencies
-        run: dotnet restore .
+        run: dotnet restore -r win
+        
       - name: Build
-        run: dotnet build --no-restore
+        run: dotnet build --configuration Release --no-restore
+        
       - name: Test
-        run: dotnet test --no-build --verbosity normal
+        run: dotnet test --configuration Release --no-build --verbosity normal
