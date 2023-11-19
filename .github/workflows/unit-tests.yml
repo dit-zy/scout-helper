@@ -4,10 +4,7 @@
 name: unit tests
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  push
 
 jobs:
   build:
