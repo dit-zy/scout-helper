@@ -15,7 +15,7 @@ namespace ScoutHelper;
 // ReSharper disable once ClassNeverInstantiated.Global
 public sealed class Plugin : IDalamudPlugin {
 
-	public const string Name = "Scout Tracker Helper";
+	public const string Name = Constants.PluginName;
 
 	private static readonly List<string> CommandNames = new List<string>() {"/scouth", "/sch"};
 

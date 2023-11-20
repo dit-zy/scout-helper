@@ -5,10 +5,6 @@ namespace ScoutHelper;
 
 public static class Constants {
 
-	static Constants() {
-		PluginVersion = Assembly.GetCallingAssembly().GetName().Version?.ToString() ?? "?.?.?.?";
-	}
-
 	#region plugin constants
 	public const string PluginName = "Scout Helper";
 	public static readonly string PluginVersion;
@@ -23,4 +19,8 @@ public static class Constants {
 		PluginVersion
 	);
 	#endregion
+
+	static Constants() {
+		PluginVersion = Assembly.GetCallingAssembly().GetName().Version?.ToString() ?? "?.?.?.?";
+	}
 }
