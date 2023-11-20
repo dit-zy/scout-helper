@@ -60,7 +60,7 @@ public class HuntHelperManager : IDisposable {
 				Available = false;
 			}
 		}
-		catch (IpcNotReadyError e) {
+		catch (IpcNotReadyError) {
 			Plugin.Log.Info("Hunt Helper is not yet available. Disabling support until it is.");
 			Available = false;
 		}
@@ -75,7 +75,7 @@ public class HuntHelperManager : IDisposable {
 		try {
 			return _cgGetTrainList.InvokeFunc();
 		}
-		catch (IpcNotReadyError e) {
+		catch (IpcNotReadyError) {
 			Plugin.Log.Warning("Hunt Helper appears to have disappeared ;-;. Can't get the train data ;-;. Disabling support until it comes back.");
 			Available = false;
 			return "Hunt Helper has disappeared from my sight ;-;";
