@@ -14,7 +14,6 @@ using System.Threading.Tasks;
 namespace ScoutHelper.Managers;
 
 public class BearManager : IDisposable {
-
 	private static HttpClient HttpClient { get; } = new();
 
 	private IDictionary<uint, (Patch patch, string name)> MobIdToBearName { get; init; }
@@ -34,7 +33,6 @@ public class BearManager : IDisposable {
 	}
 
 	private static IDictionary<uint, (Patch patch, string name)> LoadData(string dataFilePath) {
-
 		if (!File.Exists(dataFilePath)) {
 			throw new Exception($"Can't find {dataFilePath}");
 		}
@@ -50,6 +48,7 @@ public class BearManager : IDisposable {
 					if (!Enum.TryParse(patchData.Key, out Patch patch)) {
 						throw new Exception($"Unknown patch: {patchData.Key}");
 					}
+
 					return (patchData.Value as IDictionary<string, JToken>).Select(
 						mob => {
 							var mobName = mob.Key;
@@ -70,6 +69,7 @@ public class BearManager : IDisposable {
 		if (mob.Instance is >= 1 and <= 9) {
 			huntName += $" {mob.Instance}";
 		}
+
 		return new BearApiSpawnPoint(
 			huntName,
 			mob.Position.X,
@@ -78,20 +78,22 @@ public class BearManager : IDisposable {
 		);
 	}
 
-	public async Task<Result<(string Url, string Pass), string>> GenerateBearLink(
+	public async Task<Result<BearLinkData, string>> GenerateBearLink(
 		string worldName,
-		IList<TrainMob> trainMobs
+		IEnumerable<TrainMob> trainMobs
 	) {
 		var bearSupportedMobs = trainMobs.Where(mob => MobIdToBearName.ContainsKey(mob.MobId)).ToList();
+		if (bearSupportedMobs.Count == 0)
+			return "No mobs supported by Bear Toolkit were found in the Hunt Helper train recorder ;-;";
+
 		var spawnPoints = bearSupportedMobs.Select(CreateRequestSpawnPoint).ToList();
-		var patchName = bearSupportedMobs
+		var highestPatch = bearSupportedMobs
 			.Select(mob => MobIdToBearName[mob.MobId].patch)
 			.Distinct()
-			.Max()
-			.BearName();
+			.Max();
 
 		var requestPayload = JsonConvert.SerializeObject(
-			new BearApiTrainRequest(worldName, Plugin.Conf.BearTrainName, patchName, spawnPoints)
+			new BearApiTrainRequest(worldName, Plugin.Conf.BearTrainName, highestPatch.BearName(), spawnPoints)
 		);
 		Plugin.Log.Debug("Request payload: {0}", requestPayload);
 		var requestContent = new StringContent(requestPayload, Encoding.UTF8, Constants.MediaTypeJson);
@@ -110,23 +112,19 @@ public class BearManager : IDisposable {
 			var trainInfo = JsonConvert.DeserializeObject<BearApiTrainResponse>(responseJson).Trains.First();
 
 			var url = $"{Plugin.Conf.BearSiteTrainUrl}/{trainInfo.TrainId}";
-			return (url, trainInfo.Password);
-		}
-		catch (TimeoutException) {
+			return new BearLinkData(url, trainInfo.Password, highestPatch);
+		} catch (TimeoutException) {
 			const string message = "Timed out posting the train to Bear ;-;";
 			Plugin.Log.Error(message);
 			return message;
-		}
-		catch (OperationCanceledException e) {
+		} catch (OperationCanceledException e) {
 			const string message = "Generating the Bear link was canceled >_>";
 			Plugin.Log.Warning(e, message);
 			return message;
-		}
-		catch (HttpRequestException e) {
+		} catch (HttpRequestException e) {
 			Plugin.Log.Error(e, "Posting the train to Bear failed.");
 			return "Something failed when communicating with Bear :T";
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			const string message = "An unknown error happened while generating the Bear link D:";
 			Plugin.Log.Error(e, message);
 			return message;
@@ -134,15 +132,21 @@ public class BearManager : IDisposable {
 	}
 }
 
+public record struct BearLinkData(
+	string Url,
+	string Password,
+	Patch HighestPatch
+) { }
+
 public static class BearExtensions {
-	private static readonly IDictionary<Patch, string> BearPatchNames = new Dictionary<Patch, string> {
-		{Patch.ARR, "ARR"},
-		{Patch.HW, "HW"},
-		{Patch.SB, "SB"},
-		{Patch.SHB, "ShB"},
-		{Patch.EW, "EW"}
+	private static readonly IReadOnlyDictionary<Patch, string> BearPatchNames = new Dictionary<Patch, string> {
+		{ Patch.ARR, "ARR" },
+		{ Patch.HW, "HW" },
+		{ Patch.SB, "SB" },
+		{ Patch.SHB, "ShB" },
+		{ Patch.EW, "EW" }
 	}.VerifyEnumDictionary();
-	
+
 	public static string BearName(this Patch patch) {
 		return BearPatchNames[patch];
 	}

@@ -8,7 +8,7 @@ public record struct TrainMob(
 	uint MobId,
 	uint TerritoryId,
 	uint MapId,
-	uint Instance,
+	uint? Instance,
 	Vector2 Position,
 	bool Dead,
 	DateTime LastSeenUtc

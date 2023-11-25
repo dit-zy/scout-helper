@@ -22,13 +22,10 @@
 		<value>Bear Toolkit</value>
 	</data>
 	<data name="MainWindowTitle" xml:space="preserve">
-		<value>Scout Helper</value>
+		<value>SCOUT HELPER</value>
 	</data>
 	<data name="ConfigWindowTitle" xml:space="preserve">
-		<value>Scout Helper Settings</value>
-	</data>
-	<data name="ConfigWindowContent" xml:space="preserve">
-		<value>At this time there are no configurable settings for Scout Helper, but there will be in the future. Please use command `/scouth` to open the Scout Helper window.</value>
+		<value>SCOUT HELPER SETTINGS</value>
 	</data>
 	<data name="BearButtonTooltip" xml:space="preserve">
 		<value>Generate a Bear Toolkit link from the Hunt Helper train recorder.</value>
@@ -38,5 +35,51 @@
 	</data>
 	<data name="SirenButtonTooltip" xml:space="preserve">
 		<value>Siren Hunts is not yet implemented. Coming soon!</value>
+	</data>
+	<data name="CopyModeLinkButton" xml:space="preserve">
+		<value>link</value>
+	</data>
+	<data name="CopyModeFullTextButton" xml:space="preserve">
+		<value>full-text</value>
+	</data>
+	<data name="MainWindowSectionLabelMode" xml:space="preserve">
+		<value>MODE</value>
+	</data>
+	<data name="MainWindowSectionLabelGenerators" xml:space="preserve">
+		<value>GENERATORS</value>
+	</data>
+	<data name="ConfigWindowSectionLabelFullText" xml:space="preserve">
+		<value>FULL-TEXT TEMPLATE</value>
+	</data>
+	<data name="CopyModeTooltipSummary" xml:space="preserve">
+		<value>The copy mode that tracker generators will use when generating tracker links.</value>
+	</data>
+	<data name="CopyModeTooltipLinkDesc" xml:space="preserve">
+		<value>only copies the generated tracker link to your clipboard</value>
+	</data>
+	<data name="CopyModeTooltipFullTextDesc" xml:space="preserve">
+		<value>copies a full-text template to your clipboard, which can contain data about the scouted marks beyond just the tracker link. click on the '?' currently underneath your mouse, to open the SCOUT HELPER settings and configure the template, or open the settings from the Dalamud plugin installer screen.</value>
+	</data>
+	<data name="ConfigWindowPreviewLabel" xml:space="preserve">
+		<value>PREVIEW:</value>
+	</data>
+	<data name="ConfigWindowTemplateDesc" xml:space="preserve">
+		<value>Configure the template used by the full-text copy mode. When the full-text mode is selected, this template is what will be copied to your clipboard, rather than just the generated tracker link. Variables can be referenced by surrounding them with curly braces (e.g. "{link}"), and the following variables are available:</value>
+	</data>
+	<data name="ConfigWindowTemplateVariables" xml:space="preserve">
+		<value>{#} - the number of hunt marks in the train.
+
+{#max} - the maximum possible number of hunt marks in the patch.
+
+{link} - the generated tracker link \(≧▽≦)/
+
+{patch} - the latest patch contained in the recorded train. If there are 6 HW marks and 1 SHB mark in the train, the patch will be SHB.
+
+{tracker} - the name of the tracker used (e.g. "bear").
+
+{world} - the current world you are in. Make sure to use the link generator before you change worlds, if you include this in your template ;P</value>
+	</data>
+	<data name="ConfigWindowDescriptionLabel" xml:space="preserve">
+		<value>DESCRIPTION:</value>
 	</data>
 </root>

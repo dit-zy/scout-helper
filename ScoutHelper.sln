@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScoutHelper", "ScoutHelper\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScoutHelperTests", "ScoutHelperTests\ScoutHelperTests.csproj", "{31CD702B-08BA-4EB3-93D6-C895CD3DCB19}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OtterGui", "OtterGui\OtterGui.csproj", "{264A8375-1760-4D5B-87D2-9C71AC2D6460}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OtterGuiInternal", "OtterGui\OtterGuiInternal\OtterGuiInternal.csproj", "{A14FFD18-747B-4FCC-AD14-5A51A28D4710}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +25,14 @@ Global
 		{31CD702B-08BA-4EB3-93D6-C895CD3DCB19}.Debug|x64.Build.0 = Debug|Any CPU
 		{31CD702B-08BA-4EB3-93D6-C895CD3DCB19}.Release|x64.ActiveCfg = Release|Any CPU
 		{31CD702B-08BA-4EB3-93D6-C895CD3DCB19}.Release|x64.Build.0 = Release|Any CPU
+		{264A8375-1760-4D5B-87D2-9C71AC2D6460}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{264A8375-1760-4D5B-87D2-9C71AC2D6460}.Debug|x64.Build.0 = Debug|Any CPU
+		{264A8375-1760-4D5B-87D2-9C71AC2D6460}.Release|x64.ActiveCfg = Release|Any CPU
+		{264A8375-1760-4D5B-87D2-9C71AC2D6460}.Release|x64.Build.0 = Release|Any CPU
+		{A14FFD18-747B-4FCC-AD14-5A51A28D4710}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A14FFD18-747B-4FCC-AD14-5A51A28D4710}.Debug|x64.Build.0 = Debug|Any CPU
+		{A14FFD18-747B-4FCC-AD14-5A51A28D4710}.Release|x64.ActiveCfg = Release|Any CPU
+		{A14FFD18-747B-4FCC-AD14-5A51A28D4710}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

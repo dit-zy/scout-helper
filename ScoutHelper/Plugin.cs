@@ -44,10 +44,10 @@ public sealed class Plugin : IDalamudPlugin {
 		Conf.Initialize(PluginInterface);
 
 		HuntHelperManager = new HuntHelperManager();
-		BearManager = new BearManager(Utils.DataFilePath("Bear.json"));
+		BearManager = new BearManager(Utils.PluginFilePath(@"Data\Bear.json"));
 
 		ConfigWindow = new ConfigWindow();
-		MainWindow = new MainWindow(HuntHelperManager, BearManager);
+		MainWindow = new MainWindow(HuntHelperManager, BearManager, ConfigWindow);
 
 		PluginInterface.LanguageChanged += OnLanguageChanged;
 		OnLanguageChanged(PluginInterface.UiLanguage);
@@ -73,6 +73,8 @@ public sealed class Plugin : IDalamudPlugin {
 		MainWindow.Dispose();
 
 		HuntHelperManager.Dispose();
+		
+		Conf.Save();
 	}
 
 	private static void OnLanguageChanged(string languageCode) {

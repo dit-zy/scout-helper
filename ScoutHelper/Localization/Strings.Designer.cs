@@ -78,16 +78,62 @@ namespace ScoutHelper.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to At this time there are no configurable settings for Scout Helper, but there will be in the future. Please use command `/scouth` to open the Scout Helper window..
+        ///   Looks up a localized string similar to DESCRIPTION:.
         /// </summary>
-        internal static string ConfigWindowContent {
+        internal static string ConfigWindowDescriptionLabel {
             get {
-                return ResourceManager.GetString("ConfigWindowContent", resourceCulture);
+                return ResourceManager.GetString("ConfigWindowDescriptionLabel", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Scout Helper Settings.
+        ///   Looks up a localized string similar to PREVIEW:.
+        /// </summary>
+        internal static string ConfigWindowPreviewLabel {
+            get {
+                return ResourceManager.GetString("ConfigWindowPreviewLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to FULL-TEXT TEMPLATE.
+        /// </summary>
+        internal static string ConfigWindowSectionLabelFullText {
+            get {
+                return ResourceManager.GetString("ConfigWindowSectionLabelFullText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Configure the template used by the full-text copy mode. When the full-text mode is selected, this template is what will be copied to your clipboard, rather than just the generated tracker link. Variables can be referenced by surrounding them with curly braces (e.g. &quot;{link}&quot;), and the following variables are available:.
+        /// </summary>
+        internal static string ConfigWindowTemplateDesc {
+            get {
+                return ResourceManager.GetString("ConfigWindowTemplateDesc", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {#} - the number of hunt marks in the train.
+        ///
+        ///{#max} - the maximum possible number of hunt marks in the patch.
+        ///
+        ///{link} - the generated tracker link \(≧▽≦)/
+        ///
+        ///{patch} - the latest patch contained in the recorded train. If there are 6 HW marks and 1 SHB mark in the train, the patch will be SHB.
+        ///
+        ///{tracker} - the name of the tracker used (e.g. &quot;bear&quot;).
+        ///
+        ///{world} - the current world you are in. Make sure to use the link generator before you change worlds, if you include this in your template ;P.
+        /// </summary>
+        internal static string ConfigWindowTemplateVariables {
+            get {
+                return ResourceManager.GetString("ConfigWindowTemplateVariables", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SCOUT HELPER SETTINGS.
         /// </summary>
         internal static string ConfigWindowTitle {
             get {
@@ -96,7 +142,70 @@ namespace ScoutHelper.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Scout Helper.
+        ///   Looks up a localized string similar to full-text.
+        /// </summary>
+        internal static string CopyModeFullTextButton {
+            get {
+                return ResourceManager.GetString("CopyModeFullTextButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to link.
+        /// </summary>
+        internal static string CopyModeLinkButton {
+            get {
+                return ResourceManager.GetString("CopyModeLinkButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to copies a full-text template to your clipboard, which can contain data about the scouted marks beyond just the tracker link. click on the &apos;?&apos; currently underneath your mouse, to open the SCOUT HELPER settings and configure the template, or open the settings from the Dalamud plugin installer screen..
+        /// </summary>
+        internal static string CopyModeTooltipFullTextDesc {
+            get {
+                return ResourceManager.GetString("CopyModeTooltipFullTextDesc", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to only copies the generated tracker link to your clipboard.
+        /// </summary>
+        internal static string CopyModeTooltipLinkDesc {
+            get {
+                return ResourceManager.GetString("CopyModeTooltipLinkDesc", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The copy mode that tracker generators will use when generating tracker links..
+        /// </summary>
+        internal static string CopyModeTooltipSummary {
+            get {
+                return ResourceManager.GetString("CopyModeTooltipSummary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to GENERATORS.
+        /// </summary>
+        internal static string MainWindowSectionLabelGenerators {
+            get {
+                return ResourceManager.GetString("MainWindowSectionLabelGenerators", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to MODE.
+        /// </summary>
+        internal static string MainWindowSectionLabelMode {
+            get {
+                return ResourceManager.GetString("MainWindowSectionLabelMode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SCOUT HELPER.
         /// </summary>
         internal static string MainWindowTitle {
             get {

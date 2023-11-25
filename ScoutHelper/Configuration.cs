@@ -9,7 +9,7 @@ public class Configuration : IPluginConfiguration {
 
 	// the below exist just to make saving less cumbersome
 	[NonSerialized]
-	private DalamudPluginInterface? _pluginInterface;
+	private DalamudPluginInterface _pluginInterface = null!;
 
 	public int Version { get; set; } = 0;
 
@@ -19,11 +19,14 @@ public class Configuration : IPluginConfiguration {
 	public string BearSiteTrainUrl { get; set; } = "https://tracker.beartoolkit.com/train";
 	public string BearTrainName { get; set; } = "Scout Helper Train";
 
+	public string CopyTemplate { get; set; } = Constants.DefaultCopyTemplate;
+	public bool IsCopyModeFullText { get; set; } = false;
+
 	public void Initialize(DalamudPluginInterface pluginInterface) {
-		this._pluginInterface = pluginInterface;
+		_pluginInterface = pluginInterface;
 	}
 
 	public void Save() {
-		_pluginInterface!.SavePluginConfig(this);
+		_pluginInterface.SavePluginConfig(this);
 	}
 }

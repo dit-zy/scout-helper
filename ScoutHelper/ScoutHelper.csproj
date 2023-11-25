@@ -36,4 +36,8 @@
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </EmbeddedResource>
 	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\OtterGui\OtterGui.csproj" />
+	</ItemGroup>
 </Project>
