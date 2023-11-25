@@ -11,20 +11,27 @@ a dalamud helper plugin for making it easier to interact with scout trackers
 	  future)
 * automatically pulls scouted marks from the
 	[hunt helper](https://github.com/imaginary-png/HuntHelper) train recorder
+* create a whole template of text including multiple additional fields such 
+  as the number of marks and the patch
 
 ## HOW TO USE
 
 1. use hunt helper's train recorder to record hunt marks while you scout
 
-   ![hunt helper train recorder](./images/hunt-helper-train.png)
+	![hunt helper train recorder](./images/hunt-helper-train.png)
 
-2. open scout helper with the `/scouth` command
+2. open scout helper with the `/scouth` (or `/sch`) command
 
-   ![scout helper main window](./images/image1.png)
+	![scout helper main window](./images/main-window.png)
 
-3. select the tracker website you want to generate a link for. this will copy
+3. pick a copy mode
+	* link -- only copies the generated tracker link to your clipboard.
+	* full-text -- copies an entire template to your clipboard including 
+	  multiple train fields beyond just the tracker link.
+
+4. select the tracker website you want to generate a link for. this will copy
    the link to your clipboard and echo it to the chat log as a backup
 
-   ![scout helper main window](./images/image2.png)
+	![chat output](./images/output.png)
 
-4. share the link with your friends ⸜(≧▽≦)⸝
+5. share the link with your friends ⸜(≧▽≦)⸝

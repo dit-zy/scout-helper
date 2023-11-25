@@ -19,7 +19,9 @@
 	"RepoUrl": "https://github.com/im-scared/scout-helper",
 	"IconUrl": "https://raw.githubusercontent.com/im-scared/scout-helper/main/images/icon.png",
 	"ImageUrls": [
-		"https://raw.githubusercontent.com/im-scared/scout-helper/main/images/image1.png",
-		"https://raw.githubusercontent.com/im-scared/scout-helper/main/images/image2.png"
+		"https://raw.githubusercontent.com/im-scared/scout-helper/main/images/hunt-helper-train.png",
+		"https://raw.githubusercontent.com/im-scared/scout-helper/main/images/main-window.png",
+		"https://raw.githubusercontent.com/im-scared/scout-helper/main/images/settings.png",
+		"https://raw.githubusercontent.com/im-scared/scout-helper/main/images/output.png"
 	]
 }
