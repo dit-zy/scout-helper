@@ -15,10 +15,7 @@
         "contentHash": "Sc0PVxvgg4NQjcI8n10/VfUQBAS4O+Fw2pZrAqBdRMbthYGeogzu5+xmIGCGmsEZ/ukMOBuAqiNiB5qA3MRalg=="
       },
       "ottergui": {
-        "type": "Project",
-        "dependencies": {
-          "OtterGuiInternal": "[1.0.0, )"
-        }
+        "type": "Project"
       },
       "otterguiinternal": {
         "type": "Project"
