@@ -38,6 +38,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\OtterGuiInternal\OtterGuiInternal.csproj" />
+	  <ProjectReference Include="..\OtterGui\OtterGui.csproj" />
 	</ItemGroup>
 </Project>

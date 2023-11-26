@@ -1,3 +1,3 @@
-[submodule "OtterGuiInternal"]
-	path = OtterGuiInternal
-	url = https://github.com/dit-zy/OtterGuiInternal.git
+[submodule "OtterGui"]
+	path = OtterGui
+	url = https://github.com/Ottermandias/OtterGui.git
