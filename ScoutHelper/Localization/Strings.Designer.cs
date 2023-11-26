@@ -114,6 +114,24 @@ namespace ScoutHelper.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to RESET.
+        /// </summary>
+        internal static string ConfigWindowTemplateResetButton {
+            get {
+                return ResourceManager.GetString("ConfigWindowTemplateResetButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sets the full-text template back to the default value.
+        /// </summary>
+        internal static string ConfigWindowTemplateResetTooltip {
+            get {
+                return ResourceManager.GetString("ConfigWindowTemplateResetTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {#} - the number of hunt marks in the train.
         ///
         ///{#max} - the maximum possible number of hunt marks in the patch.

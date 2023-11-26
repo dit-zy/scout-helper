@@ -82,4 +82,10 @@
 	<data name="ConfigWindowDescriptionLabel" xml:space="preserve">
 		<value>DESCRIPTION:</value>
 	</data>
+	<data name="ConfigWindowTemplateResetButton" xml:space="preserve">
+		<value>RESET</value>
+	</data>
+	<data name="ConfigWindowTemplateResetTooltip" xml:space="preserve">
+		<value>Sets the full-text template back to the default value</value>
+	</data>
 </root>

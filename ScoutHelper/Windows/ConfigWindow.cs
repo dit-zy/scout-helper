@@ -49,7 +49,13 @@ public class ConfigWindow : Window, IDisposable {
 	public override void Draw() {
 		ImGuiPlus.Heading(Strings.ConfigWindowSectionLabelFullText);
 		DrawParagraphSpacing();
+		DrawTextInput();
+		DrawTemplatePreview();
+		ImGui.NewLine();
+		DrawTemplateDescription();
+	}
 
+	private void DrawTextInput() {
 		var textWasEdited = ImGui.InputTextMultiline(
 			string.Empty,
 			ref _fullTextTemplate,
@@ -59,13 +65,20 @@ public class ConfigWindow : Window, IDisposable {
 		if (ImGui.IsItemDeactivatedAfterEdit()) UpdateConfig();
 		if (textWasEdited) _previewFullText = ComputePreviewFullText();
 
+		ImGui.Button(Strings.ConfigWindowTemplateResetButton);
+		if (ImGui.IsItemHovered()) {
+			ImGui.SetTooltip($"{Strings.ConfigWindowTemplateResetTooltip}:\n\n  {Constants.DefaultCopyTemplate}");
+		}
+	}
+
+	private void DrawTemplatePreview() {
 		ImGui.Text(Strings.ConfigWindowPreviewLabel);
 		ImGui.Indent();
 		ImGui.TextDisabled(_previewFullText);
 		ImGui.Unindent();
+	}
 
-		ImGui.NewLine();
-
+	private static void DrawTemplateDescription() {
 		ImGui.Text(Strings.ConfigWindowDescriptionLabel);
 		DrawParagraphSpacing();
 		ImGui.TextWrapped(Strings.ConfigWindowTemplateDesc);
