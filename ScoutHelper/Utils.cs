@@ -13,8 +13,16 @@ using ScoutHelper.Models;
 namespace ScoutHelper;
 
 public static class Utils {
+	private static readonly IReadOnlyDictionary<Patch, uint> PatchMaxMarks = new Dictionary<Patch, uint>() {
+		{ Patch.ARR, 17 },
+		{ Patch.HW, 12 },
+		{ Patch.SB, 12 },
+		{ Patch.SHB, 12 },
+		{ Patch.EW, 16 },
+	}.VerifyEnumDictionary();
+
 	public static string WorldName =>
-		Plugin.ClientState.LocalPlayer?.CurrentWorld?.GameData?.Name.ToString() ?? "Not Found";
+		Plugin.ClientState.LocalPlayer?.CurrentWorld.GameData?.Name.ToString() ?? "Not Found";
 
 	public static string PluginFilePath(string dataFilename) => Path.Combine(
 		Plugin.PluginInterface.AssemblyLocation.Directory?.FullName!,
@@ -47,7 +55,7 @@ public static class Utils {
 
 		var variables = new Dictionary<string, string>() {
 			{ "#", trainList.Count.ToString() },
-			{ "#max", trainList.Count.ToString() },
+			{ "#max", PatchMaxMarks[highestPatch].ToString() },
 			{ "link", url },
 			{ "patch", highestPatch.ToString() },
 			{ "tracker", tracker },
