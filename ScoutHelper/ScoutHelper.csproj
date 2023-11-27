@@ -4,7 +4,7 @@
 
 	<PropertyGroup Label="Feature">
 		<Authors>ditzy</Authors>
-		<Version>0.2.0.0</Version>
+		<Version>0.2.1.0</Version>
 		<Description>A helper plugin for pre-populating hunt train scout tracker links</Description>
 		<PackageProjectUrl>https://github.com/im-scared/scout-helper</PackageProjectUrl>
 		<PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
