@@ -65,9 +65,12 @@ public class ConfigWindow : Window, IDisposable {
 		if (ImGui.IsItemDeactivatedAfterEdit()) UpdateConfig();
 		if (textWasEdited) _previewFullText = ComputePreviewFullText();
 
-		ImGui.Button(Strings.ConfigWindowTemplateResetButton);
+		if (ImGui.Button(Strings.ConfigWindowTemplateResetButton)) {
+			_fullTextTemplate = Constants.DefaultCopyTemplate;
+			UpdateConfig();
+		}
 		if (ImGui.IsItemHovered()) {
-			ImGui.SetTooltip($"{Strings.ConfigWindowTemplateResetTooltip}:\n\n  {Constants.DefaultCopyTemplate}");
+			ImGui.SetTooltip($"{Strings.ConfigWindowTemplateResetTooltip}:\n    {Constants.DefaultCopyTemplate}");
 		}
 	}
 
