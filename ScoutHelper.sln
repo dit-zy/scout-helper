@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScoutHelperTests", "ScoutHe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OtterGui", "OtterGui\OtterGui.csproj", "{7A4734E7-B71E-4A2A-A497-25892BDE1C4A}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "TestProject1", "TestProject1\TestProject1.fsproj", "{8937AF85-A11F-4B39-823C-776F120C6BA4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -27,6 +29,10 @@ Global
 		{7A4734E7-B71E-4A2A-A497-25892BDE1C4A}.Debug|x64.Build.0 = Debug|Any CPU
 		{7A4734E7-B71E-4A2A-A497-25892BDE1C4A}.Release|x64.ActiveCfg = Release|Any CPU
 		{7A4734E7-B71E-4A2A-A497-25892BDE1C4A}.Release|x64.Build.0 = Release|Any CPU
+		{8937AF85-A11F-4B39-823C-776F120C6BA4}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{8937AF85-A11F-4B39-823C-776F120C6BA4}.Debug|x64.Build.0 = Debug|Any CPU
+		{8937AF85-A11F-4B39-823C-776F120C6BA4}.Release|x64.ActiveCfg = Release|Any CPU
+		{8937AF85-A11F-4B39-823C-776F120C6BA4}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
