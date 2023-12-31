@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Dalamud.Interface.Windowing;
+using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
+using ScoutHelper.Config;
 using ScoutHelper.Localization;
 using ScoutHelper.Models;
 using static ScoutHelper.Utils;
@@ -11,7 +14,11 @@ using static ScoutHelper.Utils;
 namespace ScoutHelper.Windows;
 
 public class ConfigWindow : Window, IDisposable {
-	private string _fullTextTemplate = Plugin.Conf.CopyTemplate;
+	private readonly IClientState _clientState;
+	private readonly IPluginLog _log;
+	private readonly Configuration _conf;
+
+	private string _fullTextTemplate;
 	private string _previewFullText;
 
 	private static readonly IList<TrainMob> PreviewTrainList = new[] {
@@ -22,9 +29,15 @@ public class ConfigWindow : Window, IDisposable {
 		)
 		.ToImmutableList();
 
-	public ConfigWindow() : base(
+	public ConfigWindow(IClientState clientState, IPluginLog log, Configuration conf, IChatGui chat) : base(
 		Strings.ConfigWindowTitle
 	) {
+		_clientState = clientState;
+		_log = log;
+		_conf = conf;
+
+		_fullTextTemplate = _conf.CopyTemplate;
+
 		SizeConstraints = new WindowSizeConstraints() {
 			MinimumSize = V2(384, 256),
 			MaximumSize = V2(float.MaxValue, float.MaxValue)
@@ -40,10 +53,10 @@ public class ConfigWindow : Window, IDisposable {
 	}
 
 	private void UpdateConfig() {
-		Plugin.Conf.CopyTemplate = _fullTextTemplate;
-		Plugin.Conf.Save();
+		_conf.CopyTemplate = _fullTextTemplate;
+		_conf.Save();
 
-		Plugin.Log.Debug("config saved");
+		_log.Debug("config saved");
 	}
 
 	public override void Draw() {
@@ -99,6 +112,7 @@ public class ConfigWindow : Window, IDisposable {
 		_fullTextTemplate,
 		PreviewTrainList,
 		"bear",
+		_clientState.WorldName(),
 		Patch.SHB,
 		"https://example.com"
 	);

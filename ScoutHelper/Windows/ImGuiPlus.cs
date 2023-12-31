@@ -94,9 +94,9 @@ public static class ImGuiPlus {
 		buttonConfigs[^1].cornerFlags = ImDrawFlags.RoundCornersRight;
 
 		buttonConfigs.ForEach(
-			(i, buttonConfig) => {
+			(buttonConfig, i) => {
 				if (0 < i) ImGui.SameLine(0, 0);
-				ToggleBarButton(buttonConfig.label, i, ref newSelection, buttonSize, buttonConfig.cornerFlags);
+				ToggleBarButton(buttonConfig.label, (uint)i, ref newSelection, buttonSize, buttonConfig.cornerFlags);
 			}
 		);
 
