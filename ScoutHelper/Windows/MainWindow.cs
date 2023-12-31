@@ -1,11 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using CSharpFunctionalExtensions;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
+using ScoutHelper.Config;
 using ScoutHelper.Localization;
 using ScoutHelper.Managers;
 using ScoutHelper.Models;
@@ -13,19 +15,39 @@ using ScoutHelper.Models;
 namespace ScoutHelper.Windows;
 
 public class MainWindow : Window, IDisposable {
-	private HuntHelperManager HuntHelperManager { get; }
-	private BearManager BearManager { get; }
-	private ConfigWindow ConfigWindow { get; }
+	private readonly IClientState _clientState;
+	private readonly Configuration _conf;
+	private readonly IChatGui _chat;
+	private readonly HuntHelperManager _huntHelperManager;
+	private readonly BearManager _bearManager;
+	private readonly ConfigWindow _configWindow;
 
 	private readonly Lazy<Vector2> _buttonSize;
 	
-	private bool _isCopyModeFullText = Plugin.Conf.IsCopyModeFullText;
-	private uint _selectedMode = Plugin.Conf.IsCopyModeFullText ? 1U : 0U;
+	private bool _isCopyModeFullText;
+	private uint _selectedMode;
 
-	public MainWindow(HuntHelperManager huntHelperManager, BearManager bearManager, ConfigWindow configWindow) : base(
+	public MainWindow(
+		IClientState clientState,
+		Configuration conf,
+		IChatGui chat,
+		HuntHelperManager huntHelperManager,
+		BearManager bearManager,
+		ConfigWindow configWindow
+	) : base(
 		Strings.MainWindowTitle,
 		ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoScrollbar
 	) {
+		_clientState = clientState;
+		_conf = conf;
+		_chat = chat;
+		_huntHelperManager = huntHelperManager;
+		_bearManager = bearManager;
+		_configWindow = configWindow;
+
+		_isCopyModeFullText = _conf.IsCopyModeFullText;
+		_selectedMode = _isCopyModeFullText ? 1U : 0U;
+
 		SizeConstraints = new WindowSizeConstraints {
 			MinimumSize = new Vector2(64, 32),
 			MaximumSize = new Vector2(float.MaxValue, float.MaxValue),
@@ -48,15 +70,11 @@ public class MainWindow : Window, IDisposable {
 				return buttonSize;
 			}
 		);
-
-		HuntHelperManager = huntHelperManager;
-		BearManager = bearManager;
-		ConfigWindow = configWindow;
 	}
 
 	public void Dispose() {
-		Plugin.Conf.IsCopyModeFullText = _isCopyModeFullText;
-		Plugin.Conf.Save();
+		_conf.IsCopyModeFullText = _isCopyModeFullText;
+		_conf.Save();
 
 		GC.SuppressFinalize(this);
 	}
@@ -75,7 +93,7 @@ public class MainWindow : Window, IDisposable {
 		ImGuiHelpers.CenteredText(Strings.MainWindowSectionLabelMode);
 
 		ImGui.SameLine();
-		if (ImGuiPlus.ClickableHelpMarker(DrawModeTooltipContents)) ConfigWindow.IsOpen = true;
+		if (ImGuiPlus.ClickableHelpMarker(DrawModeTooltipContents)) _configWindow.IsOpen = true;
 
 		var modes = new[] { Strings.CopyModeLinkButton, Strings.CopyModeFullTextButton };
 		if (ImGuiPlus.ToggleBar("mode", ref _selectedMode, _buttonSize.Value, modes))
@@ -113,10 +131,10 @@ public class MainWindow : Window, IDisposable {
 	}
 
 	private void GenerateBearLink() {
-		Plugin.ChatGui.TaggedPrint("Generating Bear link...");
+		_chat.TaggedPrint("Generating Bear link...");
 		IList<TrainMob> trainList = null!;
 
-		HuntHelperManager
+		_huntHelperManager
 			.GetTrainList()
 			.Ensure(
 				train => 0 < train.Count,
@@ -125,7 +143,7 @@ public class MainWindow : Window, IDisposable {
 			.Bind(
 				train => {
 					trainList = train;
-					return BearManager.GenerateBearLink(Utils.WorldName, train);
+					return _bearManager.GenerateBearLink(_clientState.WorldName(), train);
 				}
 			)
 			.ContinueWith(
@@ -133,24 +151,25 @@ public class MainWindow : Window, IDisposable {
 					apiResponseTask
 						.Result.Match(
 							bearTrainLink => {
-								Plugin.ChatGui.TaggedPrint($"Bear train link: {bearTrainLink.Url}");
-								Plugin.ChatGui.TaggedPrint($"Train admin password: {bearTrainLink.Password}");
+								_chat.TaggedPrint($"Bear train link: {bearTrainLink.Url}");
+								_chat.TaggedPrint($"Train admin password: {bearTrainLink.Password}");
 								if (_isCopyModeFullText) {
 									var fullText = Utils.FormatTemplate(
-										Plugin.Conf.CopyTemplate,
+										_conf.CopyTemplate,
 										trainList,
 										"bear",
+										_clientState.WorldName(),
 										bearTrainLink.HighestPatch,
 										bearTrainLink.Url
 									);
 									ImGui.SetClipboardText(fullText);
-									Plugin.ChatGui.TaggedPrint($"Copied full text to clipboard: {fullText}");
+									_chat.TaggedPrint($"Copied full text to clipboard: {fullText}");
 								} else {
 									ImGui.SetClipboardText(bearTrainLink.Url);
-									Plugin.ChatGui.TaggedPrint("Copied link to clipboard");
+									_chat.TaggedPrint("Copied link to clipboard");
 								}
 							},
-							errorMessage => { Plugin.ChatGui.TaggedPrintError(errorMessage); }
+							errorMessage => { _chat.TaggedPrintError(errorMessage); }
 						);
 				}
 			);

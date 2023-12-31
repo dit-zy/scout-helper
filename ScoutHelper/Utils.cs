@@ -6,13 +6,14 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Text.RegularExpressions;
+using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
 using ScoutHelper.Models;
 
 namespace ScoutHelper;
 
-public static class Utils {
+public static partial class Utils {
 	private static readonly IReadOnlyDictionary<Patch, uint> PatchMaxMarks = new Dictionary<Patch, uint>() {
 		{ Patch.ARR, 17 },
 		{ Patch.HW, 12 },
@@ -20,14 +21,6 @@ public static class Utils {
 		{ Patch.SHB, 12 },
 		{ Patch.EW, 16 },
 	}.VerifyEnumDictionary();
-
-	public static string WorldName =>
-		Plugin.ClientState.LocalPlayer?.CurrentWorld.GameData?.Name.ToString() ?? "Not Found";
-
-	public static string PluginFilePath(string dataFilename) => Path.Combine(
-		Plugin.PluginInterface.AssemblyLocation.Directory?.FullName!,
-		dataFilename
-	);
 
 	public static void CreateTooltip(string text, float width = 12f) {
 		ImGui.BeginTooltip();
@@ -39,15 +32,18 @@ public static class Utils {
 
 	public static Vector2 V2(float x, float y) => new(x, y);
 
+	[GeneratedRegex(@"\\?\{((?!\\?\}).)+\\?\}", RegexOptions.IgnoreCase)]
+	private static partial Regex TemplateParseRegex();
+
 	public static string FormatTemplate(
 		string textTemplate,
 		IList<TrainMob> trainList,
 		string tracker,
+		string worldName,
 		Patch highestPatch,
-		string url
+		string link
 	) {
-		var regex = new Regex(@"\\?\{[^{}]+\\?\}", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-		var matches = regex.Matches(textTemplate);
+		var matches = TemplateParseRegex().Matches(textTemplate);
 
 		if (matches.Count == 0) {
 			return textTemplate;
@@ -56,10 +52,10 @@ public static class Utils {
 		var variables = new Dictionary<string, string>() {
 			{ "#", trainList.Count.ToString() },
 			{ "#max", PatchMaxMarks[highestPatch].ToString() },
-			{ "link", url },
+			{ "link", link },
 			{ "patch", highestPatch.ToString() },
 			{ "tracker", tracker },
-			{ "world", WorldName },
+			{ "world", worldName },
 		}.AsReadOnly();
 
 		var s = new StringBuilder(textTemplate.Length);
@@ -81,10 +77,21 @@ public static class Utils {
 			s.Append(textTemplate.AsSpan(i));
 		}
 
-		return s.ToString();
+		return s
+			.ToString()
+			.Replace("\\{", "{")
+			.Replace("\\}", "}");
 	}
 
 	#region extensions
+
+	public static string WorldName(this IClientState clientState) =>
+		clientState.LocalPlayer?.CurrentWorld.GameData?.Name.ToString() ?? "Not Found";
+
+	public static string PluginFilePath(this DalamudPluginInterface pluginInterface, string dataFilename) => Path.Combine(
+		pluginInterface.AssemblyLocation.Directory?.FullName!,
+		dataFilename
+	);
 
 	public static void TaggedPrint(this IChatGui chatGui, string message) {
 		chatGui.Print(message, Plugin.Name);
@@ -105,14 +112,13 @@ public static class Utils {
 	}
 
 	public static IEnumerable<T> ForEach<T>(this IEnumerable<T> source, Action<T> action) =>
-		source.ForEach((_, value) => action.Invoke(value));
+		source.ForEach((value, _) => action.Invoke(value));
 
-	public static IEnumerable<T> ForEach<T>(this IEnumerable<T> source, Action<uint, T> action) {
+	public static IEnumerable<T> ForEach<T>(this IEnumerable<T> source, Action<T, int> action) {
 		var values = source as T[] ?? source.ToArray();
-		for (var i = 0U; i < values.Length; ++i) {
-			action.Invoke(i, values[i]);
+		for (var i = 0; i < values.Length; ++i) {
+			action.Invoke(values[i], i);
 		}
-
 		return values;
 	}
 

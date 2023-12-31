@@ -1,101 +1,108 @@
-﻿using Dalamud.Game.Command;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using Dalamud.Game.Command;
 using Dalamud.Interface.Windowing;
 using Dalamud.IoC;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using ScoutHelper.Config;
 using ScoutHelper.Localization;
 using ScoutHelper.Managers;
 using ScoutHelper.Windows;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
 
 namespace ScoutHelper;
 
 // ReSharper disable once ClassNeverInstantiated.Global
 public sealed class Plugin : IDalamudPlugin {
-
 	public const string Name = Constants.PluginName;
 
-	private static readonly List<string> CommandNames = new List<string>() {"/scouth", "/sch"};
+	private static readonly List<string> CommandNames = new() { "/scouth", "/sch" };
 
-	public static Configuration Conf { get; private set; } = null!;
+	private readonly IPluginLog _log;
 
-	[RequiredVersion("1.0"), PluginService]
-	public static DalamudPluginInterface PluginInterface { get; private set; } = null!;
-	[RequiredVersion("1.0"), PluginService]
-	public static IPluginLog Log { get; private set; } = null!;
-	[RequiredVersion("1.0"), PluginService]
-	public static IChatGui ChatGui { get; private set; } = null!;
-	[RequiredVersion("1.0"), PluginService]
-	public static ICommandManager CommandManager { get; private set; } = null!;
-	[RequiredVersion("1.0"), PluginService]
-	public static IClientState ClientState { get; private set; } = null!;
+	private readonly WindowSystem _windowSystem = new WindowSystem(Constants.PluginNamespace);
+	private readonly ConfigWindow _configWindow;
+	private readonly MainWindow _mainWindow;
+	private readonly Action _dispose;
 
-	private WindowSystem WindowSystem { get; } = new WindowSystem(Constants.PluginNamespace);
-	private HuntHelperManager HuntHelperManager { get; init; }
-	private BearManager BearManager { get; init; }
+	public Plugin(
+		[RequiredVersion("1.0")] DalamudPluginInterface pluginInterface,
+		[RequiredVersion("1.0")] IPluginLog log,
+		[RequiredVersion("1.0")] IChatGui chatGui,
+		[RequiredVersion("1.0")] ICommandManager commandManager,
+		[RequiredVersion("1.0")] IClientState clientState
+	) {
+		_log = log;
 
-	private ConfigWindow ConfigWindow { get; init; }
-	private MainWindow MainWindow { get; init; }
+		var conf = pluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
+		conf.Initialize(pluginInterface);
 
-	public Plugin() {
-		Conf = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
-		Conf.Initialize(PluginInterface);
+		var serviceProvider = new ServiceCollection()
+			.AddSingleton(pluginInterface)
+			.AddSingleton(_log)
+			.AddSingleton(chatGui)
+			.AddSingleton(commandManager)
+			.AddSingleton(clientState)
+			.AddSingleton(conf)
+			.AddSingleton(new ScoutHelperOptions(pluginInterface.PluginFilePath(Constants.BearDataFile)))
+			.AddSingleton<ConfigWindow>()
+			.AddSingleton<MainWindow>()
+			.AddSingleton<BearManager>()
+			.AddSingleton<HuntHelperManager>()
+			.BuildServiceProvider();
 
-		HuntHelperManager = new HuntHelperManager();
-		BearManager = new BearManager(Utils.PluginFilePath(@"Data\Bear.json"));
+		pluginInterface.LanguageChanged += OnLanguageChanged;
+		OnLanguageChanged(pluginInterface.UiLanguage);
 
-		ConfigWindow = new ConfigWindow();
-		MainWindow = new MainWindow(HuntHelperManager, BearManager, ConfigWindow);
+		_configWindow = serviceProvider.GetRequiredService<ConfigWindow>();
+		_mainWindow = serviceProvider.GetRequiredService<MainWindow>();
+		_windowSystem.AddWindow(_configWindow);
+		_windowSystem.AddWindow(_mainWindow);
 
-		PluginInterface.LanguageChanged += OnLanguageChanged;
-		OnLanguageChanged(PluginInterface.UiLanguage);
-
-		WindowSystem.AddWindow(ConfigWindow);
-		WindowSystem.AddWindow(MainWindow);
-
-		CommandNames.ForEach(commandName =>
-			CommandManager.AddHandler(commandName, new CommandInfo(OnCommand) {HelpMessage = "Opens the main window."})
+		CommandNames.ForEach(
+			commandName =>
+				commandManager.AddHandler(commandName, new CommandInfo(OnCommand) { HelpMessage = "Opens the main window." })
 		);
 
-		PluginInterface.UiBuilder.Draw += DrawUi;
-		PluginInterface.UiBuilder.OpenConfigUi += DrawConfigUi;
+		pluginInterface.UiBuilder.Draw += DrawUi;
+		pluginInterface.UiBuilder.OpenConfigUi += DrawConfigUi;
+
+		// create the dispose action here, so fields don't need to be made just for disposal
+		_dispose = () => {
+			pluginInterface.LanguageChanged -= OnLanguageChanged;
+			CommandNames.ForEach(commandName => commandManager.RemoveHandler(commandName));
+
+			_windowSystem.RemoveAllWindows();
+
+			conf.Save();
+
+			serviceProvider.Dispose();
+		};
 	}
 
-	public void Dispose() {
-		PluginInterface.LanguageChanged -= OnLanguageChanged;
-		CommandNames.ForEach(commandName => CommandManager.RemoveHandler(commandName));
+	public void Dispose() => _dispose.Invoke();
 
-		WindowSystem.RemoveAllWindows();
-
-		ConfigWindow.Dispose();
-		MainWindow.Dispose();
-
-		HuntHelperManager.Dispose();
-		
-		Conf.Save();
-	}
-
-	private static void OnLanguageChanged(string languageCode) {
+	private void OnLanguageChanged(string languageCode) {
 		try {
-			Log.Information($"Loading localization for {languageCode}");
+			_log.Information($"Loading localization for {languageCode}");
 			Strings.Culture = new CultureInfo(languageCode);
-		}
-		catch (Exception e) {
-			Log.Error(e, "Unable to load localization for language code: {0}", languageCode);
+		} catch (Exception e) {
+			_log.Error(e, "Unable to load localization for language code: {0}", languageCode);
 		}
 	}
 
 	private void OnCommand(string command, string args) {
-		MainWindow.IsOpen = true;
+		_mainWindow.IsOpen = true;
 	}
 
 	private void DrawUi() {
-		WindowSystem.Draw();
+		_windowSystem.Draw();
 	}
 
 	private void DrawConfigUi() {
-		ConfigWindow.IsOpen = true;
+		_configWindow.IsOpen = true;
 	}
 }

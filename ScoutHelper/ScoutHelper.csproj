@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<Import Project="Dalamud.Plugin.Bootstrap.targets"/>
 
-	<PropertyGroup Label="Feature">
+	<PropertyGroup Label="feature">
 		<Authors>ditzy</Authors>
 		<Version>0.2.2.0</Version>
 		<Description>A helper plugin for pre-populating hunt train scout tracker links</Description>
@@ -12,32 +12,33 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <EmbeddedResource Update="Localization\Strings.resx">
-	    <Generator>ResXFileCodeGenerator</Generator>
-	    <LastGenOutput>Strings.Designer.cs</LastGenOutput>
-	  </EmbeddedResource>
+		<EmbeddedResource Update="Localization\Strings.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+			<LastGenOutput>Strings.Designer.cs</LastGenOutput>
+		</EmbeddedResource>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Compile Update="Localization\Strings.Designer.cs">
-	    <DesignTime>True</DesignTime>
-	    <AutoGen>True</AutoGen>
-	    <DependentUpon>Strings.resx</DependentUpon>
-	  </Compile>
+		<Compile Update="Localization\Strings.Designer.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>Strings.resx</DependentUpon>
+		</Compile>
+	</ItemGroup>
+
+	<ItemGroup Label="dependencies">
+		<PackageReference Include="CSharpFunctionalExtensions" Version="2.40.3"/>
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0"/>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="CSharpFunctionalExtensions" Version="2.40.3" />
+		<None Remove="Data\Bear.json"/>
+		<EmbeddedResource Include="Data\Bear.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</EmbeddedResource>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Remove="Data\Bear.json" />
-	  <EmbeddedResource Include="Data\Bear.json">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </EmbeddedResource>
-	</ItemGroup>
-
-	<ItemGroup>
-	  <ProjectReference Include="..\OtterGui\OtterGui.csproj" />
+		<ProjectReference Include="..\OtterGui\OtterGui.csproj"/>
 	</ItemGroup>
 </Project>

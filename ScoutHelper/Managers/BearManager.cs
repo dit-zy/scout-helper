@@ -10,20 +10,27 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Dalamud.Plugin.Services;
+using ScoutHelper.Config;
 
 namespace ScoutHelper.Managers;
 
 public class BearManager : IDisposable {
+	private readonly IPluginLog _log;
+	private readonly Configuration _conf;
 	private static HttpClient HttpClient { get; } = new();
 
 	private IDictionary<uint, (Patch patch, string name)> MobIdToBearName { get; init; }
 
-	public BearManager(string dataFilePath) {
-		HttpClient.BaseAddress = new Uri(Plugin.Conf.BearApiBaseUrl);
+	public BearManager(IPluginLog log, Configuration conf, ScoutHelperOptions options) {
+		_log = log;
+		_conf = conf;
+		
+		HttpClient.BaseAddress = new Uri(_conf.BearApiBaseUrl);
 		HttpClient.DefaultRequestHeaders.UserAgent.Add(Constants.UserAgent);
-		HttpClient.Timeout = Plugin.Conf.BearApiTimeout;
+		HttpClient.Timeout = _conf.BearApiTimeout;
 
-		MobIdToBearName = LoadData(dataFilePath);
+		MobIdToBearName = LoadData(options.BearDataFile);
 	}
 
 	public void Dispose() {
@@ -93,14 +100,14 @@ public class BearManager : IDisposable {
 			.Max();
 
 		var requestPayload = JsonConvert.SerializeObject(
-			new BearApiTrainRequest(worldName, Plugin.Conf.BearTrainName, highestPatch.BearName(), spawnPoints)
+			new BearApiTrainRequest(worldName, _conf.BearTrainName, highestPatch.BearName(), spawnPoints)
 		);
-		Plugin.Log.Debug("Request payload: {0}", requestPayload);
+		_log.Debug("Request payload: {0}", requestPayload);
 		var requestContent = new StringContent(requestPayload, Encoding.UTF8, Constants.MediaTypeJson);
 
 		try {
-			var response = await HttpClient.PostAsync(Plugin.Conf.BearApiTrainPath, requestContent);
-			Plugin.Log.Debug(
+			var response = await HttpClient.PostAsync(_conf.BearApiTrainPath, requestContent);
+			_log.Debug(
 				"Request: {0}\n\nResponse: {1}",
 				response.RequestMessage!.ToString(),
 				response.ToString()
@@ -111,22 +118,22 @@ public class BearManager : IDisposable {
 			var responseJson = await response.Content.ReadAsStringAsync();
 			var trainInfo = JsonConvert.DeserializeObject<BearApiTrainResponse>(responseJson).Trains.First();
 
-			var url = $"{Plugin.Conf.BearSiteTrainUrl}/{trainInfo.TrainId}";
+			var url = $"{_conf.BearSiteTrainUrl}/{trainInfo.TrainId}";
 			return new BearLinkData(url, trainInfo.Password, highestPatch);
 		} catch (TimeoutException) {
 			const string message = "Timed out posting the train to Bear ;-;";
-			Plugin.Log.Error(message);
+			_log.Error(message);
 			return message;
 		} catch (OperationCanceledException e) {
 			const string message = "Generating the Bear link was canceled >_>";
-			Plugin.Log.Warning(e, message);
+			_log.Warning(e, message);
 			return message;
 		} catch (HttpRequestException e) {
-			Plugin.Log.Error(e, "Posting the train to Bear failed.");
+			_log.Error(e, "Posting the train to Bear failed.");
 			return "Something failed when communicating with Bear :T";
 		} catch (Exception e) {
 			const string message = "An unknown error happened while generating the Bear link D:";
-			Plugin.Log.Error(e, message);
+			_log.Error(e, message);
 			return message;
 		}
 	}
