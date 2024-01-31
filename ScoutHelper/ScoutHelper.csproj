@@ -32,7 +32,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Remove="Data\Bear.json"/>
 		<EmbeddedResource Include="Data\Bear.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</EmbeddedResource>
