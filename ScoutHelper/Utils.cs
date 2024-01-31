@@ -14,7 +14,8 @@ using ScoutHelper.Models;
 namespace ScoutHelper;
 
 public static partial class Utils {
-	private static readonly IReadOnlyDictionary<Patch, uint> PatchMaxMarks = new Dictionary<Patch, uint>() {
+	// visible for testing
+	public static readonly IReadOnlyDictionary<Patch, uint> PatchMaxMarks = new Dictionary<Patch, uint>() {
 		{ Patch.ARR, 17 },
 		{ Patch.HW, 12 },
 		{ Patch.SB, 12 },
@@ -59,28 +60,62 @@ public static partial class Utils {
 		}.AsReadOnly();
 
 		var s = new StringBuilder(textTemplate.Length);
-		var i = 0;
-		foreach (Match match in matches) {
-			var m = match.Value;
-			if (m[0] == '\\' || m[^2] == '\\') continue;
+		var tokens = Tokenize(textTemplate);
 
-			var variable = m.Substring(1, m.Length - 2).ToLowerInvariant();
-			if (!variables.ContainsKey(variable)) continue;
+		tokens.ForEach(
+			token => {
+				if (token is ['{', _, .., '}'] && variables.TryGetValue(token[1..^1], out var value)) {
+					s.Append(value);
+					return;
+				}
 
-			s.Append(textTemplate.AsSpan(i, match.Index - i));
-			s.Append(variables[variable]);
+				s.Append(token);
+			}
+		);
 
-			i = match.Index + match.Length;
+		return s.ToString();
+	}
+
+	private static IEnumerable<string> Tokenize(string s) {
+		var tokens = new List<string>();
+
+		var nextToken = new StringBuilder();
+		var varStarted = false;
+
+		for (var i = 0; i < s.Length; i++) {
+			var c = s[i];
+			nextToken.Append(c);
+
+			if (c == '\\') {
+				if (i == s.Length - 1) continue;
+
+				if (s[i + 1] == '\\' || s[i + 1] == '{' || s[i + 1] == '}') {
+					nextToken.PopLast();
+					nextToken.Append(s[i + 1]);
+					i++;
+				}
+				continue;
+			}
+
+			if (c == '{') {
+				nextToken.PopLast();
+				tokens.Add(nextToken.ToString());
+				nextToken.Clear();
+				nextToken.Append('{');
+				varStarted = true;
+				continue;
+			}
+
+			if (c == '}' && varStarted) {
+				tokens.Add(nextToken.ToString());
+				nextToken.Clear();
+				varStarted = false;
+			}
 		}
 
-		if (i < textTemplate.Length) {
-			s.Append(textTemplate.AsSpan(i));
-		}
+		if (0 < nextToken.Length) tokens.Add(nextToken.ToString());
 
-		return s
-			.ToString()
-			.Replace("\\{", "{")
-			.Replace("\\}", "}");
+		return tokens;
 	}
 
 	#region extensions
@@ -121,6 +156,14 @@ public static partial class Utils {
 		}
 		return values;
 	}
+
+	public static IDictionary<K, V> ToDict<K, V>(this IEnumerable<KeyValuePair<K, V>> source) where K : notnull =>
+		source.Select(entry => (entry.Key, entry.Value)).ToDict();
+
+	public static IDictionary<K, V> ToDict<K, V>(this IEnumerable<(K, V)> source) where K : notnull =>
+		source.ToImmutableDictionary(entry => entry.Item1, entry => entry.Item2);
+
+	public static StringBuilder PopLast(this StringBuilder builder) => builder.Remove(builder.Length - 1, 1);
 
 	#endregion
 }

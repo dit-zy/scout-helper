@@ -1,17 +1,17 @@
-using ScoutHelper;
 using System.Collections.Immutable;
 using Dalamud.Game.ClientState.Objects.SubKinds;
-using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using FluentAssertions;
 using FsCheck;
 using FsCheck.Xunit;
 using Moq;
-using ScoutHelper.Models;
+using ScoutHelper;
+using ScoutHelperTests.Util.FsCheck;
 
 namespace ScoutHelperTests;
 
 public class UtilsTests {
+
 	[Fact]
 	public void ForEach_EmptyEnumerable() {
 		// DATA
@@ -39,85 +39,90 @@ public class UtilsTests {
 	}
 
 	[Property]
-	public void ForEach_NonEmptyEnumerable(IList<string?> testEnumerable) {
-		// DATA
-		int F(string? s) => s?.Length ?? 0;
-		var expected = testEnumerable.Select((Func<string?, int>)F).ToImmutableArray();
+	public Property ForEach_NonEmptyEnumerable() => FsCheckUtils.ForAll(
+		Arbs.NonEmptyList<string?>(),
+		testEnumerable => {
+			// DATA
+			int F(string? s) => s?.Length ?? 0;
+			var expected = testEnumerable.Select((Func<string?, int>)F).ToImmutableArray();
 
-		// WHEN
-		var actual = new List<int>();
-		testEnumerable.ForEach(s => actual.Add(F(s)));
+			// WHEN
+			var actual = new List<int>();
+			testEnumerable.ForEach(s => actual.Add(F(s)));
 
-		// THEN
-		actual.Should().Equal(expected);
-	}
-
-	[Property]
-	public void ForEach_WithIndex_NonEmptyEnumerable(IList<string?> testEnumerable) {
-		// DATA
-		int F(string? s, int i) => (s?.Length ?? 0) + i;
-		var expected = testEnumerable.Select((Func<string?, int, int>)F).ToImmutableArray();
-
-		// WHEN
-		var actual = new List<int>();
-		testEnumerable.ForEach((s, i) => actual.Add(F(s, i)));
-
-		// THEN
-		actual.Should().Equal(expected);
-	}
+			// THEN
+			actual.Should().Equal(expected);
+		}
+	);
 
 	[Property]
-	public void ForEach_ReturnsOriginalEnumerable(IList<string> testEnumerable) {
-		// WHEN
-		var actualNumItems = 0;
-		var actual = testEnumerable.ForEach(_ => actualNumItems++);
+	public Property ForEach_WithIndex_NonEmptyEnumerable() => FsCheckUtils.ForAll(
+		Arbs.NonEmptyList<string?>(),
+		testEnumerable => {
+			// DATA
+			int F(string? s, int i) => (s?.Length ?? 0) + i;
+			var expected = testEnumerable.Select((Func<string?, int, int>)F).ToImmutableArray();
 
-		// THEN
-		actualNumItems.Should().Be(testEnumerable.Count);
-		actual.Should().Equal(testEnumerable);
-	}
+			// WHEN
+			var actual = new List<int>();
+			testEnumerable.ForEach((s, i) => actual.Add(F(s, i)));
+
+			// THEN
+			actual.Should().Equal(expected);
+		}
+	);
 
 	[Property]
-	public void ForEach_WithIndex_ReturnsOriginalEnumerable(IList<string> testEnumerable) {
-		// WHEN
-		var actualNumItems = 0;
-		var actual = testEnumerable.ForEach((_, _) => actualNumItems++);
+	public Property ForEach_ReturnsOriginalEnumerable() => FsCheckUtils.ForAll(
+		Arbs.NonEmptyList<string?>(),
+		testEnumerable => {
+			// WHEN
+			var actualNumItems = 0;
+			var actual = testEnumerable.ForEach(_ => actualNumItems++);
 
-		// THEN
-		actualNumItems.Should().Be(testEnumerable.Count);
-		actual.Should().Equal(testEnumerable);
-	}
+			// THEN
+			actualNumItems.Should().Be(testEnumerable.Count);
+			actual.Should().Equal(testEnumerable);
+		}
+	);
 
-	[Fact]
-	public void VerifyEnumDictionary_ErrorOnIncompleteDictionary() {
-		// DATA
-		var testDictionary = new Dictionary<TestEnum, int>() {
-			{ TestEnum.A, 0 },
-			{ TestEnum.B, 1 }
-		};
+	[Property]
+	public Property ForEach_WithIndex_ReturnsOriginalEnumerable() => FsCheckUtils.ForAll(
+		Arbs.NonEmptyList<string?>(),
+		testEnumerable => {
+			// WHEN
+			var actualNumItems = 0;
+			var actual = testEnumerable.ForEach((_, _) => actualNumItems++);
 
-		// WHEN
-		var actual = Assert.Throws<Exception>(() => { testDictionary.VerifyEnumDictionary(); });
+			// THEN
+			actualNumItems.Should().Be(testEnumerable.Count);
+			actual.Should().Equal(testEnumerable);
+		}
+	);
 
-		// THEN
-		actual.Message.Should().BeEquivalentTo("All values of enum [TestEnum] must be in the dictionary.");
-	}
+	[Property]
+	public Property VerifyEnumDictionary_ErrorOnIncompleteDictionary() => FsCheckUtils.ForAll(
+		Arbs.PartialEnumDict<TestEnum, string>(),
+		testDictionary => {
+			// WHEN
+			var actual = Assert.Throws<Exception>(() => { testDictionary.VerifyEnumDictionary(); });
 
-	[Fact]
-	public void VerifyEnumDictionary_ReturnsImmutableDictionary() {
-		// DATA
-		var testDictionary = new Dictionary<TestEnum, int>() {
-			{ TestEnum.A, 0 },
-			{ TestEnum.B, 1 },
-			{ TestEnum.C, 2 }
-		};
+			// THEN
+			actual.Message.Should().BeEquivalentTo("All values of enum [TestEnum] must be in the dictionary.");
+		}
+	);
 
-		// WHEN
-		var actual = testDictionary.VerifyEnumDictionary();
+	[Property]
+	public Property VerifyEnumDictionary_ReturnsImmutableDictionary() => FsCheckUtils.ForAll(
+		Arbs.EnumDict<TestEnum, string>(),
+		testDictionary => {
+			// WHEN
+			var actual = new Dictionary<TestEnum, string>(testDictionary).VerifyEnumDictionary();
 
-		// THEN
-		actual.Should().BeAssignableTo<ImmutableDictionary<TestEnum, int>>();
-	}
+			// THEN
+			actual.Should().BeAssignableTo<ImmutableDictionary<TestEnum, string>>();
+		}
+	);
 
 	[Fact]
 	public void WorldName_NoPlayer() {
@@ -134,43 +139,30 @@ public class UtilsTests {
 		worldName.Should().Be("Not Found");
 	}
 
-	[Fact]
-	public void FormatTemplate() {
-		// DATA
-		var testTrainList = new List<TrainMob>() { new(), new(), new() };
-		var testTracker = "YATS";
-		var testWorldName = "Odin";
-		var testPatch = Patch.SHB;
-		var patchMaxMarks = 12;
-		var testLink = "https://ya.ts/?q=7";
+	[Property]
+	public Property FormatTemplate() => FsCheckUtils.ForAll(
+		Arbs.CopyTemplate(),
+		copyTemplate => {
+			// WHEN
+			var actual = Utils.FormatTemplate(
+				copyTemplate.Template,
+				copyTemplate.TrainList,
+				copyTemplate.Tracker,
+				copyTemplate.WorldName,
+				copyTemplate.HighestPatch,
+				copyTemplate.Link
+			);
 
-		var testTemplates = new List<(string template, string expected)>() {
-			("{patch} {#}/{#max} {world} [{tracker}]({link})", "SHB 3/12 Odin [YATS](https://ya.ts/?q=7)"),
-			("#{#} {tracker} {not a var} {patch}", "#3 YATS {not a var} SHB"),
-			("\\{link\\}{link} {world\\} \\{#}", "{link}https://ya.ts/?q=7 {world} {#}"),
-		};
-
-		var expected = testTemplates.Select(spec => spec.expected).ToImmutableList();
-
-		// WHEN
-		var actual = testTemplates.Select(
-			spec => Utils.FormatTemplate(
-				spec.template,
-				testTrainList,
-				testTracker,
-				testWorldName,
-				testPatch,
-				testLink
-			)
-		).ToImmutableList();
-
-		// THEN
-		actual.Should().BeEquivalentTo(expected);
-	}
+			// THEN
+			actual.Should().Be(copyTemplate.Expected);
+		}
+	);
 }
 
 internal enum TestEnum {
 	A,
 	B,
-	C
+	C,
+	D,
+	E
 }
