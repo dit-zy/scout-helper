@@ -3,5 +3,6 @@
 namespace ScoutHelper.Config;
 
 public record ScoutHelperOptions(
-	string BearDataFile
+	string BearDataFile,
+	string SirenDataFile
 ) { }

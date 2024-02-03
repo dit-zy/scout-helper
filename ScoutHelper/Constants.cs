@@ -16,6 +16,7 @@ public static class Constants {
 
 	public const string DefaultCopyTemplate = "{patch} {#}/{#max} {world} [{tracker}]({link})";
 	public const string BearDataFile = @"Data\Bear.json";
+	public const string SirenDataFile = @"Data\Siren.json";
 
 	#endregion
 

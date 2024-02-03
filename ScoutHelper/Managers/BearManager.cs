@@ -39,7 +39,9 @@ public class BearManager : IDisposable {
 		GC.SuppressFinalize(this);
 	}
 
-	private static IDictionary<uint, (Patch patch, string name)> LoadData(string dataFilePath) {
+	private IDictionary<uint, (Patch patch, string name)> LoadData(string dataFilePath) {
+		_log.Debug("Loading Bear data...");
+		
 		if (!File.Exists(dataFilePath)) {
 			throw new Exception($"Can't find {dataFilePath}");
 		}
@@ -49,7 +51,7 @@ public class BearManager : IDisposable {
 			throw new Exception("Failed to read in Bear data ;-;");
 		}
 
-		return data
+		var bearData = data
 			.SelectMany(
 				patchData => {
 					if (!Enum.TryParse(patchData.Key, out Patch patch)) {
@@ -69,6 +71,10 @@ public class BearManager : IDisposable {
 				mob => mob.mobId,
 				mob => (mob.patch, mob.mobName)
 			);
+		
+		_log.Debug("Bear data loaded.");
+
+		return bearData;
 	}
 
 	private BearApiSpawnPoint CreateRequestSpawnPoint(TrainMob mob) {
@@ -146,7 +152,7 @@ public record struct BearLinkData(
 ) { }
 
 public static class BearExtensions {
-	private static readonly IReadOnlyDictionary<Patch, string> BearPatchNames = new Dictionary<Patch, string> {
+	private static readonly IDictionary<Patch, string> BearPatchNames = new Dictionary<Patch, string> {
 		{ Patch.ARR, "ARR" },
 		{ Patch.HW, "HW" },
 		{ Patch.SB, "SB" },

@@ -1,21 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.IO;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
 using System.Text.RegularExpressions;
-using Dalamud.Plugin;
-using Dalamud.Plugin.Services;
 using ImGuiNET;
 using ScoutHelper.Models;
 
-namespace ScoutHelper;
+namespace ScoutHelper.Utils;
 
 public static partial class Utils {
 	// visible for testing
-	public static readonly IReadOnlyDictionary<Patch, uint> PatchMaxMarks = new Dictionary<Patch, uint>() {
+	public static readonly IDictionary<Patch, uint> PatchMaxMarks = new Dictionary<Patch, uint>() {
 		{ Patch.ARR, 17 },
 		{ Patch.HW, 12 },
 		{ Patch.SB, 12 },
@@ -120,50 +114,13 @@ public static partial class Utils {
 
 	#region extensions
 
-	public static string WorldName(this IClientState clientState) =>
-		clientState.LocalPlayer?.CurrentWorld.GameData?.Name.ToString() ?? "Not Found";
-
-	public static string PluginFilePath(this DalamudPluginInterface pluginInterface, string dataFilename) => Path.Combine(
-		pluginInterface.AssemblyLocation.Directory?.FullName!,
-		dataFilename
-	);
-
-	public static void TaggedPrint(this IChatGui chatGui, string message) {
-		chatGui.Print(message, Plugin.Name);
-	}
-
-	public static void TaggedPrintError(this IChatGui chatGui, string message) {
-		chatGui.PrintError(message, Plugin.Name);
-	}
-
-	public static IReadOnlyDictionary<K, V> VerifyEnumDictionary<K, V>(this IDictionary<K, V> enumDict)
-		where K : struct, Enum {
-		var allEnumsAreInDict = (Enum.GetValuesAsUnderlyingType<K>() as K[])!.All(enumDict.ContainsKey);
-		if (!allEnumsAreInDict) {
-			throw new Exception($"All values of enum [{typeof(K).Name}] must be in the dictionary.");
-		}
-
-		return enumDict.ToImmutableDictionary();
-	}
-
-	public static IEnumerable<T> ForEach<T>(this IEnumerable<T> source, Action<T> action) =>
-		source.ForEach((value, _) => action.Invoke(value));
-
-	public static IEnumerable<T> ForEach<T>(this IEnumerable<T> source, Action<T, int> action) {
-		var values = source as T[] ?? source.ToArray();
-		for (var i = 0; i < values.Length; ++i) {
-			action.Invoke(values[i], i);
-		}
-		return values;
-	}
-
-	public static IDictionary<K, V> ToDict<K, V>(this IEnumerable<KeyValuePair<K, V>> source) where K : notnull =>
-		source.Select(entry => (entry.Key, entry.Value)).ToDict();
-
-	public static IDictionary<K, V> ToDict<K, V>(this IEnumerable<(K, V)> source) where K : notnull =>
-		source.ToImmutableDictionary(entry => entry.Item1, entry => entry.Item2);
-
 	public static StringBuilder PopLast(this StringBuilder builder) => builder.Remove(builder.Length - 1, 1);
+
+	public static string Upper(this string s) => s.ToUpperInvariant();
+
+	public static string Lower(this string s) => s.ToLowerInvariant();
+
+	public static string Join(this IEnumerable<string> source, string? separator) => string.Join(separator, source);
 
 	#endregion
 }

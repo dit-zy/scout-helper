@@ -11,6 +11,8 @@ using ScoutHelper.Config;
 using ScoutHelper.Localization;
 using ScoutHelper.Managers;
 using ScoutHelper.Models;
+using ScoutHelper.Utils;
+using static ScoutHelper.Utils.Utils;
 
 namespace ScoutHelper.Windows;
 
@@ -20,10 +22,11 @@ public class MainWindow : Window, IDisposable {
 	private readonly IChatGui _chat;
 	private readonly HuntHelperManager _huntHelperManager;
 	private readonly BearManager _bearManager;
+	private readonly SirenManager _sirenManager;
 	private readonly ConfigWindow _configWindow;
 
 	private readonly Lazy<Vector2> _buttonSize;
-	
+
 	private bool _isCopyModeFullText;
 	private uint _selectedMode;
 
@@ -33,6 +36,7 @@ public class MainWindow : Window, IDisposable {
 		IChatGui chat,
 		HuntHelperManager huntHelperManager,
 		BearManager bearManager,
+		SirenManager sirenManager,
 		ConfigWindow configWindow
 	) : base(
 		Strings.MainWindowTitle,
@@ -43,6 +47,7 @@ public class MainWindow : Window, IDisposable {
 		_chat = chat;
 		_huntHelperManager = huntHelperManager;
 		_bearManager = bearManager;
+		_sirenManager = sirenManager;
 		_configWindow = configWindow;
 
 		_isCopyModeFullText = _conf.IsCopyModeFullText;
@@ -122,12 +127,51 @@ public class MainWindow : Window, IDisposable {
 		ImGuiHelpers.CenteredText(Strings.MainWindowSectionLabelGenerators);
 
 		if (ImGui.Button(Strings.BearButton, _buttonSize.Value)) GenerateBearLink();
-		if (ImGui.IsItemHovered()) Utils.CreateTooltip(Strings.BearButtonTooltip);
+		if (ImGui.IsItemHovered()) CreateTooltip(Strings.BearButtonTooltip);
 
+		if (ImGui.Button(Strings.SirenButton, _buttonSize.Value)) GenerateSirenLink();
 		ImGui.BeginDisabled(true);
 		ImGui.Button(Strings.SirenButton, _buttonSize.Value);
 		ImGui.EndDisabled();
-		if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) Utils.CreateTooltip(Strings.SirenButtonTooltip);
+		if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) CreateTooltip(Strings.SirenButtonTooltip);
+	}
+
+	private void GenerateSirenLink() {
+		_chat.TaggedPrint("Generating Siren link...");
+		IList<TrainMob> trainList = null!;
+
+		_huntHelperManager
+			.GetTrainList()
+			.Ensure(
+				train => 0 < train.Count,
+				"No mobs in the train :T"
+			)
+			.Map(
+				train => {
+					trainList = train;
+					return _sirenManager.GenerateSirenLink(train);
+				}
+			)
+			.Match(
+				sirenLink => {
+					if (_isCopyModeFullText) {
+						var fullText = FormatTemplate(
+							_conf.CopyTemplate,
+							trainList,
+							"siren",
+							_clientState.WorldName(),
+							sirenLink.HighestPatch,
+							sirenLink.Url
+						);
+						ImGui.SetClipboardText(fullText);
+						_chat.TaggedPrint($"Copied full text to clipboard: {fullText}");
+					} else {
+						ImGui.SetClipboardText(sirenLink.Url);
+						_chat.TaggedPrint($"Copied link to clipboard: {sirenLink.Url}");
+					}
+				},
+				errorMessage => { _chat.TaggedPrintError(errorMessage); }
+			);
 	}
 
 	private void GenerateBearLink() {
@@ -154,7 +198,7 @@ public class MainWindow : Window, IDisposable {
 								_chat.TaggedPrint($"Bear train link: {bearTrainLink.Url}");
 								_chat.TaggedPrint($"Train admin password: {bearTrainLink.Password}");
 								if (_isCopyModeFullText) {
-									var fullText = Utils.FormatTemplate(
+									var fullText = FormatTemplate(
 										_conf.CopyTemplate,
 										trainList,
 										"bear",

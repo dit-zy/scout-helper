@@ -7,10 +7,10 @@ using Dalamud.IoC;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using ScoutHelper.Config;
 using ScoutHelper.Localization;
 using ScoutHelper.Managers;
+using ScoutHelper.Utils;
 using ScoutHelper.Windows;
 
 namespace ScoutHelper;
@@ -33,7 +33,8 @@ public sealed class Plugin : IDalamudPlugin {
 		[RequiredVersion("1.0")] IPluginLog log,
 		[RequiredVersion("1.0")] IChatGui chatGui,
 		[RequiredVersion("1.0")] ICommandManager commandManager,
-		[RequiredVersion("1.0")] IClientState clientState
+		[RequiredVersion("1.0")] IClientState clientState,
+		[RequiredVersion("1.0")] IDataManager dataManager
 	) {
 		_log = log;
 
@@ -46,12 +47,21 @@ public sealed class Plugin : IDalamudPlugin {
 			.AddSingleton(chatGui)
 			.AddSingleton(commandManager)
 			.AddSingleton(clientState)
+			.AddSingleton(dataManager)
 			.AddSingleton(conf)
-			.AddSingleton(new ScoutHelperOptions(pluginInterface.PluginFilePath(Constants.BearDataFile)))
+			.AddSingleton(
+				new ScoutHelperOptions(
+					pluginInterface.PluginFilePath(Constants.BearDataFile),
+					pluginInterface.PluginFilePath(Constants.SirenDataFile)
+				)
+			)
+			.AddSingleton<MobManager>()
+			.AddSingleton<TerritoryManager>()
+			.AddSingleton<HuntHelperManager>()
+			.AddSingleton<BearManager>()
+			.AddSingleton<SirenManager>()
 			.AddSingleton<ConfigWindow>()
 			.AddSingleton<MainWindow>()
-			.AddSingleton<BearManager>()
-			.AddSingleton<HuntHelperManager>()
 			.BuildServiceProvider();
 
 		pluginInterface.LanguageChanged += OnLanguageChanged;
