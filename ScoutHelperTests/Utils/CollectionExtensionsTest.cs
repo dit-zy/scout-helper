@@ -1,17 +1,16 @@
-using System.Collections.Immutable;
-using Dalamud.Game.ClientState.Objects.SubKinds;
-using Dalamud.Plugin.Services;
+﻿using System.Collections.Immutable;
 using FluentAssertions;
 using FsCheck;
 using FsCheck.Xunit;
-using Moq;
+using JetBrains.Annotations;
 using ScoutHelper;
-using ScoutHelperTests.Util.FsCheck;
+using ScoutHelperTests.TestUtils.FsCheck;
+using CollectionExtensions = ScoutHelper.CollectionExtensions;
 
-namespace ScoutHelperTests;
+namespace ScoutHelperTests.Utils;
 
-public class UtilsTests {
-
+[TestSubject(typeof(CollectionExtensions))]
+public class CollectionExtensionsTest {
 	[Fact]
 	public void ForEach_EmptyEnumerable() {
 		// DATA
@@ -123,46 +122,4 @@ public class UtilsTests {
 			actual.Should().BeAssignableTo<ImmutableDictionary<TestEnum, string>>();
 		}
 	);
-
-	[Fact]
-	public void WorldName_NoPlayer() {
-		// DATA
-		var clientState = new Mock<IClientState>();
-
-		// GIVEN
-		clientState.Setup(state => state.LocalPlayer).Returns(null as PlayerCharacter);
-
-		// WHEN
-		var worldName = clientState.Object.WorldName();
-
-		// THEN
-		worldName.Should().Be("Not Found");
-	}
-
-	[Property]
-	public Property FormatTemplate() => FsCheckUtils.ForAll(
-		Arbs.CopyTemplate(),
-		copyTemplate => {
-			// WHEN
-			var actual = Utils.FormatTemplate(
-				copyTemplate.Template,
-				copyTemplate.TrainList,
-				copyTemplate.Tracker,
-				copyTemplate.WorldName,
-				copyTemplate.HighestPatch,
-				copyTemplate.Link
-			);
-
-			// THEN
-			actual.Should().Be(copyTemplate.Expected);
-		}
-	);
-}
-
-internal enum TestEnum {
-	A,
-	B,
-	C,
-	D,
-	E
 }

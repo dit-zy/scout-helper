@@ -1,8 +1,9 @@
 ﻿using FsCheck;
 using ScoutHelper;
 using ScoutHelper.Models;
+using static ScoutHelper.Utils.Utils;
 
-namespace ScoutHelperTests.Util.FsCheck;
+namespace ScoutHelperTests.TestUtils.FsCheck;
 
 public static class Arbs {
 	public static Arbitrary<string> NonEmptyString() =>
@@ -11,9 +12,7 @@ public static class Arbs {
 			.Select(nes => nes.ToString())
 			.ToArbitrary();
 
-	public static Arbitrary<T> OfEnum<T>() where T : struct, Enum =>
-		Gen.Elements(Enum.GetValues<T>())
-			.ToArbitrary();
+	public static Arbitrary<T> OfEnum<T>() where T : struct, Enum => Gen.Elements(Enum.GetValues<T>()).ToArbitrary();
 
 	public static Arbitrary<List<T>> ListOf<T>(Gen<T> gen) =>
 		Gen.ListOf(gen)
@@ -60,7 +59,7 @@ public static class Arbs {
 			.Select(
 				arbs => (arbs, new List<(string?, string?)>() {
 					("{#}", arbs.a.Count.ToString()),
-					("{#max}", Utils.PatchMaxMarks[arbs.d].ToString()),
+					("{#max}", PatchMaxMarks[arbs.d].ToString()),
 					("{tracker}", arbs.b),
 					("{world}", arbs.c),
 					("{patch}", arbs.d.ToString()),
