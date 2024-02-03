@@ -19,6 +19,8 @@ public class Configuration : IPluginConfiguration {
 	public string BearSiteTrainUrl { get; set; } = "https://tracker.beartoolkit.com/train";
 	public string BearTrainName { get; set; } = "Scout Helper Train";
 
+	public string SirenBaseUrl { get; set; } = "https://sirenhunts.com/scouting/";
+
 	public string CopyTemplate { get; set; } = Constants.DefaultCopyTemplate;
 	public bool IsCopyModeFullText { get; set; } = false;
 

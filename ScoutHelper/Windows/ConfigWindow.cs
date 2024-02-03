@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Dalamud.Interface.Windowing;
-using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
 using ScoutHelper.Config;
 using ScoutHelper.Localization;
 using ScoutHelper.Models;
-using static ScoutHelper.Utils;
+using ScoutHelper.Utils;
+using static ScoutHelper.Utils.Utils;
 
 namespace ScoutHelper.Windows;
 
@@ -29,7 +29,7 @@ public class ConfigWindow : Window, IDisposable {
 		)
 		.ToImmutableList();
 
-	public ConfigWindow(IClientState clientState, IPluginLog log, Configuration conf, IChatGui chat) : base(
+	public ConfigWindow(IClientState clientState, IPluginLog log, Configuration conf) : base(
 		Strings.ConfigWindowTitle
 	) {
 		_clientState = clientState;
