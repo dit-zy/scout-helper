@@ -1,7 +1,7 @@
 ﻿using FsCheck;
 using Random = FsCheck.Random;
 
-namespace ScoutHelperTests.Util.FsCheck;
+namespace ScoutHelperTests.TestUtils.FsCheck;
 
 public static class FsCheckUtils {
 	public static Gen<A> Zip<A>(Gen<A> a) => a;
