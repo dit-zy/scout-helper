@@ -96,8 +96,6 @@ public static class FsCheckUtils {
 		Action<A, B, C, D, E, F, G, H> body
 	) => Prop.ForAll(Zip(a, b, c, d, e, f, g, h), x => body.Invoke(x.a, x.b, x.c, x.d, x.e, x.f, x.g, x.h));
 
-	public static Arbitrary<T> ToArbitrary<T>(this Gen<T> gen) => Arb.From(gen);
-
 	public static void Replay(this Property prop, int a, int b) {
 		var config = Configuration.QuickThrowOnFailure;
 		config.Replay = Random.StdGen.NewStdGen(a, b);

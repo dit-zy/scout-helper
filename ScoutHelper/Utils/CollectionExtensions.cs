@@ -27,6 +27,26 @@ public static class CollectionExtensions {
 			.DistinctBy(entry => entry.Item1)
 			.ToImmutableDictionary(entry => entry.Item1, entry => entry.Item2);
 
+	public static IDictionary<K, V> ToMutableDict<K, V>(this IEnumerable<KeyValuePair<K, V>> source) where K : notnull =>
+		source.Select(entry => (entry.Key, entry.Value)).ToMutableDict();
+
+	public static IDictionary<K, V> ToMutableDict<K, V>(this IEnumerable<(K, V)> source) where K : notnull =>
+		source
+			.DistinctBy(entry => entry.Item1)
+			.ToDictionary(entry => entry.Item1, entry => entry.Item2);
+
+	public static IDictionary<K, V> With<K, V>(this IDictionary<K, V> source, params (K, V)[] entries) where K : notnull {
+		var dict = source.IsReadOnly ? source.ToMutableDict() : source;
+		entries.ForEach(entry => dict[entry.Item1] = entry.Item2);
+		return source.IsReadOnly ? dict.ToDict() : source;
+	}
+
+	public static IDictionary<K, V> Without<K, V>(this IDictionary<K, V> source, params K[] keys) where K : notnull {
+		var dict = source.IsReadOnly ? source.ToMutableDict() : source;
+		keys.ForEach(key => dict.Remove(key));
+		return source.IsReadOnly ? dict.ToDict() : source;
+	}
+
 	public static IEnumerable<U?> SelectWhere<T, U>(this IEnumerable<T> source, Func<T, (bool, U?)> filteredSelector) =>
 		source
 			.Select(filteredSelector)

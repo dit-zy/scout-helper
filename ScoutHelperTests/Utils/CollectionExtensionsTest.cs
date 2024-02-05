@@ -39,11 +39,11 @@ public class CollectionExtensionsTest {
 
 	[Property]
 	public Property ForEach_NonEmptyEnumerable() => FsCheckUtils.ForAll(
-		Arbs.NonEmptyList<string?>(),
+		Arbs.String().NonEmptyListOf(),
 		testEnumerable => {
 			// DATA
-			int F(string? s) => s?.Length ?? 0;
-			var expected = testEnumerable.Select((Func<string?, int>)F).ToImmutableArray();
+			int F(string s) => s.Length;
+			var expected = testEnumerable.Select(F).ToImmutableArray();
 
 			// WHEN
 			var actual = new List<int>();
@@ -56,11 +56,11 @@ public class CollectionExtensionsTest {
 
 	[Property]
 	public Property ForEach_WithIndex_NonEmptyEnumerable() => FsCheckUtils.ForAll(
-		Arbs.NonEmptyList<string?>(),
+		Arbs.String().NonEmptyListOf(),
 		testEnumerable => {
 			// DATA
-			int F(string? s, int i) => (s?.Length ?? 0) + i;
-			var expected = testEnumerable.Select((Func<string?, int, int>)F).ToImmutableArray();
+			int F(string s, int i) => s.Length + i;
+			var expected = testEnumerable.Select(F).ToImmutableArray();
 
 			// WHEN
 			var actual = new List<int>();
@@ -73,7 +73,7 @@ public class CollectionExtensionsTest {
 
 	[Property]
 	public Property ForEach_ReturnsOriginalEnumerable() => FsCheckUtils.ForAll(
-		Arbs.NonEmptyList<string?>(),
+		Arbs.String().NonEmptyListOf(),
 		testEnumerable => {
 			// WHEN
 			var actualNumItems = 0;
@@ -87,7 +87,7 @@ public class CollectionExtensionsTest {
 
 	[Property]
 	public Property ForEach_WithIndex_ReturnsOriginalEnumerable() => FsCheckUtils.ForAll(
-		Arbs.NonEmptyList<string?>(),
+		Arbs.String().NonEmptyListOf(),
 		testEnumerable => {
 			// WHEN
 			var actualNumItems = 0;

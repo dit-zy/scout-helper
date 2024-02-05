@@ -2,20 +2,13 @@
 using System.Numerics;
 using System.Text;
 using System.Text.RegularExpressions;
+using CSharpFunctionalExtensions;
 using ImGuiNET;
 using ScoutHelper.Models;
 
 namespace ScoutHelper.Utils;
 
 public static partial class Utils {
-	// visible for testing
-	public static readonly IDictionary<Patch, uint> PatchMaxMarks = new Dictionary<Patch, uint>() {
-		{ Patch.ARR, 17 },
-		{ Patch.HW, 12 },
-		{ Patch.SB, 12 },
-		{ Patch.SHB, 12 },
-		{ Patch.EW, 16 },
-	}.VerifyEnumDictionary();
 
 	public static void CreateTooltip(string text, float width = 12f) {
 		ImGui.BeginTooltip();
@@ -46,7 +39,7 @@ public static partial class Utils {
 
 		var variables = new Dictionary<string, string>() {
 			{ "#", trainList.Count.ToString() },
-			{ "#max", PatchMaxMarks[highestPatch].ToString() },
+			{ "#max", highestPatch.MaxMarks().ToString() },
 			{ "link", link },
 			{ "patch", highestPatch.ToString() },
 			{ "tracker", tracker },
@@ -123,4 +116,16 @@ public static partial class Utils {
 	public static string Join(this IEnumerable<string> source, string? separator) => string.Join(separator, source);
 
 	#endregion
+}
+
+public static class UtilExtensions {
+	private static readonly IDictionary<Patch, uint> PatchMaxMarks = new Dictionary<Patch, uint>() {
+		{ Patch.ARR, 17 },
+		{ Patch.HW, 12 },
+		{ Patch.SB, 12 },
+		{ Patch.SHB, 12 },
+		{ Patch.EW, 16 },
+	}.VerifyEnumDictionary();
+
+	public static uint MaxMarks(this Patch patch) => PatchMaxMarks[patch];
 }

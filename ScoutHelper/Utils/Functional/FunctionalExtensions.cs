@@ -12,8 +12,10 @@ namespace ScoutHelper.Utils.Functional;
 public static class FunctionalExtensions {
 	#region maybe
 
-	public static IEnumerable<U> SelectMaybe<T, U>(this IEnumerable<T> source, Func<T, Maybe<U>> selector)
-		where U : struct =>
+	public static IEnumerable<T> SelectMaybe<T>(this IEnumerable<Maybe<T>> source) =>
+		source.SelectMaybe(value => value);
+
+	public static IEnumerable<U> SelectMaybe<T, U>(this IEnumerable<T> source, Func<T, Maybe<U>> selector) =>
 		source.SelectWhere(
 				value => {
 					var result = selector.Invoke(value);

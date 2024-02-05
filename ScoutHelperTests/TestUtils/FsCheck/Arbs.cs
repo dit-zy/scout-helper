@@ -1,31 +1,38 @@
-﻿using FsCheck;
+﻿using CSharpFunctionalExtensions;
+using FsCheck;
 using ScoutHelper;
 using ScoutHelper.Models;
+using ScoutHelper.Utils;
 using static ScoutHelper.Utils.Utils;
 
 namespace ScoutHelperTests.TestUtils.FsCheck;
 
 public static class Arbs {
-	public static Arbitrary<string> NonEmptyString() =>
-		Arb.Default.NonEmptyString()
+	public static Arbitrary<string> String() =>
+		Arb.Default.UnicodeString()
 			.Generator
-			.Select(nes => nes.ToString())
+			.Select(s => s.ToString())
 			.ToArbitrary();
+
+	public static Arbitrary<string> NonEmptyString() =>
+		String()
+			.Generator
+			.Where(s => !string.IsNullOrEmpty(s))
+			.ToArbitrary();
+
+	public static Arbitrary<IDictionary<K, V>> DictOf<K, V>(Gen<K> keyGen, Gen<V> valueGen) where K : notnull =>
+		FsCheckUtils.Zip(keyGen, valueGen)
+			.ListOf()
+			.Select(entryList => entryList.ToDict())
+			.ToArbitrary();
+
+	public static Arbitrary<T?> WithNulls<T>(Gen<T> gen) =>
+		RandomFreq(
+			gen.Select(value => (T?)value),
+			Gen.Constant((T?)default)
+		);
 
 	public static Arbitrary<T> OfEnum<T>() where T : struct, Enum => Gen.Elements(Enum.GetValues<T>()).ToArbitrary();
-
-	public static Arbitrary<List<T>> ListOf<T>(Gen<T> gen) =>
-		Gen.ListOf(gen)
-			.Select(list => list.ToList())
-			.ToArbitrary();
-
-	public static Arbitrary<ICollection<T>> NonEmptyList<T>() =>
-		Arb.Default
-			.List<T>()
-			.Filter(list => 0 < list.Count)
-			.Generator
-			.Select(list => (ICollection<T>)list)
-			.ToArbitrary();
 
 	public static Arbitrary<IDictionary<K, V>> EnumDict<K, V>() where K : struct, Enum where V : notnull {
 		var enumValues = Enum.GetValues<K>();
@@ -48,7 +55,7 @@ public static class Arbs {
 			.ToArbitrary();
 
 	public static Arbitrary<CopyTemplateArb> CopyTemplate() {
-		var trainList = Arbs.ListOf(Gen.Constant(new TrainMob()));
+		var trainList = Gen.Constant(new TrainMob()).ListOf().ToArbitrary();
 		var tracker = Arb.Default.String();
 		var worldName = Arb.Default.String();
 		var highestPatch = OfEnum<Patch>();
@@ -59,7 +66,7 @@ public static class Arbs {
 			.Select(
 				arbs => (arbs, new List<(string?, string?)>() {
 					("{#}", arbs.a.Count.ToString()),
-					("{#max}", PatchMaxMarks[arbs.d].ToString()),
+					("{#max}", arbs.d.MaxMarks().ToString()),
 					("{tracker}", arbs.b),
 					("{world}", arbs.c),
 					("{patch}", arbs.d.ToString()),
@@ -68,20 +75,14 @@ public static class Arbs {
 			)
 			.SelectMany(
 				acc =>
-					Gen.Choose(0, 10)
-						.SelectMany(
-							f =>
-								Gen.Frequency(
-									Tuple.Create(f, Gen.Elements<(string?, string?)>(acc.Item2)),
-									Tuple.Create(
-										10 - f,
-										Arb.Generate<UnicodeString>()
-											.Select(s => s?.ToString()?.TrimEnd('\\'))
-											.Select(s => (s, s))
-									)
-								)
+					RandomFreq(
+							Gen.Elements<(string?, string?)>(acc.Item2),
+							String().Generator
+								.Select(s => ((string?)s)?.TrimEnd('\\'))
+								.Select(s => (s, s))
 						)
 						.ListOf()
+						.Generator
 						.Select(
 							chunks => (
 								string.Join(null, chunks.Select(chunk => chunk.Item1)),
@@ -104,7 +105,7 @@ public static class Arbs {
 	}
 
 	public record struct CopyTemplateArb(
-		List<TrainMob> TrainList,
+		IList<TrainMob> TrainList,
 		string Tracker,
 		string WorldName,
 		Patch HighestPatch,
@@ -112,4 +113,49 @@ public static class Arbs {
 		string Template,
 		string Expected
 	);
+
+	public static Arbitrary<Maybe<T>> MaybeArb<T>(Gen<T> gen, bool includeNulls = false) =>
+		(includeNulls ? WithNulls(gen).Generator : gen.Select(value => (T?)value!))
+		.Select(
+			value =>
+				Maybe
+					.From(value)
+					.Select(maybeValue => (T)maybeValue!)
+		)
+		.ToArbitrary();
+
+	public static Arbitrary<T> RandomFreq<T>(params Gen<T>[] gens) =>
+		Gen.Choose(0, 100)
+			.ListOf(gens.Length)
+			.SelectMany(
+				freqs =>
+					Gen.Frequency(freqs.Zip(gens).Select(f => Tuple.Create(f.First, f.Second)))
+			)
+			.ToArbitrary();
+}
+
+public static class ArbExtensions {
+	public static Arbitrary<IList<T>> ListOf<T>(this Arbitrary<T> arb) => arb.Generator.ListOf().ToArbitrary();
+
+	public static Arbitrary<IList<T>> NonEmptyListOf<T>(this Arbitrary<T> arb) =>
+		arb.Generator.NonEmptyListOf().ToArbitrary();
+
+	public static Arbitrary<IDictionary<K, V>> DictWith<K, V>(
+		this Arbitrary<K> keyArb,
+		Arbitrary<V> valueArb,
+		params K[] excluding
+	) where K : notnull =>
+		Arbs.DictOf(keyArb.Generator, valueArb.Generator)
+			.Generator
+			.Select(dict => dict.ToMutableDict())
+			.Select(
+				dict => {
+					excluding.ForEach(key => dict.Remove(key));
+					return dict.ToDict();
+				}
+			)
+			.ToArbitrary();
+
+	public static Arbitrary<Maybe<T>> ToMaybeArb<T>(this Arbitrary<T> arb, bool includeNulls = false) =>
+		Arbs.MaybeArb(arb.Generator, includeNulls);
 }
