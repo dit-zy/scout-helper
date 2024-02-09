@@ -1,5 +1,7 @@
-﻿using CSharpFunctionalExtensions;
+﻿using System.Collections.Immutable;
+using CSharpFunctionalExtensions;
 using FsCheck;
+using Moq;
 using ScoutHelper;
 using ScoutHelper.Models;
 using ScoutHelper.Utils;
@@ -143,19 +145,59 @@ public static class ArbExtensions {
 	public static Arbitrary<IDictionary<K, V>> DictWith<K, V>(
 		this Arbitrary<K> keyArb,
 		Arbitrary<V> valueArb,
-		params K[] excluding
+		params K[] keysToExclude
 	) where K : notnull =>
 		Arbs.DictOf(keyArb.Generator, valueArb.Generator)
+			.Excluding(keysToExclude);
+
+	public static Arbitrary<IDictionary<K, V>> DistinctDictWith<K, V>(
+		this Arbitrary<K> keyArb,
+		Arbitrary<V> valueArb,
+		params K[] keysToExclude
+	) where K : notnull where V : notnull =>
+		Arbs.DictOf(keyArb.Generator, valueArb.Generator)
+			// flipping forces the values (now keys) to be distinct. double flip, to force keys and values to be distinct.
+			.Select(dict => dict.Flip().Flip())
+			.Excluding(keysToExclude);
+
+	public static Arbitrary<IDictionary<K, V>> Excluding<K, V>(
+		this Arbitrary<IDictionary<K, V>> source,
+		params K[] keysToExclude
+	) where K : notnull =>
+		source
 			.Generator
+			.Excluding(keysToExclude);
+
+	public static Arbitrary<IDictionary<K, V>> Excluding<K, V>(
+		this Gen<IDictionary<K, V>> source,
+		params K[] keysToExclude
+	) where K : notnull =>
+		source
 			.Select(dict => dict.ToMutableDict())
 			.Select(
 				dict => {
-					excluding.ForEach(key => dict.Remove(key));
+					keysToExclude.ForEach(key => dict.Remove(key));
 					return dict.ToDict();
 				}
 			)
 			.ToArbitrary();
 
+	public static Arbitrary<(T, U)> ZipWith<T, U>(this Arbitrary<T> arb, Arbitrary<U> secondArb) =>
+		FsCheckUtils.Zip(arb, secondArb);
+
+	public static Arbitrary<IList<(T, U)>> DistinctListOfPairsWith<T, U>(this Arbitrary<T> arb, Arbitrary<U> secondArb)
+		where T : notnull where U : notnull =>
+		arb
+			.DistinctDictWith(secondArb)
+			.Select(dict => dict.Select(entry => (entry.Key, entry.Value)))
+			.Select(entries => (IList<(T, U)>)entries.ToImmutableList())
+			.ToArbitrary();
+
 	public static Arbitrary<Maybe<T>> ToMaybeArb<T>(this Arbitrary<T> arb, bool includeNulls = false) =>
 		Arbs.MaybeArb(arb.Generator, includeNulls);
+
+	public static Gen<U> Select<T, U>(this Arbitrary<T> arb, Func<T, U> selector) =>
+		arb
+			.Generator
+			.Select(selector);
 }
