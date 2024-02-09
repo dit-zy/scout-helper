@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using CSharpFunctionalExtensions;
 using ImGuiNET;
+using Lumina.Text;
 using ScoutHelper.Models;
 
 namespace ScoutHelper.Utils;
@@ -114,6 +115,8 @@ public static partial class Utils {
 	public static string Lower(this string s) => s.ToLowerInvariant();
 
 	public static string Join(this IEnumerable<string> source, string? separator) => string.Join(separator, source);
+
+	public static SeString ToSeString(this string str) => new(str);
 
 	#endregion
 }
