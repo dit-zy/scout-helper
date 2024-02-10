@@ -19,6 +19,10 @@ public static class CollectionExtensions {
 		return values;
 	}
 
+	public static IList<T> AsList<T>(this IEnumerable<T> source) => source.ToImmutableList();
+
+	public static IList<T> AsMutableList<T>(this IEnumerable<T> source) => source.ToList();
+
 	public static IDictionary<K, V> ToDict<K, V>(this IEnumerable<KeyValuePair<K, V>> source) where K : notnull =>
 		source.Select(entry => (entry.Key, entry.Value)).ToDict();
 
@@ -69,4 +73,25 @@ public static class CollectionExtensions {
 		source
 			.Select(entry => (entry.Value, entry.Key))
 			.ToDict();
+
+	#region lists
+
+	public static bool IsEmpty<T>(this ICollection<T> source) => source.Count == 0;
+	
+	public static bool IsNotEmpty<T>(this ICollection<T> source) => 0 < source.Count;
+
+	#endregion
+
+	#region pairs
+
+	public static IEnumerable<(K key, V val)> AsPairs<K, V>(this IDictionary<K, V> source) =>
+		source.Select(entry => (entry.Key, entry.Value)).AsList();
+
+	public static IEnumerable<(A, B)> WithDistinctFirst<A, B>(this IEnumerable<(A, B)> source) where A : notnull =>
+		source
+			.ToDict()
+			.AsPairs()
+			.AsList();
+
+	#endregion
 }

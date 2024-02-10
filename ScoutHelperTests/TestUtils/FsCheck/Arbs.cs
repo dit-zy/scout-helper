@@ -1,11 +1,9 @@
 ﻿using System.Collections.Immutable;
 using CSharpFunctionalExtensions;
 using FsCheck;
-using Moq;
 using ScoutHelper;
 using ScoutHelper.Models;
 using ScoutHelper.Utils;
-using static ScoutHelper.Utils.Utils;
 
 namespace ScoutHelperTests.TestUtils.FsCheck;
 
@@ -142,6 +140,12 @@ public static class ArbExtensions {
 	public static Arbitrary<IList<T>> NonEmptyListOf<T>(this Arbitrary<T> arb) =>
 		arb.Generator.NonEmptyListOf().ToArbitrary();
 
+	public static Arbitrary<IList<T>> NonEmpty<T>(this Gen<IList<T>> gen) =>
+		gen.Where(list => list.IsNotEmpty()).ToArbitrary();
+
+	public static Arbitrary<IList<T>> NonEmpty<T>(this Arbitrary<IList<T>> arb) =>
+		arb.Generator.Where(list => list.IsNotEmpty()).ToArbitrary();
+
 	public static Arbitrary<IDictionary<K, V>> DictWith<K, V>(
 		this Arbitrary<K> keyArb,
 		Arbitrary<V> valueArb,
@@ -185,6 +189,15 @@ public static class ArbExtensions {
 	public static Arbitrary<(T, U)> ZipWith<T, U>(this Arbitrary<T> arb, Arbitrary<U> secondArb) =>
 		FsCheckUtils.Zip(arb, secondArb);
 
+	public static Arbitrary<(T, U)> ZipWith<T, U>(this Arbitrary<T> arb, Gen<U> gen) =>
+		FsCheckUtils.Zip(arb.Generator, gen).ToArbitrary();
+
+	public static Arbitrary<(T, U)> ZipWith<T, U>(this Gen<T> gen, Arbitrary<U> arb) =>
+		FsCheckUtils.Zip(gen, arb.Generator).ToArbitrary();
+
+	public static Arbitrary<(T, U)> ZipWith<T, U>(this Gen<T> gen, Gen<U> secondGen) =>
+		FsCheckUtils.Zip(gen, secondGen).ToArbitrary();
+
 	public static Arbitrary<IList<(T, U)>> DistinctListOfPairsWith<T, U>(this Arbitrary<T> arb, Arbitrary<U> secondArb)
 		where T : notnull where U : notnull =>
 		arb
@@ -200,4 +213,15 @@ public static class ArbExtensions {
 		arb
 			.Generator
 			.Select(selector);
+
+	public static Gen<U> SelectMany<T, U>(this Arbitrary<T> arb, Func<T, Gen<U>> selector) =>
+		arb
+			.Generator
+			.SelectMany(selector);
+
+	public static Gen<T> Where<T>(this Arbitrary<T> arb, Func<T, bool> predicate) => arb.Generator.Where(predicate);
+
+	public static Gen<A> KeepFirst<A, B>(this Gen<(A, B)> source) => source.Select(pair => pair.Item1);
+	
+	public static Gen<B> KeepSecond<A, B>(this Gen<(A, B)> source) => source.Select(pair => pair.Item2);
 }
