@@ -232,6 +232,24 @@ namespace ScoutHelper.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Prime Hunt Tools.
+        /// </summary>
+        internal static string PrimeButton {
+            get {
+                return ResourceManager.GetString("PrimeButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Not currently available, but coming soon! (for real this time XD;;).
+        /// </summary>
+        internal static string PrimeButtonTooltip {
+            get {
+                return ResourceManager.GetString("PrimeButtonTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Siren Hunts.
         /// </summary>
         internal static string SirenButton {
@@ -241,7 +259,7 @@ namespace ScoutHelper.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Siren Hunts is not yet implemented. Coming soon!.
+        ///   Looks up a localized string similar to Generate a Siren Hunts link from the Hunt Helper train recorder data..
         /// </summary>
         internal static string SirenButtonTooltip {
             get {

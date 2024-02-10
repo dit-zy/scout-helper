@@ -63,6 +63,7 @@ public class MainWindow : Window, IDisposable {
 				var buttonSize = new[] {
 						new[] { Strings.BearButton },
 						new[] { Strings.SirenButton },
+						new[] { Strings.PrimeButton },
 						new[] { Strings.CopyModeLinkButton, Strings.CopyModeFullTextButton, },
 					}
 					.Select(
@@ -130,10 +131,12 @@ public class MainWindow : Window, IDisposable {
 		if (ImGui.IsItemHovered()) CreateTooltip(Strings.BearButtonTooltip);
 
 		if (ImGui.Button(Strings.SirenButton, _buttonSize.Value)) GenerateSirenLink();
+		if (ImGui.IsItemHovered()) CreateTooltip(Strings.SirenButtonTooltip);
+		
 		ImGui.BeginDisabled(true);
-		ImGui.Button(Strings.SirenButton, _buttonSize.Value);
+		ImGui.Button(Strings.PrimeButton, _buttonSize.Value);
 		ImGui.EndDisabled();
-		if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) CreateTooltip(Strings.SirenButtonTooltip);
+		if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) CreateTooltip(Strings.PrimeButtonTooltip);
 	}
 
 	private void GenerateSirenLink() {
