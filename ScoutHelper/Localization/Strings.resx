@@ -34,7 +34,7 @@
 		<value>Siren Hunts</value>
 	</data>
 	<data name="SirenButtonTooltip" xml:space="preserve">
-		<value>Siren Hunts is not yet implemented. Coming soon!</value>
+		<value>Generate a Siren Hunts link from the Hunt Helper train recorder data.</value>
 	</data>
 	<data name="CopyModeLinkButton" xml:space="preserve">
 		<value>link</value>
@@ -87,5 +87,11 @@
 	</data>
 	<data name="ConfigWindowTemplateResetTooltip" xml:space="preserve">
 		<value>Sets the full-text template back to the default value</value>
+	</data>
+	<data name="PrimeButton" xml:space="preserve">
+		<value>Prime Hunt Tools</value>
+	</data>
+	<data name="PrimeButtonTooltip" xml:space="preserve">
+		<value>Not currently available, but coming soon! (for real this time XD;;)</value>
 	</data>
 </root>
