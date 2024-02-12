@@ -31,13 +31,16 @@ jobs:
           DEPLOYMENT_TYPE: ${{ inputs.deployment_type }}
         run: |
           if [[ $DEPLOYMENT_TYPE == 'testing' ]]; then
-              echo "DEPLOYMENT_TYPE=testing/live" >> $GITHUB_ENV
+              echo "deployment_type=testing/live" >> $GITHUB_OUTPUT
           else
-              echo "DEPLOYMENT_TYPE=$DEPLOYMENT_TYPE" >> $GITHUB_ENV
+              echo "deployment_type=$DEPLOYMENT_TYPE" >> $GITHUB_OUTPUT
           fi
+    outputs:
+      deployment_type: ${{ steps.configure-inputs.outputs.deployment_type }}
 
   deploy-plugin:
     uses: kalilistic/DalamudPluginDeploy/.github/workflows/deploy_plugin.yml@7dd6a4952a96ad4b3b5b0c61ab90e64fd09f1c4e
+    needs: prepare-deploy
     with:
       public_name: 'ScoutHelper'
       internal_name: 'ScoutHelper'
@@ -46,7 +49,7 @@ jobs:
       github_username: 'dit-zy'
       github_email: 'dit.zy@pm.com'
       open_pr: ${{ inputs.open_pr }}
-      deployment_type: ${{ env.DEPLOYMENT_TYPE }}
+      deployment_type: ${{ needs.prepare-deploy.outputs.deployment_type }}
       version: ${{ inputs.version }}
     secrets:
       DEPLOY_TOKEN: ${{ secrets.PAT }}
