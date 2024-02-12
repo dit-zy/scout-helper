@@ -63,7 +63,7 @@ public class SirenManager {
 
 					patchData.MobOrder
 						.Select(
-							mobId => mobList.FindMob(mobId)
+							mobOrderInfo => mobList.FindMob(mobOrderInfo.mobId, mobOrderInfo.instance)
 								.SelectMany(
 									mob => patchData
 										.Maps
@@ -110,7 +110,7 @@ public class SirenManager {
 
 		var mobToPatch = patchesData
 			.Value
-			.SelectMany(entry => entry.Value.MobOrder.Select(mobId => (mobId, entry.Key)))
+			.SelectMany(entry => entry.Value.MobOrder.Select(mob => (mob.mobId, entry.Key)))
 			.ToDict();
 
 		_log.Debug("Siren data loaded.");
@@ -134,6 +134,7 @@ public class SirenManager {
 				mobName => mobManager
 					.GetMobId(mobName.UnInstanced())
 					.ToResult($"No mobId found for mobName: {mobName.UnInstanced()}")
+					.Map(mobId => (mobId, mobName.Instance()))
 			);
 
 		var mapResults = patchDataElements["maps"]
