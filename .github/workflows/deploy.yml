@@ -1,0 +1,38 @@
+name: deploy plugin
+
+on:
+  workflow_dispatch:
+    inputs:
+      deployment_type:
+        description: 'stable or testing'
+        type: choice
+        required: true
+        default: 'testing'
+        options:
+          - stable
+          - testing
+      version:
+        description: 'version (e.g. 1.0.0.0)'
+        type: string
+        required: true
+      open_pr:
+        description: 'should a pr be opened for the deployment?'
+        type: boolean
+        required: false
+        default: false
+
+jobs:
+  deploy-plugin:
+    uses: kalilistic/DalamudPluginDeploy/.github/workflows/deploy_plugin.yml@7dd6a4952a96ad4b3b5b0c61ab90e64fd09f1c4e
+    with:
+      public_name: "ScoutHelper"
+      internal_name: "ScoutHelper"
+      project_dir: "ScoutHelper"
+      project_name: "ScoutHelper"
+      github_username: "dit-zy"
+      github_email: "dit.zy@protonmail.com"
+      open_pr: ${{ github.event.inputs.open_pr }}
+      deployment_type: ${{ github.event.inputs.deployment_type }}
+      version: ${{ github.event.inputs.version }}
+    secrets:
+      DEPLOY_TOKEN: ${{ secrets.PAT }}
