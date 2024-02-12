@@ -22,6 +22,20 @@ on:
         default: false
 
 jobs:
+  prepare-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: configure inputs
+        id: configure-inputs
+        env:
+          DEPLOYMENT_TYPE: ${{ inputs.deployment_type }}
+        run: |
+          if [[ $DEPLOYMENT_TYPE == 'testing' ]]; then
+              echo "DEPLOYMENT_TYPE=testing/live" >> $GITHUB_ENV
+          else
+              echo "DEPLOYMENT_TYPE=$DEPLOYMENT_TYPE" >> $GITHUB_ENV
+          fi
+
   deploy-plugin:
     uses: kalilistic/DalamudPluginDeploy/.github/workflows/deploy_plugin.yml@7dd6a4952a96ad4b3b5b0c61ab90e64fd09f1c4e
     with:
@@ -32,7 +46,7 @@ jobs:
       github_username: 'dit-zy'
       github_email: 'dit.zy@pm.com'
       open_pr: ${{ inputs.open_pr }}
-      deployment_type: ${{ inputs.deployment_type }}
+      deployment_type: ${{ env.DEPLOYMENT_TYPE }}
       version: ${{ inputs.version }}
     secrets:
       DEPLOY_TOKEN: ${{ secrets.PAT }}
