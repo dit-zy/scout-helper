@@ -1,4 +1,5 @@
-﻿using Lumina.Excel;
+﻿using Lumina.Data;
+using Lumina.Excel;
 
 namespace ScoutHelperTests.TestUtils.MoqHelpers;
 
@@ -14,6 +15,8 @@ public static class MoqUtils {
 			.GetSetMethod(true)!
 			.Invoke(excelRow, new object?[] { value });
 	}
+
+	public static LazyRow<T> MockLazyRow<T>(uint rowId) where T : ExcelRow => new(null, rowId, Language.English);
 
 	#endregion
 }
