@@ -29,17 +29,22 @@ public class MobManagerTest {
 			// DATA
 			var npcNameSheet = MockExcelSheet.Create<BNpcName>()
 				.AddRows(npcNames.Select(name => MockBNpcName.Create(name.Item1, name.Item2)));
+			var notoriousMonsterSheet = MockExcelSheet.Create<NotoriousMonster>()
+				.AddRows(npcNames.Select(name => MockNotoriousMonster.Create(name.Item1, name.Item1)));
 
 			// GIVEN
 			_log.Setup(log => log.Debug(It.IsAny<string>()));
 			_dataManager.Setup(dm => dm.GetExcelSheet<BNpcName>(It.IsAny<ClientLanguage>()))
 				.Returns(npcNameSheet);
+			_dataManager.Setup(dm => dm.GetExcelSheet<NotoriousMonster>(It.IsAny<ClientLanguage>()))
+				.Returns(notoriousMonsterSheet);
 
 			// WHEN
 			var mobManager = new MobManager(_log.Object, _dataManager.Object);
 
 			// THEN
 			_dataManager.Verify(manager => manager.GetExcelSheet<BNpcName>(ClientLanguage.English));
+			_dataManager.Verify(manager => manager.GetExcelSheet<NotoriousMonster>(ClientLanguage.English));
 			_log.Verify(log => log.Debug("Building mob data from game files..."));
 			_log.Verify(log => log.Debug("Mob data built."));
 			_dataManager.VerifyNoOtherCalls();
@@ -49,8 +54,8 @@ public class MobManagerTest {
 				entry => {
 					var mobId = entry.Item1;
 					var mobName = entry.Item2;
-					mobManager.GetMobName(mobId).Should().Be(mobName.Lower());
-					mobManager.GetMobId(mobName).Should().Be(mobId);
+					mobManager.GetMobName(mobId).Should().Be(Maybe.From(mobName.Lower()));
+					mobManager.GetMobId(mobName).Should().Be(Maybe.From(mobId));
 				}
 			);
 		}
@@ -66,9 +71,10 @@ public class MobManagerTest {
 				.AsList();
 			var numDupNames = inputs.dupNames.DistinctBy(name => name.mobName).Count();
 
-			var npcNameSheet = MockExcelSheet
-				.Create<BNpcName>()
+			var npcNameSheet = MockExcelSheet .Create<BNpcName>()
 				.AddRows(npcNames.Select(name => MockBNpcName.Create(name.mobId, name.mobName)));
+			var notoriousMonsterSheet = MockExcelSheet.Create<NotoriousMonster>()
+				.AddRows(npcNames.Select(name => MockNotoriousMonster.Create(name.mobId, name.mobId)));
 
 			// GIVEN
 			_log.Reset();
@@ -78,12 +84,15 @@ public class MobManagerTest {
 			_log.Setup(log => log.Debug(It.IsAny<string>(), It.IsAny<object[]>()));
 			_dataManager.Setup(dm => dm.GetExcelSheet<BNpcName>(It.IsAny<ClientLanguage>()))
 				.Returns(npcNameSheet);
+			_dataManager.Setup(dm => dm.GetExcelSheet<NotoriousMonster>(It.IsAny<ClientLanguage>()))
+				.Returns(notoriousMonsterSheet);
 
 			// WHEN
 			var mobManager = new MobManager(_log.Object, _dataManager.Object);
 
 			// THEN
 			_dataManager.Verify(manager => manager.GetExcelSheet<BNpcName>(ClientLanguage.English));
+			_dataManager.Verify(manager => manager.GetExcelSheet<NotoriousMonster>(ClientLanguage.English));
 			_log.Verify(log => log.Debug("Building mob data from game files..."));
 			_log.Verify(log => log.Debug("Mob data built."));
 			_log.Verify(

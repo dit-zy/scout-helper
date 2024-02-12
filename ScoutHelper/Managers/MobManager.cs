@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using CSharpFunctionalExtensions;
 using Dalamud;
@@ -30,9 +31,14 @@ public class MobManager {
 		IDataManager dataManager
 	) {
 		_log.Debug("Building mob data from game files...");
+
+		var notoriousMonsters = dataManager.GetExcelSheet<NotoriousMonster>(ClientLanguage.English)!
+			.Select(monster => monster.BNpcName.Row)
+			.ToImmutableHashSet();
 		
 		var nameToId = dataManager.GetExcelSheet<BNpcName>(ClientLanguage.English)!
-			.Select(name => (name.Singular.ToString().Lower(), name.RowId))
+			.Select(name => (name: name.Singular.ToString().Lower(), mobId: name.RowId))
+			.Where(name => notoriousMonsters.Contains(name.mobId))
 			.GroupBy(entry => entry.Item1)
 			.Select(
 				grouping => {
@@ -40,7 +46,7 @@ public class MobManager {
 						_log.Debug(
 							"Duplicate mobs found for name [{0:l}]: {1:l}",
 							grouping.Key,
-							grouping.Select(entry => entry.RowId.ToString()).Join(", ")
+							grouping.Select(entry => entry.mobId.ToString()).Join(", ")
 						);
 					}
 					return grouping.First();
