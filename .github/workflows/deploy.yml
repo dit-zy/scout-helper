@@ -25,14 +25,14 @@ jobs:
   deploy-plugin:
     uses: kalilistic/DalamudPluginDeploy/.github/workflows/deploy_plugin.yml@7dd6a4952a96ad4b3b5b0c61ab90e64fd09f1c4e
     with:
-      public_name: "ScoutHelper"
-      internal_name: "ScoutHelper"
-      project_dir: "ScoutHelper"
-      project_name: "ScoutHelper"
-      github_username: "dit-zy"
-      github_email: "dit.zy@protonmail.com"
-      open_pr: ${{ github.event.inputs.open_pr }}
-      deployment_type: ${{ github.event.inputs.deployment_type }}
-      version: ${{ github.event.inputs.version }}
+      public_name: 'ScoutHelper'
+      internal_name: 'ScoutHelper'
+      project_dir: 'ScoutHelper'
+      project_name: 'ScoutHelper'
+      github_username: 'dit-zy'
+      github_email: 'dit.zy@pm.com'
+      open_pr: ${{ inputs.open_pr }}
+      deployment_type: ${{ inputs.deployment_type }}
+      version: ${{ inputs.version }}
     secrets:
       DEPLOY_TOKEN: ${{ secrets.PAT }}
