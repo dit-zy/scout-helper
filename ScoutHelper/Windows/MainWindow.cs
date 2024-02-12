@@ -149,7 +149,7 @@ public class MainWindow : Window, IDisposable {
 				train => 0 < train.Count,
 				"No mobs in the train :T"
 			)
-			.Map(
+			.Bind(
 				train => {
 					trainList = train;
 					return _sirenManager.GenerateSirenLink(train);

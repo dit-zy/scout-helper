@@ -38,7 +38,7 @@ public class SirenManager {
 		(_patchData, _mobToPatch) = LoadData(options.SirenDataFile, territoryManager, mobManager);
 	}
 
-	public (string Url, Patch HighestPatch) GenerateSirenLink(IList<TrainMob> mobList) {
+	public Result<(string Url, Patch HighestPatch), string> GenerateSirenLink(IList<TrainMob> mobList) {
 		_log.Debug("Generating a siren link for mob list: {0}", mobList);
 
 		var patches = mobList
@@ -49,6 +49,8 @@ public class SirenManager {
 			.ToImmutableList();
 
 		_log.Debug("Patches represented in mob list: {0}", patches);
+
+		if (patches.IsEmpty()) return "No mobs in the train are supported by Siren Hunts ;-;";
 
 		var fullPath = patches
 			.Select(
