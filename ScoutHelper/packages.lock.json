@@ -321,10 +321,7 @@
         }
       },
       "ottergui": {
-        "type": "Project",
-        "dependencies": {
-          "Microsoft.Extensions.DependencyInjection": "[7.0.0, )"
-        }
+        "type": "Project"
       }
     }
   }
