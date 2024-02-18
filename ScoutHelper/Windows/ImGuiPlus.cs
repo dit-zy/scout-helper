@@ -48,6 +48,8 @@ public static class ImGuiPlus {
 		return finalCursorPos;
 	}
 
+	public static float ScaledFontSize() => 4 * MathF.Pow(ImGui.GetFontSize(), 0.6f);
+
 	public static void Heading(string text, float scale = 1.25f, bool centered = false) {
 		var font = ImGui.GetFont();
 		var originalScale = font.Scale;

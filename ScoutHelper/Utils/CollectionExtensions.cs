@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using CSharpFunctionalExtensions;
+using ScoutHelper.Utils.Functional;
 
 namespace ScoutHelper;
 
@@ -26,10 +27,10 @@ public static class CollectionExtensions {
 	public static IDictionary<K, V> ToDict<K, V>(this IEnumerable<KeyValuePair<K, V>> source) where K : notnull =>
 		source.Select(entry => (entry.Key, entry.Value)).ToDict();
 
-	public static IDictionary<K, V> ToDict<K, V>(this IEnumerable<(K, V)> source) where K : notnull =>
+	public static IDictionary<K, V> ToDict<K, V>(this IEnumerable<(K key, V value)> source) where K : notnull =>
 		source
-			.DistinctBy(entry => entry.Item1)
-			.ToImmutableDictionary(entry => entry.Item1, entry => entry.Item2);
+			.DistinctBy(entry => entry.key)
+			.ToImmutableDictionary(entry => entry.key, entry => entry.value);
 
 	public static IDictionary<K, V> ToMutableDict<K, V>(this IEnumerable<KeyValuePair<K, V>> source) where K : notnull =>
 		source.Select(entry => (entry.Key, entry.Value)).ToMutableDict();
@@ -59,6 +60,8 @@ public static class CollectionExtensions {
 
 	public static IList<T> ToImmutable<T>(this IEnumerable<T> source) => source.ToImmutableList();
 
+	#region dicts
+
 	public static IDictionary<K, V> VerifyEnumDictionary<K, V>(this IDictionary<K, V> enumDict)
 		where K : struct, Enum {
 		var allEnumsAreInDict = (Enum.GetValuesAsUnderlyingType<K>() as K[])!.All(enumDict.ContainsKey);
@@ -74,11 +77,49 @@ public static class CollectionExtensions {
 			.Select(entry => (entry.Value, entry.Key))
 			.ToDict();
 
+	public static IDictionary<K, V> Update<K, V>(
+		this IDictionary<K, V> source,
+		IEnumerable<(K key, V value)> updateEntries
+	) where K : notnull {
+		if (source.IsReadOnly) {
+			return source
+				.AsPairs()
+				.Concat(updateEntries)
+				.GroupBy(entry => entry.key)
+				.Select(grouping => grouping.Last())
+				.ToDict();
+		} else {
+			updateEntries.ForEach(entry => source[entry.key] = entry.value);
+			return source;
+		}
+	}
+
+	#endregion
+
 	#region lists
 
 	public static bool IsEmpty<T>(this ICollection<T> source) => source.Count == 0;
-	
+
 	public static bool IsNotEmpty<T>(this ICollection<T> source) => 0 < source.Count;
+
+	public static (IEnumerable<T> ts, IEnumerable<U> us) Unzip<T, U>(this IEnumerable<(T t, U u)> source) =>
+		source.Unzip(tus => tus);
+
+	public static R Unzip<T, U, R>(
+		this IEnumerable<(T t, U u)> source,
+		Func<(IEnumerable<T> ts, IEnumerable<U> us), R> transform
+	) =>
+		transform.Invoke(
+			source
+				.Reduce(
+					(acc, pair) => {
+						acc.ts.Add(pair.t);
+						acc.us.Add(pair.u);
+						return acc;
+					},
+					(ts: new List<T>(), us: new List<U>())
+				)
+		);
 
 	#endregion
 

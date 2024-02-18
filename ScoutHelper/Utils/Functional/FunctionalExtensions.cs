@@ -104,6 +104,12 @@ public static class FunctionalExtensions {
 		return source;
 	}
 
+	public static AccResults<TWrap, E> ForEachValue<T, TWrap, E>(this AccResults<TWrap, E> source, Action<T> action)
+		where TWrap : IEnumerable<T> {
+		source.Value.ForEach(action);
+		return source;
+	}
+
 	public static (T, IEnumerable<E>) AsPair<T, E>(this AccResults<T, E> source) {
 		return (source.Value, source.Errors);
 	}

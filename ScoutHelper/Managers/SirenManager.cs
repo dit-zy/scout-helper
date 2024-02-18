@@ -156,10 +156,10 @@ public class SirenManager {
 			.SelectResults(
 				mapData => territoryManager
 					.GetTerritoryId(mapData.mapName)
-					.Select(ids => ids.Select(id => (id, mapData.spawnPoints)))
+					.Select(id => (id, mapData.spawnPoints))
 					.ToResult($"No territoryId found for territoryName: {mapData.mapName}")
 			)
-			.WithValue(value => value.SelectMany(x => x).ToDict());
+			.WithValue(value => value.ToDict());
 
 		return mobOrderResults.Join(
 			mapResults,
