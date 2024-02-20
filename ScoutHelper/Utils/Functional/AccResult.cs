@@ -1,11 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 
 namespace ScoutHelper.Utils.Functional;
 
 public class AccResults<T, E> : IAccResults<T, E> {
-
 	private readonly T _value;
 	private readonly IList<E> _errors;
 
@@ -13,8 +11,13 @@ public class AccResults<T, E> : IAccResults<T, E> {
 
 	public IEnumerable<E> Errors => _errors;
 
-	public AccResults(T value, IEnumerable<E> errors) {
+	internal AccResults(T value, IEnumerable<E> errors) {
 		_value = value;
 		_errors = errors.ToImmutableList();
 	}
+}
+
+public static class AccResults {
+	public static AccResults<T, E> From<T, E>(T value) => new(value, new List<E>());
+	public static AccResults<T, E> From<T, E>(T value, IEnumerable<E> errors) => new(value, errors);
 }

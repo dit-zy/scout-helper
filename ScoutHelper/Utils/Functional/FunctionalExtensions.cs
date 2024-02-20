@@ -24,6 +24,12 @@ public static class FunctionalExtensions {
 			)
 			.Select(result => result.Value);
 
+	public static IEnumerable<Maybe<U>> MaybeSelect<T, U>(this IEnumerable<Maybe<T>> source, Func<T, U> transform) =>
+		source.Select(maybeValue => maybeValue.Select(transform));
+
+	public static IEnumerable<Maybe<U>> MaybeSelectMany<T, U>(this IEnumerable<Maybe<T>> source, Func<T, Maybe<U>> transform) =>
+		source.Select(maybeValue => maybeValue.SelectMany(transform));
+
 	public static Maybe<V> MaybeGet<K, V>(this IDictionary<K, V> source, K key) {
 		if (source.TryGetValue(key, out var value)) {
 			return value;
@@ -55,20 +61,31 @@ public static class FunctionalExtensions {
 	public static AccResults<IEnumerable<U>, E> SelectResults<T, U, E>(
 		this IEnumerable<T> source,
 		Func<T, Result<U, E>> selector
-	) {
-		var finalAcc = source.Reduce(
-			(acc, value) => {
-				selector.Invoke(value).Match(
-					success => acc.results.Add(success),
-					error => acc.errors.Add(error)
-				);
-				return acc;
-			},
-			(results: new List<U>(), errors: new List<E>())
+	) =>
+		source.BindResults(
+			result => selector
+				.Invoke(result)
+				.Map(AccResults.From<U, E>)
 		);
 
-		return new AccResults<IEnumerable<U>, E>(finalAcc.results, finalAcc.errors);
-	}
+	public static AccResults<IEnumerable<U>, E> BindResults<T, U, E>(
+		this IEnumerable<T> source,
+		Func<T, Result<AccResults<U, E>, E>> transform
+	) =>
+		source.Reduce(
+				(acc, value) => {
+					transform.Invoke(value).Match(
+						success => {
+							acc.results.Add(success.Value);
+							acc.errors.AddRange(success.Errors);
+						},
+						error => acc.errors.Add(error)
+					);
+					return acc;
+				},
+				(results: new List<U>(), errors: new List<E>())
+			)
+			.ToAccResult(results => (IEnumerable<U>)results);
 
 	public static AccResults<IEnumerable<U>, E> SelectValues<T, U, E>(
 		this AccResults<IEnumerable<T>, E> source,
@@ -119,6 +136,8 @@ public static class FunctionalExtensions {
 	public static AccResults<U, E> ToAccResult<T, U, E>(this (T, IEnumerable<E>) pair, Func<T, U> transformer) =>
 		new(transformer.Invoke(pair.Item1), pair.Item2);
 
+	public static AccResults<T, E> ToAccResult<T, E>(this T value) => AccResults.From<T, E>(value);
+
 	public static AccResults<IEnumerable<U>, E> SelectMany<T, U, E>(
 		this IEnumerable<T> source,
 		Func<T, AccResults<U, E>> selector
@@ -143,6 +162,12 @@ public static class FunctionalExtensions {
 		var acc = initial;
 		source.ForEach(value => { acc = reducer.Invoke(acc, value); });
 		return acc;
+	}
+
+	public static IEnumerable<int> Sequence(this Range range) {
+		for (int i = range.Start.Value; i < range.End.Value; i++) {
+			yield return i;
+		}
 	}
 
 	#endregion

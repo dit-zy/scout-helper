@@ -142,7 +142,7 @@ public class ConfigWindow : Window, IDisposable {
 				.GetTerritoryId(mapName)
 				.Select(
 					mapId => ImGui.InputScalar(
-						_territoryManager.GetTerritoryName(mapId).Value,
+						" " + _territoryManager.GetTerritoryName(mapId).Value,
 						ImGuiDataType.U8,
 						(IntPtr)_instances[mapId].GetPointer(),
 						(IntPtr)InputScalarStep.GetPointer()

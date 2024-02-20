@@ -45,10 +45,11 @@ public class TerritoryManager {
 
 		var supportedPlaceIds = dataManager.GetExcelSheet<PlaceName>(ClientLanguage.English)!
 			.Where(place => supportedMapNames.Contains(place.Name.ToString().Lower()))
+			.ForEach(place => _log.Verbose("Found PlaceName: {0} | {1:l}", place.RowId, place.Name))
 			.Select(place => place.RowId)
 			.ToImmutableHashSet();
 
-		var (nameToId, idToName) = GetEnumValues<ClientLanguage>()
+		var dataDicts = GetEnumValues<ClientLanguage>()
 			.Select(
 				language => {
 					var placeNames = dataManager
@@ -57,44 +58,56 @@ public class TerritoryManager {
 						.Select(name => (name.RowId, name.Name.ToString()))
 						.ToDict();
 
-					var nameToId = dataManager
+					var idToName = dataManager
 						.GetExcelSheet<TerritoryType>(language)!
 						.Where(territory => territory.Unknown0 != 0)
 						.Where(territory => placeNames.ContainsKey(territory.PlaceName.Row))
-						.Select(territory => (name: placeNames[territory.PlaceName.Row], mapId: territory.RowId))
+						.Select(territory => (mapId: territory.RowId, name: placeNames[territory.PlaceName.Row]))
 						.GroupBy(map => map.name)
 						.Select(
 							grouping => {
 								if (1 < grouping.Count()) {
 									_log.Debug(
-										"Duplicate maps found for name [{0:l}]: {1:l}",
+										"[{2:l}] Duplicate maps found for name [{0:l}]: {1:l}",
 										grouping.Key,
-										grouping.Select(place => place.mapId.ToString()).Join(", ")
+										grouping.Select(place => place.mapId.ToString()).Join(", "),
+										language.GetLanguageCode()
 									);
 								}
 								return grouping.First();
 							}
 						)
+						.ForEach(
+							territory => _log.Verbose(
+								"[{2:l}] Found territoryId [{0}] for place: {1:l}",
+								territory.mapId,
+								territory.name,
+								language.GetLanguageCode()
+							)
+						)
 						.ToDict();
 
-					var idToName = nameToId.Flip();
+					var nameToId = idToName
+						.Flip()
+						.Select(entry => (entry.Key.Lower(), entry.Value))
+						.ToDict();
 
 					return (nameToId, (language.GetLanguageCode(), idToName));
 				}
 			)
 			.Unzip(
-				tus => (
-					tus.ts
+				(ts, us) => (
+					ts
 						.SelectMany(nameToId => nameToId.AsPairs())
 						.ToDict(),
-					tus.us
+					us
 						.ToDict()
 				)
 			);
 
 		_log.Debug("Map data built.");
 
-		return (nameToId, idToName);
+		return dataDicts;
 	}
 }
 

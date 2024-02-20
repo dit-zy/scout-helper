@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using CSharpFunctionalExtensions;
 using ScoutHelper.Utils.Functional;
 
 namespace ScoutHelper;
@@ -102,24 +100,26 @@ public static class CollectionExtensions {
 
 	public static bool IsNotEmpty<T>(this ICollection<T> source) => 0 < source.Count;
 
+	public static IList<T> AsSingletonList<T>(this T value) => new List<T>() { value }.AsList();
+
 	public static (IEnumerable<T> ts, IEnumerable<U> us) Unzip<T, U>(this IEnumerable<(T t, U u)> source) =>
-		source.Unzip(tus => tus);
+		source.Unzip((ts, us) => (ts, us));
 
 	public static R Unzip<T, U, R>(
 		this IEnumerable<(T t, U u)> source,
-		Func<(IEnumerable<T> ts, IEnumerable<U> us), R> transform
-	) =>
-		transform.Invoke(
-			source
-				.Reduce(
-					(acc, pair) => {
-						acc.ts.Add(pair.t);
-						acc.us.Add(pair.u);
-						return acc;
-					},
-					(ts: new List<T>(), us: new List<U>())
-				)
-		);
+		Func<IEnumerable<T>, IEnumerable<U>, R> transform
+	) {
+		var (ts, us) = source
+			.Reduce(
+				(acc, pair) => {
+					acc.ts.Add(pair.t);
+					acc.us.Add(pair.u);
+					return acc;
+				},
+				(ts: new List<T>(), us: new List<U>())
+			);
+		return transform.Invoke(ts, us);
+	}
 
 	#endregion
 

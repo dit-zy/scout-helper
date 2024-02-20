@@ -1,18 +1,12 @@
 ﻿{
 	"HW": {
 		"mob order": [
-			"lyuba",
-			"mirka",
-			"enkelados",
-			"sisiutl",
-			"campacti",
-			"stench blossom",
-			"lord of the wyverns",
-			"pylraster",
-			"slipkinx steeljoints",
-			"stolas",
-			"agathos",
-			"bune"
+			["coerthas western highlands", "lyuba", "mirka"],
+			["the sea of clouds", "enkelados", "sisiutl"],
+			["azys lla", "campacti", "stench blossom"],
+			["the dravanian forelands", "lord of the wyverns", "pylraster"],
+			["the dravanian hinterlands","slipkinx steeljoints", "stolas"],
+			["the churning mists","agathos", "bune"]
 		],
 		"maps": {
 			"coerthas western highlands": {
@@ -161,18 +155,12 @@
 	},
 	"SB": {
 		"mob order": [
-			"erle",
-			"orcus",
-			"aqrabuamelu",
-			"vochstein",
-			"luminare",
-			"mahisha",
-			"funa yurei",
-			"oni yumemi",
-			"angada",
-			"gajasura",
-			"girimekhala",
-			"sum"
+			["the fringes", "erle", "orcus"],
+			["the peaks", "aqrabuamelu", "vochstein"],
+			["the lochs", "luminare", "mahisha"],
+			["the ruby sea", "funa yurei", "oni yumemi"],
+			["yanxia", "angada", "gajasura"],
+			["the azim steppe", "girimekhala", "sum"]
 		],
 		"maps": {
 			"the fringes": {
@@ -272,18 +260,12 @@
 	},
 	"SHB": {
 		"mob order": [
-			"nariphon",
-			"nuckelavee",
-			"huracan",
-			"li'l murderer",
-			"maliktender",
-			"sugaar",
-			"o poorest pauldia",
-			"the mudman",
-			"grassman",
-			"supay",
-			"rusalka",
-			"baal"
+			["lakeland", "nariphon", "nuckelavee"],
+			["kholusia", "huracan", "li'l murderer"],
+			["amh araeng", "maliktender", "sugaar"],
+			["il mheg", "o poorest pauldia", "the mudman"],
+			["the rak'tika greatwood", "grassman", "supay"],
+			["the tempest", "rusalka", "baal"]
 		],
 		"maps": {
 			"lakeland": {
@@ -403,18 +385,12 @@
 	},
 	"EW": {
 		"mob order": [
-			"storsie",
-			"hulder",
-			"yilan",
-			"sugriva",
-			"minerva",
-			"aegeiros",
-			"mousse princess",
-			"lunatender queen",
-			"petalodus",
-			"gurangatch",
-			"fan ail",
-			"arch-eta"
+			["labyrinthos", "storsie", "hulder"],
+			["thavnair", "yilan", "sugriva"],
+			["garlemald", "minerva", "aegeiros"],
+			["mare lamentorum", "mousse princess", "lunatender queen"],
+			["elpis", "petalodus", "gurangatch"],
+			["ultima thule", "fan ail", "arch-eta"]
 		],
 		"maps": {
 			"labyrinthos": {
