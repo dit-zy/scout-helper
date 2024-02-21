@@ -37,7 +37,7 @@ public class MobManager {
 			.ToImmutableHashSet();
 		
 		var nameToId = dataManager.GetExcelSheet<BNpcName>(ClientLanguage.English)!
-			.Select(name => (name: name.Singular.ToString().Lower(), mobId: name.RowId))
+			.Select(name => (name: name.Singular.RawString.Lower(), mobId: name.RowId))
 			.Where(name => notoriousMonsters.Contains(name.mobId))
 			.GroupBy(entry => entry.Item1)
 			.Select(

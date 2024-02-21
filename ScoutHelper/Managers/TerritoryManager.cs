@@ -44,7 +44,7 @@ public class TerritoryManager {
 			.ToImmutableHashSet();
 
 		var supportedPlaceIds = dataManager.GetExcelSheet<PlaceName>(ClientLanguage.English)!
-			.Where(place => supportedMapNames.Contains(place.Name.ToString().Lower()))
+			.Where(place => supportedMapNames.Contains(place.Name.RawString.Lower()))
 			.ForEach(place => _log.Verbose("Found PlaceName: {0} | {1:l}", place.RowId, place.Name))
 			.Select(place => place.RowId)
 			.ToImmutableHashSet();
@@ -55,7 +55,7 @@ public class TerritoryManager {
 					var placeNames = dataManager
 						.GetExcelSheet<PlaceName>(language)!
 						.Where(name => supportedPlaceIds.Contains(name.RowId))
-						.Select(name => (name.RowId, name.Name.ToString()))
+						.Select(name => (name.RowId, name.Name.RawString))
 						.ToDict();
 
 					var idToName = dataManager
