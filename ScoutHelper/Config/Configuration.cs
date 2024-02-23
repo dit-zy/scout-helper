@@ -25,7 +25,7 @@ public class Configuration : IPluginConfiguration {
 	public string CopyTemplate { get; set; } = Constants.DefaultCopyTemplate;
 	public bool IsCopyModeFullText { get; set; } = false;
 
-	public IDictionary<uint, uint> Instances { get; set; } = new Dictionary<uint, uint>();
+	public Dictionary<uint, uint> Instances { get; set; } = new();
 
 	public void Initialize(DalamudPluginInterface pluginInterface) {
 		_pluginInterface = pluginInterface;

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using CSharpFunctionalExtensions;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
@@ -24,14 +26,12 @@ public class ConfigWindow : Window, IDisposable {
 		)
 		.ToImmutableList();
 
-	private static readonly PointerRef<uint> InputScalarStep = new(1U);
+	private static readonly uint InputScalarStep = 1U;
 
 	private readonly IClientState _clientState;
 	private readonly IPluginLog _log;
 	private readonly Configuration _conf;
 	private readonly TerritoryManager _territoryManager;
-
-	private readonly IDictionary<uint, PointerRef<uint>> _instances = new Dictionary<uint, PointerRef<uint>>();
 
 	private string _fullTextTemplate;
 	private string _previewFullText;
@@ -55,10 +55,6 @@ public class ConfigWindow : Window, IDisposable {
 			MaximumSize = V2(float.MaxValue, float.MaxValue)
 		};
 
-		_conf
-			.Instances
-			.ForEach(entry => _instances[entry.Key] = new PointerRef<uint>(entry.Value));
-
 		_previewFullText = ComputePreviewFullText();
 	}
 
@@ -74,11 +70,6 @@ public class ConfigWindow : Window, IDisposable {
 
 	private void UpdateConfig() {
 		_conf.CopyTemplate = _fullTextTemplate;
-		_conf.Instances.Update(
-			_instances
-				.AsPairs()
-				.Select(entry => (entry.key, entry.val.GetValue()))
-		);
 		_conf.Save();
 
 		_log.Debug("config saved");
@@ -135,20 +126,24 @@ public class ConfigWindow : Window, IDisposable {
 			);
 	}
 
-	private unsafe void DrawPatchInstanceInputs(Patch patch) => patch
-		.HuntMaps()
-		.ForEach(
-			mapName => _territoryManager
-				.GetTerritoryId(mapName)
-				.Select(
-					mapId => ImGui.InputScalar(
-						" " + _territoryManager.GetTerritoryName(mapId).Value,
-						ImGuiDataType.U8,
-						(IntPtr)_instances[mapId].GetPointer(),
-						(IntPtr)InputScalarStep.GetPointer()
+	private unsafe void DrawPatchInstanceInputs(Patch patch) {
+		var stepSize = InputScalarStep;
+		var stepSizePointer = (IntPtr)Unsafe.AsPointer(ref stepSize);
+		patch
+			.HuntMaps()
+			.ForEach(
+				mapName => _territoryManager
+					.GetTerritoryId(mapName)
+					.Select(
+						mapId => ImGui.InputScalar(
+							" " + _territoryManager.GetTerritoryName(mapId).Value,
+							ImGuiDataType.U8,
+							_conf.Instances.GetValuePointer(mapId),
+							stepSizePointer
+						)
 					)
-				)
-		);
+			);
+	}
 
 	private void DrawTextInput() {
 		var textWasEdited = ImGui.InputTextMultiline(
@@ -198,4 +193,9 @@ public class ConfigWindow : Window, IDisposable {
 		Patch.SHB,
 		"https://example.com"
 	);
+}
+
+internal static class ConfigWindowExtensions {
+	public static unsafe IntPtr GetValuePointer<K>(this Dictionary<K, uint> source, K key) where K : notnull =>
+		(IntPtr)Unsafe.AsPointer(ref CollectionsMarshal.GetValueRefOrNullRef(source, key));
 }
