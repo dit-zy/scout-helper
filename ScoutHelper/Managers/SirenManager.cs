@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using CSharpFunctionalExtensions;
 using Dalamud.Plugin.Services;
@@ -80,16 +81,7 @@ public class SirenManager {
 							}
 						)
 						.Select(mobOrderInfo => mobList.FindMob(mobOrderInfo.mobId, mobOrderInfo.instance))
-						.MaybeSelectMany(
-							mob => patchData
-								.Maps
-								.MaybeGet(mob.TerritoryId)
-								.SelectMany(
-									spawnPoints => Maybe.From(
-										spawnPoints.MinBy(spawnPoint => (spawnPoint.Pos - mob.Position).LengthSquared())!
-									)
-								)
-						)
+						.MaybeSelectMany(mob => patchData.GetNearestSpawnPoint(mob.TerritoryId, mob.Position))
 						.MaybeSelect(spawnPoint => spawnPoint.Glyph.Upper())
 						.Select(glyph => glyph.GetValueOrDefault("-"))
 						.Join(null);
@@ -217,4 +209,18 @@ public static class SirenExtensions {
 	public static string SirenName(this Patch patch) {
 		return SirenPatchNames[patch];
 	}
+
+	public static Maybe<SirenSpawnPoint> GetNearestSpawnPoint(
+		this SirenPatchData patchData,
+		uint territoryId,
+		Vector2 pos
+	) =>
+		patchData
+			.Maps
+			.MaybeGet(territoryId)
+			.SelectMany(
+				spawnPoints => Maybe.From(
+					spawnPoints.MinBy(spawnPoint => (spawnPoint.Pos - pos).LengthSquared())!
+				)
+			);
 }

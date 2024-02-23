@@ -6,6 +6,7 @@ using ScoutHelper.Config;
 using ScoutHelper.Models;
 using ScoutHelper.Utils;
 using ScoutHelper.Utils.Functional;
+using static ScoutHelper.Utils.Utils;
 
 namespace ScoutHelper.Managers;
 
@@ -37,7 +38,7 @@ public class InitializationManager {
 	}
 
 	private void InitializeInstanceMap() {
-		(Enum.GetValuesAsUnderlyingType<Patch>() as Patch[])!
+		GetEnumValues<Patch>()
 			.ForEach(
 				patch => patch
 					.HuntMaps()
