@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using Lumina;
 using Lumina.Data;
 using Lumina.Data.Files.Excel;
 using Lumina.Excel;
@@ -7,9 +6,9 @@ using Lumina.Excel;
 namespace ScoutHelperTests.TestUtils.MoqHelpers;
 
 public class MockExcelSheet<T> : ExcelSheet<T>, IEnumerable<T> where T : ExcelRow {
-	private readonly List<T> _rows = new List<T>();
+	private readonly List<T> _rows = new();
 
-	internal MockExcelSheet() : base(new ExcelHeaderFile(), "test sheet", Language.English, null) { }
+	internal MockExcelSheet() : base(new ExcelHeaderFile(), "test sheet", Language.English, null!) { }
 
 	public new IEnumerator<T> GetEnumerator() => _rows.GetEnumerator();
 	

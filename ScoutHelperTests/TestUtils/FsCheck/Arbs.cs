@@ -115,7 +115,7 @@ public static class Arbs {
 	);
 
 	public static Arbitrary<Maybe<T>> MaybeArb<T>(Gen<T> gen, bool includeNulls = false) =>
-		(includeNulls ? WithNulls(gen).Generator : gen.Select(value => (T?)value!))
+		(includeNulls ? WithNulls(gen).Generator : gen.Select(value => (T?)value))
 		.Select(
 			value =>
 				Maybe
