@@ -81,8 +81,8 @@ public class SirenManager {
 							}
 						)
 						.Select(mobOrderInfo => mobList.FindMob(mobOrderInfo.mobId, mobOrderInfo.instance))
-						.MaybeSelectMany(mob => patchData.GetNearestSpawnPoint(mob.TerritoryId, mob.Position))
-						.MaybeSelect(spawnPoint => spawnPoint.Glyph.Upper())
+						.SelectManyOverMaybe(mob => patchData.GetNearestSpawnPoint(mob.TerritoryId, mob.Position))
+						.SelectOverMaybe(spawnPoint => spawnPoint.Glyph.Upper())
 						.Select(glyph => glyph.GetValueOrDefault("-"))
 						.Join(null);
 

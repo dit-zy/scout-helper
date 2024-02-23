@@ -24,10 +24,10 @@ public static class FunctionalExtensions {
 			)
 			.Select(result => result.Value);
 
-	public static IEnumerable<Maybe<U>> MaybeSelect<T, U>(this IEnumerable<Maybe<T>> source, Func<T, U> transform) =>
+	public static IEnumerable<Maybe<U>> SelectOverMaybe<T, U>(this IEnumerable<Maybe<T>> source, Func<T, U> transform) =>
 		source.Select(maybeValue => maybeValue.Select(transform));
 
-	public static IEnumerable<Maybe<U>> MaybeSelectMany<T, U>(this IEnumerable<Maybe<T>> source, Func<T, Maybe<U>> transform) =>
+	public static IEnumerable<Maybe<U>> SelectManyOverMaybe<T, U>(this IEnumerable<Maybe<T>> source, Func<T, Maybe<U>> transform) =>
 		source.Select(maybeValue => maybeValue.SelectMany(transform));
 
 	public static Maybe<V> MaybeGet<K, V>(this IDictionary<K, V> source, K key) {
