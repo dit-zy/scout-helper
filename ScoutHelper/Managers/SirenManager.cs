@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Text;
 using CSharpFunctionalExtensions;
 using Dalamud.Plugin.Services;
+using Dalamud.Utility;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ScoutHelper.Config;
@@ -38,7 +38,7 @@ public class SirenManager {
 		(_patchData, _mobToPatch) = LoadData(options.SirenDataFile, territoryManager, mobManager);
 	}
 
-	public Result<(string Url, Patch HighestPatch), string> GenerateSirenLink(IList<TrainMob> mobList) {
+	public AccResults<Maybe<(string Url, Patch HighestPatch)>, string> GenerateSirenLink(IList<TrainMob> mobList) {
 		_log.Debug("Generating a siren link for mob list: {0}", mobList);
 
 		var patches = mobList
@@ -50,10 +50,14 @@ public class SirenManager {
 
 		_log.Debug("Patches represented in mob list: {0}", patches);
 
-		if (patches.IsEmpty()) return "No mobs in the train are supported by Siren Hunts ;-;";
+		if (patches.IsEmpty())
+			return AccResults.From(
+				Maybe<(string, Patch)>.None,
+				"No mobs in the train are supported by Siren Hunts ;-;".AsSingletonList()
+			);
 
-		var fullPath = patches
-			.Select(
+		return patches
+			.SelectResults(
 				patch => {
 					var patchData = _patchData[patch];
 					var urlPathForPatch = new StringBuilder(patchData.MobOrder.Count + 4);
@@ -61,30 +65,42 @@ public class SirenManager {
 					urlPathForPatch.Append(patch.SirenName());
 					urlPathForPatch.Append('>');
 
-					patchData.MobOrder
-						.Select(
-							mobOrderInfo => mobList.FindMob(mobOrderInfo.mobId, mobOrderInfo.instance)
-								.SelectMany(
-									mob => patchData
-										.Maps
-										.MaybeGet(mob.TerritoryId)
-										.SelectMany(
-											spawnPoints => Maybe.From(
-												spawnPoints.MinBy(spawnPoint => (spawnPoint.Pos - mob.Position).LengthSquared())
-											)
+					var mobPathSpec = patchData.MobOrder
+						.SelectMany(
+							mapData => {
+								var numInstances = (int)_conf.Instances[mapData.MapId];
+								return (0..numInstances)
+									.Sequence()
+									.SelectMany(
+										i => mapData.Mobs.Select(
+											mobId => (
+												mobId,
+												instance: (uint)(numInstances == 1 ? 0 : i + 1))
 										)
-								)
-								.Select(spawnPoint => spawnPoint.Glyph.Upper())
-								.GetValueOrDefault("-")
+									);
+							}
 						)
-						.ForEach(glyph => urlPathForPatch.Append(glyph));
+						.Select(mobOrderInfo => mobList.FindMob(mobOrderInfo.mobId, mobOrderInfo.instance))
+						.SelectManyOverMaybe(mob => patchData.GetNearestSpawnPoint(mob.TerritoryId, mob.Position))
+						.SelectOverMaybe(spawnPoint => spawnPoint.Glyph.Upper())
+						.Select(glyph => glyph.GetValueOrDefault("-"))
+						.Join(null);
 
-					return urlPathForPatch.ToString();
+					if (mobPathSpec.Trim('-').IsNullOrEmpty())
+						return Result.Failure<string, string>(
+							$"No {patch} mobs in the train are from locations with instances v_v."
+						);
+
+					urlPathForPatch.Append(mobPathSpec);
+					return Result.Success<string, string>(urlPathForPatch.ToString());
 				}
 			)
-			.Join("&");
-
-		return ($"{_conf.SirenBaseUrl}{fullPath.ToString()}", patches.Last());
+			.WithValue(patchPaths => patchPaths.Join("&"))
+			.WithValue(
+				patchPaths => patchPaths.IsNullOrEmpty()
+					? Maybe.None
+					: Maybe.From(($"{_conf.SirenBaseUrl}{patchPaths}", patches.Last()))
+			);
 	}
 
 	private (IDictionary<Patch, SirenPatchData> patchData, IDictionary<uint, Patch> mobToPatch) LoadData(
@@ -110,7 +126,11 @@ public class SirenManager {
 
 		var mobToPatch = patchesData
 			.Value
-			.SelectMany(entry => entry.Value.MobOrder.Select(mob => (mob.mobId, entry.Key)))
+			.SelectMany(
+				entry => entry.Value.MobOrder.SelectMany(
+					mapData => mapData.Mobs.Select(mob => (mob, entry.Key))
+				)
+			)
 			.ToDict();
 
 		_log.Debug("Siren data loaded.");
@@ -129,12 +149,21 @@ public class SirenManager {
 
 		var patchDataElements = patchData.Value as IDictionary<string, JToken>;
 
-		var mobOrderResults = patchDataElements["mob order"].ToObject<List<string>>()!
-			.SelectResults(
-				mobName => mobManager
-					.GetMobId(mobName.UnInstanced())
-					.ToResult($"No mobId found for mobName: {mobName.UnInstanced()}")
-					.Map(mobId => (mobId, mobName.Instance()))
+		var parsedMobOrder = patchDataElements["mob order"].ToObject<List<List<string>>>()!
+			.BindResults(
+				map => territoryManager
+					.GetTerritoryId(map[0])
+					.ToResult<uint, string>($"No mapId found for mapName: {map[0]}")
+					.Map(
+						mapId => map
+							.TakeLast(map.Count - 1)
+							.SelectResults(
+								mobName => mobManager
+									.GetMobId(mobName)
+									.ToResult($"No mobId found for mobName: {mobName}")
+							)
+							.WithValue(mobIds => SirenMapData.From(mapId, mobIds))
+					)
 			);
 
 		var mapResults = patchDataElements["maps"]
@@ -156,12 +185,12 @@ public class SirenManager {
 			.SelectResults(
 				mapData => territoryManager
 					.GetTerritoryId(mapData.mapName)
-					.Select(ids => ids.Select(id => (id, mapData.spawnPoints)))
+					.Select(id => (id, mapData.spawnPoints))
 					.ToResult($"No territoryId found for territoryName: {mapData.mapName}")
 			)
-			.WithValue(value => value.SelectMany(x => x).ToDict());
+			.WithValue(value => value.ToDict());
 
-		return mobOrderResults.Join(
+		return parsedMobOrder.Join(
 			mapResults,
 			(mobOrder, maps) => (patch, SirenPatchData.From(mobOrder, maps))
 		);
@@ -180,4 +209,18 @@ public static class SirenExtensions {
 	public static string SirenName(this Patch patch) {
 		return SirenPatchNames[patch];
 	}
+
+	public static Maybe<SirenSpawnPoint> GetNearestSpawnPoint(
+		this SirenPatchData patchData,
+		uint territoryId,
+		Vector2 pos
+	) =>
+		patchData
+			.Maps
+			.MaybeGet(territoryId)
+			.SelectMany(
+				spawnPoints => Maybe.From(
+					spawnPoints.MinBy(spawnPoint => (spawnPoint.Pos - pos).LengthSquared())!
+				)
+			);
 }

@@ -4,9 +4,9 @@ using System.Collections.Immutable;
 namespace ScoutHelper.Models;
 
 public record SirenPatchData(
-	IList<(uint mobId, uint? instance)> MobOrder,
+	IList<SirenMapData> MobOrder,
 	IDictionary<uint, IList<SirenSpawnPoint>> Maps
 ) {
-	public static SirenPatchData From(IEnumerable<(uint, uint?)> mobOrder, IDictionary<uint, IList<SirenSpawnPoint>> maps) =>
-		new(mobOrder.ToImmutableList(), maps);
+	public static SirenPatchData From(IEnumerable<SirenMapData> mobOrder, IDictionary<uint, IList<SirenSpawnPoint>> maps) =>
+		new(mobOrder.ToImmutable(), maps);
 }

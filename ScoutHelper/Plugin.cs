@@ -62,7 +62,11 @@ public sealed class Plugin : IDalamudPlugin {
 			.AddSingleton<SirenManager>()
 			.AddSingleton<ConfigWindow>()
 			.AddSingleton<MainWindow>()
+			.AddSingleton<InitializationManager>()
 			.BuildServiceProvider();
+
+		var initManager = serviceProvider.GetRequiredService<InitializationManager>();
+		initManager.InitializeNecessaryComponents();
 
 		pluginInterface.LanguageChanged += OnLanguageChanged;
 		OnLanguageChanged(pluginInterface.UiLanguage);
@@ -98,7 +102,7 @@ public sealed class Plugin : IDalamudPlugin {
 	private void OnLanguageChanged(string languageCode) {
 		try {
 			_log.Information($"Loading localization for {languageCode}");
-			Strings.Culture = new CultureInfo(languageCode);
+			Strings.Culture = CultureInfo.GetCultureInfo(languageCode);
 		} catch (Exception e) {
 			_log.Error(e, "Unable to load localization for language code: {0}", languageCode);
 		}

@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
 using System.Text.RegularExpressions;
-using CSharpFunctionalExtensions;
 using ImGuiNET;
 using Lumina.Text;
 using ScoutHelper.Models;
@@ -10,7 +10,6 @@ using ScoutHelper.Models;
 namespace ScoutHelper.Utils;
 
 public static partial class Utils {
-
 	public static void CreateTooltip(string text, float width = 12f) {
 		ImGui.BeginTooltip();
 		ImGui.PushTextWrapPos(ImGui.GetFontSize() * width);
@@ -20,6 +19,9 @@ public static partial class Utils {
 	}
 
 	public static Vector2 V2(float x, float y) => new(x, y);
+
+	public static T[] GetEnumValues<T>() where T : struct, Enum =>
+		Enum.GetValuesAsUnderlyingType<T>() as T[] ?? Array.Empty<T>();
 
 	[GeneratedRegex(@"\\?\{((?!\\?\}).)+\\?\}", RegexOptions.IgnoreCase)]
 	private static partial Regex TemplateParseRegex();
@@ -130,5 +132,33 @@ public static class UtilExtensions {
 		{ Patch.EW, 16 },
 	}.VerifyEnumDictionary();
 
+	private static readonly IDictionary<Patch, IList<string>> PatchHuntMaps = new Dictionary<Patch, IList<string>>() {
+		{
+			Patch.ARR, new List<string>() { }
+		}, {
+			Patch.HW, new List<string>() {
+				"coerthas western highlands", "the sea of clouds", "azys lla",
+				"the dravanian forelands", "the dravanian hinterlands", "the churning mists",
+			}
+		}, {
+			Patch.SB, new List<string>() {
+				"the fringes", "the peaks", "the lochs",
+				"the ruby sea", "yanxia", "the azim steppe",
+			}
+		}, {
+			Patch.SHB, new List<string>() {
+				"lakeland", "kholusia", "amh araeng",
+				"il mheg", "the rak'tika greatwood", "the tempest",
+			}
+		}, {
+			Patch.EW, new List<string>() {
+				"labyrinthos", "thavnair", "garlemald",
+				"mare lamentorum", "elpis", "ultima thule",
+			}
+		},
+	}.VerifyEnumDictionary();
+
 	public static uint MaxMarks(this Patch patch) => PatchMaxMarks[patch];
+
+	public static IList<string> HuntMaps(this Patch patch) => PatchHuntMaps[patch];
 }

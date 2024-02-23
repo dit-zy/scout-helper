@@ -12,6 +12,7 @@ using ScoutHelper.Localization;
 using ScoutHelper.Managers;
 using ScoutHelper.Models;
 using ScoutHelper.Utils;
+using ScoutHelper.Utils.Functional;
 using static ScoutHelper.Utils.Utils;
 
 namespace ScoutHelper.Windows;
@@ -132,7 +133,7 @@ public class MainWindow : Window, IDisposable {
 
 		if (ImGui.Button(Strings.SirenButton, _buttonSize.Value)) GenerateSirenLink();
 		if (ImGui.IsItemHovered()) CreateTooltip(Strings.SirenButtonTooltip);
-		
+
 		ImGui.BeginDisabled(true);
 		ImGui.Button(Strings.PrimeButton, _buttonSize.Value);
 		ImGui.EndDisabled();
@@ -149,7 +150,7 @@ public class MainWindow : Window, IDisposable {
 				train => 0 < train.Count,
 				"No mobs in the train :T"
 			)
-			.Bind(
+			.Map(
 				train => {
 					trainList = train;
 					return _sirenManager.GenerateSirenLink(train);
@@ -157,23 +158,12 @@ public class MainWindow : Window, IDisposable {
 			)
 			.Match(
 				sirenLink => {
-					if (_isCopyModeFullText) {
-						var fullText = FormatTemplate(
-							_conf.CopyTemplate,
-							trainList,
-							"siren",
-							_clientState.WorldName(),
-							sirenLink.HighestPatch,
-							sirenLink.Url
-						);
-						ImGui.SetClipboardText(fullText);
-						_chat.TaggedPrint($"Copied full text to clipboard: {fullText}");
-					} else {
-						ImGui.SetClipboardText(sirenLink.Url);
-						_chat.TaggedPrint($"Copied link to clipboard: {sirenLink.Url}");
-					}
+					sirenLink
+						.ForEachError(errorMessage => _chat.TaggedPrintError(errorMessage))
+						.Value
+						.Execute(linkData => CopyLink(trainList, "siren", linkData.HighestPatch, linkData.Url));
 				},
-				errorMessage => { _chat.TaggedPrintError(errorMessage); }
+				errorMessage => _chat.TaggedPrintError(errorMessage)
 			);
 	}
 
@@ -200,25 +190,29 @@ public class MainWindow : Window, IDisposable {
 							bearTrainLink => {
 								_chat.TaggedPrint($"Bear train link: {bearTrainLink.Url}");
 								_chat.TaggedPrint($"Train admin password: {bearTrainLink.Password}");
-								if (_isCopyModeFullText) {
-									var fullText = FormatTemplate(
-										_conf.CopyTemplate,
-										trainList,
-										"bear",
-										_clientState.WorldName(),
-										bearTrainLink.HighestPatch,
-										bearTrainLink.Url
-									);
-									ImGui.SetClipboardText(fullText);
-									_chat.TaggedPrint($"Copied full text to clipboard: {fullText}");
-								} else {
-									ImGui.SetClipboardText(bearTrainLink.Url);
-									_chat.TaggedPrint("Copied link to clipboard");
-								}
+								CopyLink(trainList, "bear", bearTrainLink.HighestPatch, bearTrainLink.Url);
 							},
 							errorMessage => { _chat.TaggedPrintError(errorMessage); }
 						);
 				}
 			);
+	}
+
+	private void CopyLink(IList<TrainMob> trainList, string tracker, Patch highestPatch, string link) {
+		if (_isCopyModeFullText) {
+			var fullText = FormatTemplate(
+				_conf.CopyTemplate,
+				trainList,
+				tracker,
+				_clientState.WorldName(),
+				highestPatch,
+				link
+			);
+			ImGui.SetClipboardText(fullText);
+			_chat.TaggedPrint($"Copied full text to clipboard: {fullText}");
+		} else {
+			ImGui.SetClipboardText(link);
+			_chat.TaggedPrint($"Copied link to clipboard: {link}");
+		}
 	}
 }

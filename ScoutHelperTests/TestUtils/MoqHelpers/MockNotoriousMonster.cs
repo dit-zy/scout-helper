@@ -1,7 +1,4 @@
-﻿using Lumina.Data;
-using Lumina.Excel;
-using Lumina.Excel.GeneratedSheets2;
-using ScoutHelper.Utils;
+﻿using Lumina.Excel.GeneratedSheets2;
 using static ScoutHelperTests.TestUtils.MoqHelpers.MoqUtils;
 
 namespace ScoutHelperTests.TestUtils.MoqHelpers;
