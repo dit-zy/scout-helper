@@ -12,6 +12,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ScoutHelper.Config;
 using ScoutHelper.Models;
+using ScoutHelper.Models.Json;
 using ScoutHelper.Utils;
 using ScoutHelper.Utils.Functional;
 using static ScoutHelper.Utils.Utils;
@@ -114,7 +115,7 @@ public class SirenManager {
 			throw new Exception($"Can't find {dataFilePath}");
 		}
 
-		var data = JsonConvert.DeserializeObject<IDictionary<string, JObject>>(File.ReadAllText(dataFilePath));
+		var data = JsonConvert.DeserializeObject<Dictionary<string, SirenJsonPatchData>>(File.ReadAllText(dataFilePath));
 		if (data == null) {
 			throw new Exception("Failed to read Siren data ;-;");
 		}
@@ -141,22 +142,22 @@ public class SirenManager {
 	private static AccResults<(Patch patch, SirenPatchData), string> ParsePatchData(
 		TerritoryManager territoryManager,
 		MobManager mobManager,
-		KeyValuePair<string, JObject> patchData
+		KeyValuePair<string, SirenJsonPatchData> patchData
 	) {
 		if (!Enum.TryParse(patchData.Key.Upper(), out Patch patch)) {
 			throw new Exception($"Unknown patch: {patchData.Key}");
 		}
 
-		var patchDataElements = patchData.Value as IDictionary<string, JToken>;
-
-		var parsedMobOrder = patchDataElements["mob order"].ToObject<List<List<string>>>()!
+		var parsedMobOrder = patchData
+			.Value
+			.MobOrder
 			.BindResults(
-				map => territoryManager
-					.GetTerritoryId(map[0])
-					.ToResult<uint, string>($"No mapId found for mapName: {map[0]}")
+				mapMobs => territoryManager
+					.GetTerritoryId(mapMobs.Map)
+					.ToResult<uint, string>($"No mapId found for mapName: {mapMobs.Map}")
 					.Map(
-						mapId => map
-							.TakeLast(map.Count - 1)
+						mapId => mapMobs
+							.Mobs
 							.SelectResults(
 								mobName => mobManager
 									.GetMobId(mobName)
@@ -166,20 +167,22 @@ public class SirenManager {
 					)
 			);
 
-		var mapResults = patchDataElements["maps"]
-			.ToObject<IDictionary<string, JToken>>()!
+		var mapResults = patchData
+			.Value
+			.Maps
 			.Select(
 				mapData => {
-					var spawnPoints = mapData.Value.ToObject<IDictionary<string, JToken>>()!
+					var spawnPoints = mapData
+						.Value
 						.Select(
 							spawnPoint => {
-								var pos = spawnPoint.Value.ToObject<IList<float>>()!;
-								return new SirenSpawnPoint(spawnPoint.Key, V2(pos[0], pos[1]));
+								var pos = spawnPoint.Value;
+								return new SirenSpawnPoint(spawnPoint.Key, V2(float.Parse(pos.X.Trim()), float.Parse(pos.Y.Trim())));
 							}
 						)
 						.ToImmutable();
 
-					return (mapName: mapData.Key!, spawnPoints);
+					return (mapName: mapData.Key, spawnPoints);
 				}
 			)
 			.SelectResults(
