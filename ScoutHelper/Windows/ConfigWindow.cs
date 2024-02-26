@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using CSharpFunctionalExtensions;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
@@ -13,6 +14,7 @@ using ScoutHelper.Localization;
 using ScoutHelper.Managers;
 using ScoutHelper.Models;
 using ScoutHelper.Utils;
+using ScoutHelper.Utils.Functional;
 using static ScoutHelper.Utils.Utils;
 
 namespace ScoutHelper.Windows;
@@ -112,12 +114,35 @@ public class ConfigWindow : Window, IDisposable {
 
 		ImGui.Text("Configure how many instances there are for each map:");
 
+		if (ImGui.Button("RESET")) {
+			GetEnumValues<Patch>()
+				.ForEach(
+					patch => patch
+						.HuntMaps()
+						.SelectResults(
+							territory => _territoryManager
+								.GetTerritoryId(territory.Name())
+								.Map(territoryId => (territoryId, territory.Instances()))
+						)
+						.ForEachError(error => _log.Debug(error))
+						.Value
+						.UseToUpdate(_conf.Instances)
+				);
+		}
+		if (ImGui.IsItemHovered()) {
+			ImGui.SetTooltip("Resets the configured instances to the current patch values.");
+		}
+
+		var textSize = ImGui.CalcTextSize("8 (current patch: 8)");
+		var buttonsSize = ImGuiHelpers.GetButtonSize(" +  ");
+		var spacing = ImGui.GetStyle().ItemSpacing;
+		var inputSize = (textSize + 2 * (buttonsSize + spacing)).X;
 		(Enum.GetValuesAsUnderlyingType<Patch>() as Patch[])!
 			.OrderDescending()
 			.ForEach(
 				patch => {
 					if (ImGui.TreeNode(patch.ToString())) {
-						ImGui.PushItemWidth(ImGuiPlus.ScaledFontSize() * 4);
+						ImGui.PushItemWidth(inputSize);
 						DrawPatchInstanceInputs(patch);
 						ImGui.PopItemWidth();
 						ImGui.TreePop();
@@ -139,7 +164,9 @@ public class ConfigWindow : Window, IDisposable {
 							" " + _territoryManager.GetTerritoryName(mapId).Value,
 							ImGuiDataType.U8,
 							_conf.Instances.GetValuePointer(mapId),
-							stepSizePointer
+							stepSizePointer,
+							IntPtr.Zero,
+							$"%d (current patch: {_conf.Instances[mapId]})"
 						)
 					)
 			);
