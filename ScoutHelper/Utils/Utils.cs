@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Text.RegularExpressions;
 using ImGuiNET;
 using Lumina.Text;
 using ScoutHelper.Models;
+using static ScoutHelper.Models.Territory;
 
 namespace ScoutHelper.Utils;
 
@@ -124,41 +126,41 @@ public static partial class Utils {
 }
 
 public static class UtilExtensions {
-	private static readonly IDictionary<Patch, uint> PatchMaxMarks = new Dictionary<Patch, uint>() {
-		{ Patch.ARR, 17 },
-		{ Patch.HW, 12 },
-		{ Patch.SB, 12 },
-		{ Patch.SHB, 12 },
-		{ Patch.EW, 16 },
-	}.VerifyEnumDictionary();
+	private static readonly IDictionary<Patch, IList<Territory>> PatchHuntMaps = new (Patch, IList<Territory>)[] {
+			(Patch.ARR, Array.Empty<Territory>()), // TODO: add arr maps
+			(Patch.HW, new[] {
+				CoerthasWesternHighlands, TheSeaOfClouds, AzysLla,
+				TheDravanianForelands, TheDravanianHinterlands, TheChurningMists,
+			}),
+			(Patch.SB, new[] {
+				TheFringes, ThePeaks, TheLochs,
+				TheRubySea, Yanxia, TheAzimSteppe,
+			}),
+			(Patch.SHB, new[] {
+				Lakeland, Kholusia, AmhAraeng,
+				IlMheg, TheRaktikaGreatwood, TheTempest,
+			}),
+			(Patch.EW, new[] {
+				Labyrinthos, Thavnair, Garlemald,
+				MareLamentorum, Elpis, UltimaThule,
+			}),
+		}
+		.Select(patch => (patch.Item1, patch.Item2.AsList()))
+		.ToDict()
+		.VerifyEnumDictionary();
 
-	private static readonly IDictionary<Patch, IList<string>> PatchHuntMaps = new Dictionary<Patch, IList<string>>() {
-		{
-			Patch.ARR, new List<string>() { }
-		}, {
-			Patch.HW, new List<string>() {
-				"coerthas western highlands", "the sea of clouds", "azys lla",
-				"the dravanian forelands", "the dravanian hinterlands", "the churning mists",
-			}
-		}, {
-			Patch.SB, new List<string>() {
-				"the fringes", "the peaks", "the lochs",
-				"the ruby sea", "yanxia", "the azim steppe",
-			}
-		}, {
-			Patch.SHB, new List<string>() {
-				"lakeland", "kholusia", "amh araeng",
-				"il mheg", "the rak'tika greatwood", "the tempest",
-			}
-		}, {
-			Patch.EW, new List<string>() {
-				"labyrinthos", "thavnair", "garlemald",
-				"mare lamentorum", "elpis", "ultima thule",
-			}
-		},
-	}.VerifyEnumDictionary();
+	private static readonly IDictionary<Patch, uint> PatchMaxMarks = PatchHuntMaps
+		.Select(
+			patchMaps => (
+				patchMaps.Key,
+				(uint)patchMaps.Value.Sum(territory => 2 * territory.Instances())
+			)
+		)
+		.Append((Patch.ARR, 17U))
+		.ToDict()
+		.VerifyEnumDictionary();
+
+	public static IList<Territory> HuntMaps(this Patch patch) => PatchHuntMaps[patch];
 
 	public static uint MaxMarks(this Patch patch) => PatchMaxMarks[patch];
-
-	public static IList<string> HuntMaps(this Patch patch) => PatchHuntMaps[patch];
 }

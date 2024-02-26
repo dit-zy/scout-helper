@@ -132,8 +132,8 @@ public class ConfigWindow : Window, IDisposable {
 		patch
 			.HuntMaps()
 			.ForEach(
-				mapName => _territoryManager
-					.GetTerritoryId(mapName)
+				map => _territoryManager
+					.FindTerritoryId(map.Name())
 					.Select(
 						mapId => ImGui.InputScalar(
 							" " + _territoryManager.GetTerritoryName(mapId).Value,

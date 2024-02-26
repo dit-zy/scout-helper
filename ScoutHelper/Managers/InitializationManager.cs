@@ -38,19 +38,24 @@ public class InitializationManager {
 	}
 
 	private void InitializeInstanceMap() {
+		var patchUpdateNotYetApplied = _conf.LastInstancePatchUpdate < Constants.LatestPatchUpdate;
 		GetEnumValues<Patch>()
 			.ForEach(
 				patch => patch
 					.HuntMaps()
 					.SelectResults(
-						map => _territoryManager
-							.GetTerritoryId(map)
-							.ToResult($"Failed to find a territoryId for map name: {map}")
+						territory => _territoryManager
+							.GetTerritoryId(territory.Name())
+							.Map(territoryId => (territory, territoryId))
 					)
 					.ForEachError(error => _log.Debug(error))
 					.Value
-					.Where(mapId => !_conf.Instances.ContainsKey(mapId))
-					.ForEach(mapId => _conf.Instances[mapId] = 1U)
+					.Where(map => patchUpdateNotYetApplied || !_conf.Instances.ContainsKey(map.territoryId))
+					.Select(map => (map.territoryId, map.territory.Instances()))
+					.UseToUpdate(_conf.Instances)
 			);
+
+		_conf.LastInstancePatchUpdate = Constants.LatestPatchUpdate;
+		_conf.Save();
 	}
 }
