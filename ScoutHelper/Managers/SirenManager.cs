@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Numerics;
@@ -177,7 +178,13 @@ public class SirenManager {
 						.Select(
 							spawnPoint => {
 								var pos = spawnPoint.Value;
-								return new SirenSpawnPoint(spawnPoint.Key, V2(float.Parse(pos.X.Trim()), float.Parse(pos.Y.Trim())));
+								return new SirenSpawnPoint(
+									spawnPoint.Key,
+									V2(
+										float.Parse(pos.X.Trim(), CultureInfo.InvariantCulture),
+										float.Parse(pos.Y.Trim(), CultureInfo.InvariantCulture)
+									)
+								);
 							}
 						)
 						.ToImmutable();
