@@ -154,7 +154,7 @@ public class SirenManager {
 			.MobOrder
 			.BindResults(
 				mapMobs => territoryManager
-					.GetTerritoryId(mapMobs.Map)
+					.FindTerritoryId(mapMobs.Map)
 					.ToResult<uint, string>($"No mapId found for mapName: {mapMobs.Map}")
 					.Map(
 						mapId => mapMobs
@@ -194,7 +194,7 @@ public class SirenManager {
 			)
 			.SelectResults(
 				mapData => territoryManager
-					.GetTerritoryId(mapData.mapName)
+					.FindTerritoryId(mapData.mapName)
 					.Select(id => (id, mapData.spawnPoints))
 					.ToResult($"No territoryId found for territoryName: {mapData.mapName}")
 			)

@@ -27,7 +27,11 @@ public class TerritoryManager {
 		(_nameToId, _idToName) = LoadData(dataManager);
 	}
 
-	public Maybe<uint> GetTerritoryId(string territoryName) => _nameToId.MaybeGet(territoryName.Lower());
+	public Maybe<uint> FindTerritoryId(string territoryName) => _nameToId.MaybeGet(territoryName.Lower());
+
+	public Result<uint, string> GetTerritoryId(string territoryName) =>
+		FindTerritoryId(territoryName)
+			.ToResult<uint, string>($"Failed to find a territoryId for map name: {territoryName}");
 
 	public Maybe<string> GetTerritoryName(uint territoryId) =>
 		_idToName
@@ -41,6 +45,7 @@ public class TerritoryManager {
 
 		var supportedMapNames = GetEnumValues<Patch>()
 			.SelectMany(patch => patch.HuntMaps())
+			.Select(map => map.Name())
 			.ToImmutableHashSet();
 
 		var supportedPlaceIds = dataManager.GetExcelSheet<PlaceName>(ClientLanguage.English)!

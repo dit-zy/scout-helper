@@ -1,5 +1,8 @@
-﻿using System.Net.Http.Headers;
+﻿using System;
+using System.Collections.Generic;
+using System.Net.Http.Headers;
 using System.Reflection;
+using ScoutHelper.Models;
 
 namespace ScoutHelper;
 
@@ -17,6 +20,9 @@ public static class Constants {
 	public const string DefaultCopyTemplate = "{patch} {#}/{#max} {world} [{tracker}]({link})";
 	public const string BearDataFile = @"Data\Bear.json";
 	public const string SirenDataFile = @"Data\Siren.json";
+
+	public static readonly DateTime LatestPatchUpdate = DateTime.Parse("2024-01-01T00:00:00Z");
+	public static readonly (Territory, uint)[] LatestPatchInstances = {};
 
 	#endregion
 

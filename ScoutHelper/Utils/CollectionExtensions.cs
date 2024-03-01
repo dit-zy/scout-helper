@@ -27,7 +27,8 @@ public static class CollectionExtensions {
 
 	public static IDictionary<K, V> ToDict<K, V>(this IEnumerable<(K key, V value)> source) where K : notnull =>
 		source
-			.DistinctBy(entry => entry.key)
+			.GroupBy(entry => entry.key)
+			.Select(grouping => grouping.Last())
 			.ToImmutableDictionary(entry => entry.key, entry => entry.value);
 
 	public static IDictionary<K, V> ToMutableDict<K, V>(this IEnumerable<KeyValuePair<K, V>> source) where K : notnull =>
@@ -35,8 +36,8 @@ public static class CollectionExtensions {
 
 	public static IDictionary<K, V> ToMutableDict<K, V>(this IEnumerable<(K, V)> source) where K : notnull =>
 		source
-			.DistinctBy(entry => entry.Item1)
-			.ToDictionary(entry => entry.Item1, entry => entry.Item2);
+			.ToDict()
+			.ToDictionary(entry => entry.Key, entry => entry.Value);
 
 	public static IDictionary<K, V> With<K, V>(this IDictionary<K, V> source, params (K, V)[] entries) where K : notnull {
 		var dict = source.IsReadOnly ? source.ToMutableDict() : source;
@@ -67,7 +68,7 @@ public static class CollectionExtensions {
 			throw new Exception($"All values of enum [{typeof(K).Name}] must be in the dictionary.");
 		}
 
-		return enumDict.ToImmutableDictionary();
+		return enumDict.ToDict();
 	}
 
 	public static IDictionary<V, K> Flip<K, V>(this IDictionary<K, V> source) where V : notnull =>
@@ -79,18 +80,22 @@ public static class CollectionExtensions {
 		this IDictionary<K, V> source,
 		IEnumerable<(K key, V value)> updateEntries
 	) where K : notnull {
-		if (source.IsReadOnly) {
+		if (source.IsReadOnly)
 			return source
 				.AsPairs()
 				.Concat(updateEntries)
-				.GroupBy(entry => entry.key)
-				.Select(grouping => grouping.Last())
 				.ToDict();
-		} else {
-			updateEntries.ForEach(entry => source[entry.key] = entry.value);
-			return source;
-		}
+		
+		updateEntries.ForEach(entry => source[entry.key] = entry.value);
+		return source;
+
 	}
+
+	public static IDictionary<K, V> UseToUpdate<K, V>(
+		this IEnumerable<(K, V)> updateEntries,
+		IDictionary<K, V> target
+	) where K : notnull =>
+		target.Update(updateEntries);
 
 	#endregion
 
