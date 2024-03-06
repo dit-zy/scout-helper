@@ -138,11 +138,11 @@ namespace ScoutHelper.Localization {
         ///
         ///{link} - the generated tracker link \(≧▽≦)/
         ///
-        ///{patch} - the latest patch contained in the recorded train. If there are 6 HW marks and 1 SHB mark in the train, the patch will be SHB.
+        ///{patch} - the name for the latest patch contained in the recorded train. If there are 6 HW marks and 1 SHB mark in the train, the patch will be SHB.
         ///
-        ///{tracker} - the name of the tracker used (e.g. &quot;bear&quot;).
+        ///{patch-emote} - the discord emote for the latest patch contained in the recorded train. If there are 6 HW marks and 1 SHB mark in the train, the patch-emote will be &quot;:5x:&quot;.
         ///
-        ///{world} - the current world you are in. Make sure to use the link generator before you change worlds, if you include this in your template ;P.
+        ///{tracker} - the name  [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string ConfigWindowTemplateVariables {
             get {

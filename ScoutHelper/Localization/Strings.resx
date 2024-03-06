@@ -73,7 +73,9 @@
 
 {link} - the generated tracker link \(≧▽≦)/
 
-{patch} - the latest patch contained in the recorded train. If there are 6 HW marks and 1 SHB mark in the train, the patch will be SHB.
+{patch} - the name for the latest patch contained in the recorded train. If there are 6 HW marks and 1 SHB mark in the train, the patch will be SHB.
+
+{patch-emote} - the discord emote for the latest patch contained in the recorded train. If there are 6 HW marks and 1 SHB mark in the train, the patch-emote will be ":5x:".
 
 {tracker} - the name of the tracker used (e.g. "bear").
 
