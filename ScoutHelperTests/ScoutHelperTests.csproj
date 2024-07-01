@@ -45,4 +45,10 @@
 		<ProjectReference Include="..\ScoutHelper\ScoutHelper.csproj"/>
 	</ItemGroup>
 
+	<ItemGroup>
+	  <EmbeddedResource Include="TestData\Siren.json">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </EmbeddedResource>
+	</ItemGroup>
+
 </Project>

@@ -54,66 +54,6 @@ public static class Arbs {
 			.Select(entries => entries.ToDict())
 			.ToArbitrary();
 
-	public static Arbitrary<CopyTemplateArb> CopyTemplate() {
-		var trainList = Gen.Constant(new TrainMob()).ListOf().ToArbitrary();
-		var tracker = Arb.Default.String();
-		var worldName = Arb.Default.String();
-		var highestPatch = OfEnum<Patch>();
-		var link = Arb.Default.String();
-
-		return FsCheckUtils.Zip(trainList, tracker, worldName, highestPatch, link)
-			.Generator
-			.Select(
-				arbs => (arbs, new List<(string?, string?)>() {
-					("{#}", arbs.a.Count.ToString()),
-					("{#max}", arbs.d.MaxMarks().ToString()),
-					("{tracker}", arbs.b),
-					("{world}", arbs.c),
-					("{patch}", arbs.d.ToString()),
-					("{link}", arbs.e),
-				})
-			)
-			.SelectMany(
-				acc =>
-					RandomFreq(
-							Gen.Elements<(string?, string?)>(acc.Item2),
-							String().Generator
-								.Select(s => ((string?)s)?.TrimEnd('\\'))
-								.Select(s => (s, s))
-						)
-						.ListOf()
-						.Generator
-						.Select(
-							chunks => (
-								string.Join(null, chunks.Select(chunk => chunk.Item1)),
-								string.Join(null, chunks.Select(chunk => chunk.Item2))
-							)
-						)
-						.Select(
-							x => new CopyTemplateArb(
-								acc.arbs.a,
-								acc.arbs.b,
-								acc.arbs.c,
-								acc.arbs.d,
-								acc.arbs.e,
-								x.Item1,
-								x.Item2
-							)
-						)
-			)
-			.ToArbitrary();
-	}
-
-	public record struct CopyTemplateArb(
-		IList<TrainMob> TrainList,
-		string Tracker,
-		string WorldName,
-		Patch HighestPatch,
-		string Link,
-		string Template,
-		string Expected
-	);
-
 	public static Arbitrary<Maybe<T>> MaybeArb<T>(Gen<T> gen, bool includeNulls = false) =>
 		(includeNulls ? WithNulls(gen).Generator : gen.Select(value => (T?)value))
 		.Select(

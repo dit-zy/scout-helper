@@ -13,7 +13,7 @@ using static ScoutHelper.Utils.Utils;
 
 namespace ScoutHelper.Managers;
 
-public class TerritoryManager {
+public class TerritoryManager : ITerritoryManager {
 	private readonly DalamudPluginInterface _pluginInterface;
 	private readonly IPluginLog _log;
 

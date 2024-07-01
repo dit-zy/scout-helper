@@ -122,4 +122,12 @@ public class CollectionExtensionsTest {
 			actual.Should().BeAssignableTo<ImmutableDictionary<TestEnum, string>>();
 		}
 	);
+
+	private enum TestEnum {
+		A,
+		B,
+		C,
+		D,
+		E
+	}
 }

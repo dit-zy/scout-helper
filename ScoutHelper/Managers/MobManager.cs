@@ -11,7 +11,7 @@ using ScoutHelper.Utils.Functional;
 
 namespace ScoutHelper.Managers;
 
-public class MobManager {
+public class MobManager : IMobManager {
 	private readonly IPluginLog _log;
 
 	private readonly IDictionary<string, uint> _mobNameToId;

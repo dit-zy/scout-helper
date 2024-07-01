@@ -33,7 +33,7 @@ public class ConfigWindow : Window, IDisposable {
 	private readonly IClientState _clientState;
 	private readonly IPluginLog _log;
 	private readonly Configuration _conf;
-	private readonly TerritoryManager _territoryManager;
+	private readonly ITerritoryManager _territoryManager;
 
 	private string _fullTextTemplate;
 	private string _previewFullText;
@@ -43,7 +43,7 @@ public class ConfigWindow : Window, IDisposable {
 		IClientState clientState,
 		IPluginLog log,
 		Configuration conf,
-		TerritoryManager territoryManager
+		ITerritoryManager territoryManager
 	) : base(Strings.ConfigWindowTitle) {
 		_clientState = clientState;
 		_log = log;

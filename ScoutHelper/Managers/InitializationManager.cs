@@ -18,15 +18,15 @@ namespace ScoutHelper.Managers;
 public class InitializationManager {
 	private readonly IPluginLog _log;
 	private readonly Configuration _conf;
-	private readonly TerritoryManager _territoryManager;
+	private readonly ITerritoryManager _territoryManager;
 
 	// mobManager is unused, but including it in the constructor forces it to be
 	// initialized right away, rather than waiting for a dependant to be used.
 	public InitializationManager(
 		IPluginLog log,
 		Configuration conf,
-		TerritoryManager territoryManager,
-		MobManager mobManager
+		ITerritoryManager territoryManager,
+		IMobManager mobManager
 	) {
 		_log = log;
 		_conf = conf;
