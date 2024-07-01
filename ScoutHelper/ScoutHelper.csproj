@@ -29,6 +29,7 @@
 	<ItemGroup Label="dependencies">
 		<PackageReference Include="CSharpFunctionalExtensions" Version="2.40.3"/>
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0"/>
+		<PackageReference Update="DalamudPackager" Version="2.1.13" />
 	</ItemGroup>
 
 	<ItemGroup>

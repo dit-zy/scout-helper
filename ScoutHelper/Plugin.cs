@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using Dalamud.Game.Command;
 using Dalamud.Interface.Windowing;
-using Dalamud.IoC;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,12 +28,12 @@ public sealed class Plugin : IDalamudPlugin {
 	private readonly Action _dispose;
 
 	public Plugin(
-		[RequiredVersion("1.0")] DalamudPluginInterface pluginInterface,
-		[RequiredVersion("1.0")] IPluginLog log,
-		[RequiredVersion("1.0")] IChatGui chatGui,
-		[RequiredVersion("1.0")] ICommandManager commandManager,
-		[RequiredVersion("1.0")] IClientState clientState,
-		[RequiredVersion("1.0")] IDataManager dataManager
+		IDalamudPluginInterface pluginInterface,
+		IPluginLog log,
+		IChatGui chatGui,
+		ICommandManager commandManager,
+		IClientState clientState,
+		IDataManager dataManager
 	) {
 		_log = log;
 

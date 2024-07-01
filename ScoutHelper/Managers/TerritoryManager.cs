@@ -2,7 +2,7 @@
 using System.Collections.Immutable;
 using System.Linq;
 using CSharpFunctionalExtensions;
-using Dalamud;
+using Dalamud.Game;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Lumina.Excel.GeneratedSheets2;
@@ -14,13 +14,13 @@ using static ScoutHelper.Utils.Utils;
 namespace ScoutHelper.Managers;
 
 public class TerritoryManager {
-	private readonly DalamudPluginInterface _pluginInterface;
+	private readonly IDalamudPluginInterface _pluginInterface;
 	private readonly IPluginLog _log;
 
 	private readonly IDictionary<string, uint> _nameToId;
 	private readonly IDictionary<string, IDictionary<uint, string>> _idToName;
 
-	public TerritoryManager(DalamudPluginInterface pluginInterface, IPluginLog log, IDataManager dataManager) {
+	public TerritoryManager(IDalamudPluginInterface pluginInterface, IPluginLog log, IDataManager dataManager) {
 		_pluginInterface = pluginInterface;
 		_log = log;
 
@@ -65,7 +65,7 @@ public class TerritoryManager {
 
 					var idToName = dataManager
 						.GetExcelSheet<TerritoryType>(language)!
-						.Where(territory => territory.Unknown0 != 0)
+						.Where(territory => territory.TerritoryIntendedUse.Row == 1)
 						.Where(territory => placeNames.ContainsKey(territory.PlaceName.Row))
 						.Select(territory => (mapId: territory.RowId, name: placeNames[territory.PlaceName.Row]))
 						.GroupBy(map => map.name)

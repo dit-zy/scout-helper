@@ -10,7 +10,7 @@ public class Configuration : IPluginConfiguration {
 
 	// the below exists just to make saving less cumbersome
 	[NonSerialized]
-	private DalamudPluginInterface _pluginInterface = null!;
+	private IDalamudPluginInterface _pluginInterface = null!;
 
 	public int Version { get; set; } = 0;
 
@@ -28,7 +28,7 @@ public class Configuration : IPluginConfiguration {
 	public DateTime LastInstancePatchUpdate = DateTime.UnixEpoch;
 	public Dictionary<uint, uint> Instances { get; set; } = new();
 
-	public void Initialize(DalamudPluginInterface pluginInterface) {
+	public void Initialize(IDalamudPluginInterface pluginInterface) {
 		_pluginInterface = pluginInterface;
 	}
 

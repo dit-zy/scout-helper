@@ -2,10 +2,9 @@
 using System.Collections.Immutable;
 using System.Linq;
 using CSharpFunctionalExtensions;
-using Dalamud;
+using Dalamud.Game;
 using Dalamud.Plugin.Services;
 using Lumina.Excel.GeneratedSheets2;
-using ScoutHelper.Config;
 using ScoutHelper.Utils;
 using ScoutHelper.Utils.Functional;
 
@@ -39,7 +38,7 @@ public class MobManager {
 		var nameToId = dataManager.GetExcelSheet<BNpcName>(ClientLanguage.English)!
 			.Select(name => (name: name.Singular.RawString.Lower(), mobId: name.RowId))
 			.Where(name => notoriousMonsters.Contains(name.mobId))
-			.GroupBy(entry => entry.Item1)
+			.GroupBy(entry => entry.name)
 			.Select(
 				grouping => {
 					if (1 < grouping.Count()) {

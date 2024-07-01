@@ -19,7 +19,7 @@ public class UtilsTests {
 		var clientState = new Mock<IClientState>();
 
 		// GIVEN
-		clientState.Setup(state => state.LocalPlayer).Returns(null as PlayerCharacter);
+		clientState.Setup(state => state.LocalPlayer).Returns(null as IPlayerCharacter);
 
 		// WHEN
 		var worldName = clientState.Object.WorldName();

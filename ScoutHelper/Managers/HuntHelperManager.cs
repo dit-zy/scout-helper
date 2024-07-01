@@ -4,7 +4,6 @@ using Dalamud.Plugin.Ipc.Exceptions;
 using ScoutHelper.Models;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 
@@ -21,7 +20,7 @@ public class HuntHelperManager : IDisposable {
 
 	public bool Available { get; private set; } = false;
 
-	public HuntHelperManager(DalamudPluginInterface pluginInterface, IPluginLog log) {
+	public HuntHelperManager(IDalamudPluginInterface pluginInterface, IPluginLog log) {
 		_log = log;
 
 		_cgGetVersion = pluginInterface.GetIpcSubscriber<uint>("HH.GetVersion");

@@ -6,7 +6,7 @@ using Dalamud.Interface;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
-using OtterGui.Classes;
+using OtterGui.Widgets;
 
 namespace ScoutHelper.Windows;
 

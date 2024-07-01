@@ -1,5 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
-using Dalamud;
+using Dalamud.Game;
 using Dalamud.Plugin.Services;
 using FluentAssertions;
 using FsCheck;

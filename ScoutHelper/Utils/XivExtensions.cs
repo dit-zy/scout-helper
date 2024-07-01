@@ -15,7 +15,7 @@ public static partial class XivExtensions {
 	public static string WorldName(this IClientState clientState) =>
 		clientState.LocalPlayer?.CurrentWorld.GameData?.Name.ToString() ?? "Not Found";
 
-	public static string PluginFilePath(this DalamudPluginInterface pluginInterface, string dataFilename) => Path.Combine(
+	public static string PluginFilePath(this IDalamudPluginInterface pluginInterface, string dataFilename) => Path.Combine(
 		pluginInterface.AssemblyLocation.Directory?.FullName!,
 		dataFilename
 	);
