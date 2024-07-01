@@ -1,15 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Microsoft.NET.Sdk">
-	<Import Project="Dalamud.Plugin.Bootstrap.targets"/>
-
+<Project Sdk="Dalamud.NET.Sdk/9.0.2">
 	<PropertyGroup Label="feature">
 		<Authors>ditzy</Authors>
-		<Version>1.1.2.0</Version>
+		<Version>1.2.0.0</Version>
 		<Description>A helper plugin for pre-populating hunt train scout tracker links</Description>
 		<PackageProjectUrl>https://github.com/im-scared/scout-helper</PackageProjectUrl>
 		<PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
 		<IsPackable>false</IsPackable>
 	</PropertyGroup>
+
+	<ItemGroup Label="dependencies">
+		<PackageReference Include="CSharpFunctionalExtensions" Version="2.40.3"/>
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0"/>
+		<ProjectReference Include="..\OtterGui\OtterGui.csproj"/>
+	</ItemGroup>
 
 	<ItemGroup>
 		<EmbeddedResource Update="Localization\Strings.resx">
@@ -26,20 +30,10 @@
 		</Compile>
 	</ItemGroup>
 
-	<ItemGroup Label="dependencies">
-		<PackageReference Include="CSharpFunctionalExtensions" Version="2.40.3"/>
-		<PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0"/>
-		<PackageReference Update="DalamudPackager" Version="2.1.13" />
-	</ItemGroup>
-
 	<ItemGroup>
 		<EmbeddedResource Include="Data\Bear.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</EmbeddedResource>
-	</ItemGroup>
-
-	<ItemGroup>
-		<ProjectReference Include="..\OtterGui\OtterGui.csproj"/>
 	</ItemGroup>
 
 	<ItemGroup>
