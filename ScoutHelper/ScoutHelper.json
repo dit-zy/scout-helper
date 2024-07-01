@@ -4,7 +4,7 @@
 	"Punchline": "A helper plugin for pre-populating hunt train scout tracker links",
 	"Description": "A helper for generating scout tracker links for a-rank hunt trains",
 	"ApplicableVersion": "any",
-	"DalamudApiLevel": 9,
+	"DalamudApiLevel": 10,
 	"LoadPriority": 0,
 	"InternalName": "scoutHelper",
 	"Tags": [
