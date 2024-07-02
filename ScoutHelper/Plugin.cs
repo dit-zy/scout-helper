@@ -18,7 +18,7 @@ namespace ScoutHelper;
 public sealed class Plugin : IDalamudPlugin {
 	public const string Name = Constants.PluginName;
 
-	private static readonly List<string> CommandNames = new() { "/scouth", "/sch" };
+	private static readonly List<string> CommandNames = ["/scouth", "/sch"];
 
 	private readonly IPluginLog _log;
 
@@ -81,6 +81,7 @@ public sealed class Plugin : IDalamudPlugin {
 		);
 
 		pluginInterface.UiBuilder.Draw += DrawUi;
+		pluginInterface.UiBuilder.OpenMainUi += DrawMainUi;
 		pluginInterface.UiBuilder.OpenConfigUi += DrawConfigUi;
 
 		// create the dispose action here, so fields don't need to be made just for disposal
@@ -113,6 +114,10 @@ public sealed class Plugin : IDalamudPlugin {
 
 	private void DrawUi() {
 		_windowSystem.Draw();
+	}
+
+	private void DrawMainUi() {
+		_mainWindow.IsOpen = true;
 	}
 
 	private void DrawConfigUi() {
