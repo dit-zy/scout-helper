@@ -73,5 +73,19 @@
 		"Gurangatch": 10631,
 		"Arch-Eta": 10634,
 		"Fan Ail": 10633
-	}
+	},
+	"DT": {
+    	"Pkuucha": 13443,
+    	"The Raintriller": 13442,
+    	"Nechuciho": 13362,
+    	"Queen Hawk": 13361,
+    	"Rrax Yitya": 12753, // apostraphe removed to comply with bear api
+    	"Starcrier": 12692,
+    	"Keheniheyamewi": 13401,
+    	"Yehehetoauapyo": 13400, // apostraphe removed to comply with bear api
+    	"Heshuala": 13157,
+    	"Urna Variabilis": 13158,
+    	"Cats Eye": 13436, // apostraphe removed to comply with bear api
+    	"Sally the Sweeper": 13435
+    }
 }

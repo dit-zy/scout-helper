@@ -13,6 +13,7 @@ public enum Patch {
 	SB,
 	SHB,
 	EW,
+	DT,
 }
 
 public static class PatchExtensions {
@@ -33,6 +34,10 @@ public static class PatchExtensions {
 			(Patch.EW, new[] {
 				Labyrinthos, Thavnair, Garlemald,
 				MareLamentorum, Elpis, UltimaThule,
+			}),
+			(Patch.DT, new[] {
+				Urqopacha, Kozamauka, YakTel,
+				Shaaloani, HeritageFound, LivingMemory,
 			}),
 		}
 		.Select(patch => (patch.Item1, patch.Item2.AsList()))
@@ -56,6 +61,7 @@ public static class PatchExtensions {
 		{ Patch.SB, ":4x:" },
 		{ Patch.SHB, ":5x:" },
 		{ Patch.EW, ":6x:" },
+		{ Patch.DT, ":7x:" },
 	}.VerifyEnumDictionary();
 
 	public static IList<Territory> HuntMaps(this Patch patch) => PatchHuntMaps[patch];

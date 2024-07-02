@@ -37,6 +37,14 @@ public enum Territory {
 	MareLamentorum,
 	Elpis,
 	UltimaThule,
+
+	// DT
+	Urqopacha,
+	Kozamauka,
+	YakTel,
+	Shaaloani,
+	HeritageFound,
+	LivingMemory,
 }
 
 public static class TerritoryExtensions {
@@ -68,6 +76,13 @@ public static class TerritoryExtensions {
 		{ MareLamentorum, "mare lamentorum" },
 		{ Elpis, "elpis" },
 		{ UltimaThule, "ultima thule" },
+
+		{ Urqopacha, "urqopacha" },
+		{ Kozamauka, "kozama'uka" },
+		{ YakTel, "yak t'el" },
+		{ Shaaloani, "shaaloani" },
+		{ HeritageFound, "heritage found" },
+		{ LivingMemory, "living memory" },
 	}.VerifyEnumDictionary();
 
 	private static readonly IDictionary<Territory, uint> TerritoryInstances = GetEnumValues<Territory>()
