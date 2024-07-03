@@ -157,7 +157,8 @@ public static class BearExtensions {
 		{ Patch.HW, "HW" },
 		{ Patch.SB, "SB" },
 		{ Patch.SHB, "ShB" },
-		{ Patch.EW, "EW" }
+		{ Patch.EW, "EW" },
+		{ Patch.DT, "DT" }
 	}.VerifyEnumDictionary();
 
 	public static string BearName(this Patch patch) {
