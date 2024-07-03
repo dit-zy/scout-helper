@@ -214,6 +214,7 @@ public static class SirenExtensions {
 		{ Patch.SB, "STB" },
 		{ Patch.SHB, "SHB" },
 		{ Patch.EW, "EW" },
+		{ Patch.DT, "DT" },
 	}.VerifyEnumDictionary();
 
 	public static string SirenName(this Patch patch) {
