@@ -50,6 +50,13 @@ public static class ImGuiPlus {
 
 	public static float ScaledFontSize() => 4 * MathF.Pow(ImGui.GetFontSize(), 0.6f);
 
+	public static void Separator() {
+		var dummySize = new Vector2(0, ImGui.GetStyle().FramePadding.Y);
+		ImGui.Dummy(dummySize);
+		ImGui.Separator();
+		ImGui.Dummy(dummySize);
+	}
+
 	public static void Heading(string text, float scale = 1.25f, bool centered = false) {
 		var font = ImGui.GetFont();
 		var originalScale = font.Scale;

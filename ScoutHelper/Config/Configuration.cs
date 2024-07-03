@@ -29,6 +29,7 @@ public class Configuration : IPluginConfiguration {
 	public string CopyTemplate { get; set; } = Constants.DefaultCopyTemplate;
 	public bool IsCopyModeFullText { get; set; } = false;
 
+	public DateTime LastPluginUpdate = DateTime.UnixEpoch;
 	public DateTime LastInstancePatchUpdate = DateTime.UnixEpoch;
 	public Dictionary<uint, uint> Instances { get; set; } = new();
 
