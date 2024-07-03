@@ -34,7 +34,7 @@ public static class Constants {
 	#region patch update constants
 
 	public static readonly IList<string> Notices = new string[] {
-		// "Dawntrail regions are not yet supported.",
+		// "Something important we don't want the user forgetting.",
 	}.AsList();
 
 	public static readonly DateTime LatestPatchUpdate = DateTime.Parse("2024-07-18T00:00:00Z");

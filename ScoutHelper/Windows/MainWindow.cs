@@ -20,6 +20,8 @@ using static ScoutHelper.Utils.Utils;
 namespace ScoutHelper.Windows;
 
 public class MainWindow : Window, IDisposable {
+	private static readonly string NoticeBulletChar = "▪";
+	
 	private readonly IClientState _clientState;
 	private readonly Configuration _conf;
 	private readonly IChatGui _chat;
@@ -32,6 +34,7 @@ public class MainWindow : Window, IDisposable {
 	private readonly Lazy<Vector2> _buttonSize;
 	private readonly IList<string> _notices;
 	private readonly float _noticeFrameHeight;
+	private readonly float _noticeFrameWrap;
 
 	private bool _isCopyModeFullText;
 	private uint _selectedMode;
@@ -85,17 +88,14 @@ public class MainWindow : Window, IDisposable {
 			}
 		);
 
-		_notices = Constants.Notices
-			.Select(notice => "· " + notice)
-			.AsList();
+		_notices = Constants.Notices;
 
-		var noticeWrapWidth = _buttonSize.Value.X - ImGui.GetStyle().WindowPadding.X * 2;
-		_noticeFrameHeight = ImGui.GetStyle().WindowPadding.Y * 2 + ImGui.CalcTextSize(
-			_notices
-				.Append("NOTICES")
-				.Join("\n"),
-			noticeWrapWidth
-		).Y;
+		_noticeFrameWrap = _buttonSize.Value.X - 2 * ImGui.GetStyle().WindowPadding.X + ImGui.CalcTextSize(NoticeBulletChar).X +
+			4 * ImGui.GetStyle().CellPadding.X;
+		_noticeFrameHeight = ImGui.GetStyle().WindowPadding.Y * 2 + _notices
+			.Append("NOTICES")
+			.Select(notice => 4 * ImGui.GetStyle().CellPadding.Y + ImGui.CalcTextSize(notice, _noticeFrameWrap).Y)
+			.Sum();
 	}
 
 	public void Dispose() {
@@ -131,7 +131,21 @@ public class MainWindow : Window, IDisposable {
 			if (!startedChildFrame) return;
 
 			ImGuiHelpers.CenteredText("NOTICES");
-			_notices.ForEach(ImGui.TextWrapped);
+			if (ImGui.BeginTable("notices", 2, ImGuiTableFlags.SizingFixedFit)) {
+				_notices.ForEach(
+					notice => {
+						ImGui.TableNextRow();
+						ImGui.TableNextColumn();
+						ImGui.Text(NoticeBulletChar);
+						ImGui.TableNextColumn();
+						ImGui.PushTextWrapPos(_noticeFrameWrap);
+						ImGui.TextWrapped(notice);
+						ImGui.PopTextWrapPos();
+					}
+				);
+
+				ImGui.EndTable();
+			}
 		} finally {
 			ImGui.PopStyleColor(2);
 		}
