@@ -15,12 +15,12 @@
 		"scouting",
 		"train"
 	],
-	"RepoUrl": "https://github.com/ditzy/scout-helper",
-	"IconUrl": "https://raw.githubusercontent.com/ditzy/scout-helper/main/images/icon.png",
+	"RepoUrl": "https://github.com/dit-zy/scout-helper",
+	"IconUrl": "https://raw.githubusercontent.com/dit-zy/scout-helper/main/images/icon.png",
 	"ImageUrls": [
-		"https://raw.githubusercontent.com/ditzy/scout-helper/main/images/hunt-helper-train.png",
-		"https://raw.githubusercontent.com/ditzy/scout-helper/main/images/main-window.png",
-		"https://raw.githubusercontent.com/ditzy/scout-helper/main/images/settings.png",
-		"https://raw.githubusercontent.com/ditzy/scout-helper/main/images/output.png"
+		"https://raw.githubusercontent.com/dit-zy/scout-helper/main/images/hunt-helper-train.png",
+		"https://raw.githubusercontent.com/dit-zy/scout-helper/main/images/main-window.png",
+		"https://raw.githubusercontent.com/dit-zy/scout-helper/main/images/settings.png",
+		"https://raw.githubusercontent.com/dit-zy/scout-helper/main/images/output.png"
 	]
 }
