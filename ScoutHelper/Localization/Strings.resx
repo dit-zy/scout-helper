@@ -48,11 +48,20 @@
 	<data name="CopyModeFullTextButton" xml:space="preserve">
 		<value>full-text</value>
 	</data>
+	<data name="MainWindowSectionLabelNotices" xml:space="preserve">
+		<value>NOTICES</value>
+	</data>
 	<data name="MainWindowSectionLabelMode" xml:space="preserve">
 		<value>MODE</value>
 	</data>
 	<data name="MainWindowSectionLabelGenerators" xml:space="preserve">
 		<value>GENERATORS</value>
+	</data>
+	<data name="MainWindowNoticesAck" xml:space="preserve">
+		<value>   DISMISS   </value>
+	</data>
+	<data name="MainWindowNoticesAckTooltip" xml:space="preserve">
+		<value>dismiss these notices.</value>
 	</data>
 	<data name="ConfigWindowSectionLabelFullText" xml:space="preserve">
 		<value>FULL-TEXT TEMPLATE</value>

@@ -21,7 +21,19 @@ namespace ScoutHelper.Windows;
 
 public class MainWindow : Window, IDisposable {
 	private static readonly string NoticeBulletChar = "▪";
-	
+	private static readonly bool NoticeHasBorder = true;
+
+	private static readonly Vector4 DangerFgColor = Color(255, 235, 242);
+	private static readonly Vector4 DangerBgColor = Color(181, 0, 69);
+
+	private static readonly IList<(ImGuiCol, Vector4)> NoticeStyleColors = new[] {
+		(ImGuiCol.FrameBg, DangerBgColor),
+		(ImGuiCol.Button, DangerBgColor),
+		(ImGuiCol.ButtonHovered, DangerFgColor),
+		(ImGuiCol.Border, DangerFgColor),
+		(ImGuiCol.Text, DangerFgColor),
+	}.AsList();
+
 	private readonly IClientState _clientState;
 	private readonly Configuration _conf;
 	private readonly IChatGui _chat;
@@ -35,9 +47,13 @@ public class MainWindow : Window, IDisposable {
 	private readonly IList<string> _notices;
 	private readonly float _noticeFrameHeight;
 	private readonly float _noticeFrameWrap;
+	private readonly float _noticeFrameBorderSize;
+	private readonly Lazy<Vector2> _noticeAckButtonPos;
 
 	private bool _isCopyModeFullText;
 	private uint _selectedMode;
+	private bool _latestNoticesAreAcknowledged;
+	private Vector4 _noticeAckButtonColor = DangerFgColor;
 
 	public MainWindow(
 		IClientState clientState,
@@ -90,12 +106,36 @@ public class MainWindow : Window, IDisposable {
 
 		_notices = Constants.Notices;
 
-		_noticeFrameWrap = _buttonSize.Value.X - 2 * ImGui.GetStyle().WindowPadding.X + ImGui.CalcTextSize(NoticeBulletChar).X +
-			4 * ImGui.GetStyle().CellPadding.X;
-		_noticeFrameHeight = ImGui.GetStyle().WindowPadding.Y * 2 + _notices
-			.Append("NOTICES")
-			.Select(notice => 4 * ImGui.GetStyle().CellPadding.Y + ImGui.CalcTextSize(notice, _noticeFrameWrap).Y)
-			.Sum();
+		var style = ImGui.GetStyle();
+		_noticeFrameBorderSize = ImGuiHelpers.GlobalScale * (NoticeHasBorder ? 1 : 0);
+		_noticeFrameWrap = new[] {
+			_buttonSize.Value.X,
+			-2 * style.FramePadding.X,
+			-ImGui.CalcTextSize(NoticeBulletChar).X,
+		}.Sum();
+		var noticeAckButtonSize = ImGuiHelpers.GetButtonSize(Strings.MainWindowNoticesAck);
+		_noticeFrameHeight = new[] {
+			2 * style.FramePadding.Y,
+			ImGui.CalcTextSize(Strings.MainWindowSectionLabelNotices).Y,
+			4 * style.ItemSpacing.Y,
+			noticeAckButtonSize.Y,
+			2 * _noticeFrameBorderSize,
+			_notices
+				.Select(
+					notice =>
+						ImGui.CalcTextSize(notice, _noticeFrameWrap).Y
+						+ style.ItemSpacing.Y
+				)
+				.Sum(),
+		}.Sum();
+		_noticeAckButtonPos = new Lazy<Vector2>(
+			() => V2(
+				(_buttonSize.Value.X - noticeAckButtonSize.X) / 2,
+				_noticeFrameHeight - noticeAckButtonSize.Y - style.FramePadding.Y - 2 * _noticeFrameBorderSize
+			)
+		);
+
+		_latestNoticesAreAcknowledged = Constants.LatestNoticeUpdate < _conf.LastNoticeAcknowledged;
 	}
 
 	public void Dispose() {
@@ -115,43 +155,79 @@ public class MainWindow : Window, IDisposable {
 		DrawGeneratorButtons();
 	}
 
-	private void DrawNotices() {
-		if (Constants.Notices.IsEmpty())
-			return;
+	private unsafe void DrawNotices() {
+		if (Constants.Notices.IsEmpty()) return;
+		if (_latestNoticesAreAcknowledged) return;
 
-		try {
-			ImGui.PushStyleColor(ImGuiCol.FrameBg, new Vector4(.7f, .0f, .2f, 1f));
-			ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1f, 1f, 1f, 1f));
+		var textColor = *ImGui.GetStyleColorVec4(ImGuiCol.Text);
 
-			var startedChildFrame = ImGui.BeginChildFrame(
-				ImGui.GetID("notice panel"),
-				_buttonSize.Value.WithY(_noticeFrameHeight),
-				ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.AlwaysAutoResize
+		ImGuiPlus
+			.WithStyle(NoticeStyleColors)
+			.Do(
+				() => {
+					var startedChildFrame = ImGui.BeginChildFrame(
+						ImGui.GetID("notice panel"),
+						_buttonSize.Value.WithY(_noticeFrameHeight),
+						ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.AlwaysAutoResize
+					);
+					if (!startedChildFrame) return;
+
+					ImGuiHelpers.CenteredText(Strings.MainWindowSectionLabelNotices);
+					ImGuiPlus
+						.WithStyle(ImGuiStyleVar.CellPadding, V2(0, 0))
+						.Do(
+							() => {
+								if (!ImGui.BeginTable("notices", 2, ImGuiTableFlags.SizingFixedFit))
+									return;
+
+								_notices.ForEach(
+									notice => {
+										ImGui.TableNextRow();
+										ImGui.TableNextColumn();
+										ImGui.Text(NoticeBulletChar);
+
+										ImGui.TableNextColumn();
+										ImGui.PushTextWrapPos(_noticeFrameWrap + ImGui.GetCursorPosX());
+										ImGui.TextWrapped(notice);
+										ImGui.PopTextWrapPos();
+									}
+								);
+
+								ImGui.EndTable();
+							}
+						);
+
+					ImGui.Dummy(2 * V2(0, ImGui.GetStyle().ItemSpacing.Y));
+					ImGuiPlus
+						.WithStyle(ImGuiCol.Text, _noticeAckButtonColor)
+						.WithStyle(ImGuiStyleVar.FrameBorderSize, _noticeFrameBorderSize)
+						.Do(
+							() => {
+								var buttonSize = ImGuiHelpers.GetButtonSize(Strings.MainWindowNoticesAck);
+								ImGui.SetCursorPos(_noticeAckButtonPos.Value);
+								if (!ImGui.Button(Strings.MainWindowNoticesAck)) return;
+
+								_conf.LastNoticeAcknowledged = DateTime.UtcNow;
+								_conf.Save();
+								_latestNoticesAreAcknowledged = true;
+							}
+						);
+					ImGuiPlus.WithStyle(ImGuiCol.Text, textColor).Do(
+						() => {
+							if (ImGui.IsItemHovered()) {
+								CreateTooltip(Strings.MainWindowNoticesAckTooltip);
+								_noticeAckButtonColor = DangerBgColor;
+							} else {
+								_noticeAckButtonColor = DangerFgColor;
+							}
+						}
+					);
+
+					ImGui.EndChildFrame();
+
+					ImGuiPlus.Separator();
+				}
 			);
-			if (!startedChildFrame) return;
-
-			ImGuiHelpers.CenteredText("NOTICES");
-			if (ImGui.BeginTable("notices", 2, ImGuiTableFlags.SizingFixedFit)) {
-				_notices.ForEach(
-					notice => {
-						ImGui.TableNextRow();
-						ImGui.TableNextColumn();
-						ImGui.Text(NoticeBulletChar);
-						ImGui.TableNextColumn();
-						ImGui.PushTextWrapPos(_noticeFrameWrap);
-						ImGui.TextWrapped(notice);
-						ImGui.PopTextWrapPos();
-					}
-				);
-
-				ImGui.EndTable();
-			}
-		} finally {
-			ImGui.PopStyleColor(2);
-		}
-		ImGui.EndChildFrame();
-
-		ImGuiPlus.Separator();
 	}
 
 	private void DrawModeButtons() {

@@ -250,6 +250,24 @@ namespace ScoutHelper.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to    DISMISS   .
+        /// </summary>
+        internal static string MainWindowNoticesAck {
+            get {
+                return ResourceManager.GetString("MainWindowNoticesAck", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to dismiss these notices..
+        /// </summary>
+        internal static string MainWindowNoticesAckTooltip {
+            get {
+                return ResourceManager.GetString("MainWindowNoticesAckTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to GENERATORS.
         /// </summary>
         internal static string MainWindowSectionLabelGenerators {
@@ -264,6 +282,15 @@ namespace ScoutHelper.Localization {
         internal static string MainWindowSectionLabelMode {
             get {
                 return ResourceManager.GetString("MainWindowSectionLabelMode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to NOTICES.
+        /// </summary>
+        internal static string MainWindowSectionLabelNotices {
+            get {
+                return ResourceManager.GetString("MainWindowSectionLabelNotices", resourceCulture);
             }
         }
         
