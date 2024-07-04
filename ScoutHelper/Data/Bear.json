@@ -79,13 +79,13 @@
     		"The Raintriller": 13442,
     		"Nechuciho": 13362,
     		"Queen Hawk": 13361,
-    		"Rrax Yitya": 12753, // apostraphe removed to comply with bear api
+    		"Rrax Yity'a": 12753,
     		"Starcrier": 12692,
     		"Keheniheyamewi": 13401,
-    		"Yehehetoauapyo": 13400, // apostraphe removed to comply with bear api
+    		"Yehehetoaua'pyo": 13400,
     		"Heshuala": 13157,
     		"Urna Variabilis": 13158,
-    		"Cats Eye": 13436, // apostraphe removed to comply with bear api
+    		"Cat's Eye": 13436,
     		"Sally the Sweeper": 13435
     	}
 }
