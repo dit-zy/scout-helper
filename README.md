@@ -6,13 +6,13 @@ a dalamud helper plugin for making it easier to interact with scout trackers
 
 * integrates with multiple scout trackers:
 	* [bear toolkit](https://tracker.beartoolkit.com/train)
-	* [siren hunts](https://www.sirenhunts.com/scouting) (next to be implemented)
-	* [prime hunt tools](https://prime-hunt-tools.web.app/#/) (planned for the
-	  future)
+	* [siren hunts](https://www.sirenhunts.com/scouting)
+	* [turtle scouter](https://scout.wobbuffet.net/)
 * automatically pulls scouted marks from the
 	[hunt helper](https://github.com/imaginary-png/HuntHelper) train recorder
 * create a whole template of text including multiple additional fields such 
-  as the number of marks and the patch
+  as the number of marks and the patch. e.g.:
+![full text example](./images/full-text-example.png)
 
 ## HOW TO USE
 
