@@ -2,6 +2,11 @@
 
 a dalamud helper plugin for making it easier to interact with scout trackers
 
+# CONTACT
+if you have feedback or questions about the plugin, you can reach me at ditzy.
+zy@pm.me, or find us in the
+[light trains discord](https://discord.gg/9YjuHqVG)'s #tech channel.
+
 ## FEATURES
 
 * integrates with multiple scout trackers:
