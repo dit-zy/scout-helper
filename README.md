@@ -12,7 +12,8 @@ a dalamud helper plugin for making it easier to interact with scout trackers
 	[hunt helper](https://github.com/imaginary-png/HuntHelper) train recorder
 * create a whole template of text including multiple additional fields such 
   as the number of marks and the patch. e.g.:
-![full text example](./images/full-text-example.png)
+
+  ![full text example](./images/full-text-example.png)
 
 ## HOW TO USE
 
