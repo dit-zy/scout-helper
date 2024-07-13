@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net.Http.Headers;
 using System.Reflection;
 using ScoutHelper.Models;
@@ -20,6 +19,7 @@ public static class Constants {
 	public const string DefaultCopyTemplate = "{patch-emote} {patch} {#}/{#max} {world} [{tracker}]({link})";
 	public const string BearDataFile = @"Data\Bear.json";
 	public const string SirenDataFile = @"Data\Siren.json";
+	public const string TurtleDataFile = @"Data\Turtle.json";
 
 	public static readonly DateTime LatestPatchUpdate = DateTime.Parse("2024-07-03T00:00:00Z");
 	public static readonly (Territory, uint)[] LatestPatchInstances = {

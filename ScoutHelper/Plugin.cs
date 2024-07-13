@@ -51,7 +51,8 @@ public sealed class Plugin : IDalamudPlugin {
 			.AddSingleton(
 				new ScoutHelperOptions(
 					pluginInterface.PluginFilePath(Constants.BearDataFile),
-					pluginInterface.PluginFilePath(Constants.SirenDataFile)
+					pluginInterface.PluginFilePath(Constants.SirenDataFile),
+					pluginInterface.PluginFilePath(Constants.TurtleDataFile)
 				)
 			)
 			.AddSingleton<MobManager>()
@@ -59,6 +60,7 @@ public sealed class Plugin : IDalamudPlugin {
 			.AddSingleton<HuntHelperManager>()
 			.AddSingleton<BearManager>()
 			.AddSingleton<SirenManager>()
+			.AddSingleton<TurtleManager>()
 			.AddSingleton<ConfigWindow>()
 			.AddSingleton<MainWindow>()
 			.AddSingleton<InitializationManager>()

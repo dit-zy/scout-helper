@@ -1,8 +1,4 @@
-﻿using CSharpFunctionalExtensions;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using ScoutHelper.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -10,8 +6,12 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using CSharpFunctionalExtensions;
 using Dalamud.Plugin.Services;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using ScoutHelper.Config;
+using ScoutHelper.Models;
 
 namespace ScoutHelper.Managers;
 
@@ -25,7 +25,7 @@ public class BearManager : IDisposable {
 	public BearManager(IPluginLog log, Configuration conf, ScoutHelperOptions options) {
 		_log = log;
 		_conf = conf;
-		
+
 		HttpClient.BaseAddress = new Uri(_conf.BearApiBaseUrl);
 		HttpClient.DefaultRequestHeaders.UserAgent.Add(Constants.UserAgent);
 		HttpClient.Timeout = _conf.BearApiTimeout;
@@ -37,58 +37,6 @@ public class BearManager : IDisposable {
 		HttpClient.Dispose();
 
 		GC.SuppressFinalize(this);
-	}
-
-	private IDictionary<uint, (Patch patch, string name)> LoadData(string dataFilePath) {
-		_log.Debug("Loading Bear data...");
-		
-		if (!File.Exists(dataFilePath)) {
-			throw new Exception($"Can't find {dataFilePath}");
-		}
-
-		var data = JsonConvert.DeserializeObject<IDictionary<string, JObject>>(File.ReadAllText(dataFilePath));
-		if (data == null) {
-			throw new Exception("Failed to read in Bear data ;-;");
-		}
-
-		var bearData = data
-			.SelectMany(
-				patchData => {
-					if (!Enum.TryParse(patchData.Key, out Patch patch)) {
-						throw new Exception($"Unknown patch: {patchData.Key}");
-					}
-
-					return (patchData.Value as IDictionary<string, JToken>).Select(
-						mob => {
-							var mobName = mob.Key;
-							var mobId = (uint)mob.Value;
-							return (mobName, patch, mobId);
-						}
-					);
-				}
-			)
-			.ToImmutableDictionary(
-				mob => mob.mobId,
-				mob => (mob.patch, mob.mobName)
-			);
-		
-		_log.Debug("Bear data loaded.");
-
-		return bearData;
-	}
-
-	private BearApiSpawnPoint CreateRequestSpawnPoint(TrainMob mob) {
-		var huntName = MobIdToBearName[mob.MobId].name;
-		if (mob.Instance is >= 1 and <= 9) {
-			huntName += $" {mob.Instance}";
-		}
-
-		return new BearApiSpawnPoint(
-			huntName,
-			mob.Position.X,
-			mob.Position.Y,
-			mob.LastSeenUtc
-		);
 	}
 
 	public async Task<Result<BearLinkData, string>> GenerateBearLink(
@@ -142,6 +90,58 @@ public class BearManager : IDisposable {
 			_log.Error(e, message);
 			return message;
 		}
+	}
+
+	private BearApiSpawnPoint CreateRequestSpawnPoint(TrainMob mob) {
+		var huntName = MobIdToBearName[mob.MobId].name;
+		if (mob.Instance is >= 1 and <= 9) {
+			huntName += $" {mob.Instance}";
+		}
+
+		return new BearApiSpawnPoint(
+			huntName,
+			mob.Position.X,
+			mob.Position.Y,
+			mob.LastSeenUtc
+		);
+	}
+
+	private IDictionary<uint, (Patch patch, string name)> LoadData(string dataFilePath) {
+		_log.Debug("Loading Bear data...");
+
+		if (!File.Exists(dataFilePath)) {
+			throw new Exception($"Can't find {dataFilePath}");
+		}
+
+		var data = JsonConvert.DeserializeObject<IDictionary<string, JObject>>(File.ReadAllText(dataFilePath));
+		if (data == null) {
+			throw new Exception("Failed to read in Bear data ;-;");
+		}
+
+		var bearData = data
+			.SelectMany(
+				patchData => {
+					if (!Enum.TryParse(patchData.Key, out Patch patch)) {
+						throw new Exception($"Unknown patch: {patchData.Key}");
+					}
+
+					return (patchData.Value as IDictionary<string, JToken>).Select(
+						mob => {
+							var mobName = mob.Key;
+							var mobId = (uint)mob.Value;
+							return (mobName, patch, mobId);
+						}
+					);
+				}
+			)
+			.ToImmutableDictionary(
+				mob => mob.mobId,
+				mob => (mob.patch, mob.mobName)
+			);
+
+		_log.Debug("Bear data loaded.");
+
+		return bearData;
 	}
 }
 

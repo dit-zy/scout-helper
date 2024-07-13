@@ -121,5 +121,7 @@ public static partial class Utils {
 
 	public static SeString ToSeString(this string str) => new(str);
 
+	public static float AsFloat(this string str) => float.Parse(str);
+
 	#endregion
 }

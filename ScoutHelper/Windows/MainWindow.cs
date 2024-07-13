@@ -24,6 +24,7 @@ public class MainWindow : Window, IDisposable {
 	private readonly HuntHelperManager _huntHelperManager;
 	private readonly BearManager _bearManager;
 	private readonly SirenManager _sirenManager;
+	private readonly TurtleManager _turtleManager;
 	private readonly ConfigWindow _configWindow;
 
 	private readonly Lazy<Vector2> _buttonSize;
@@ -38,6 +39,7 @@ public class MainWindow : Window, IDisposable {
 		HuntHelperManager huntHelperManager,
 		BearManager bearManager,
 		SirenManager sirenManager,
+		TurtleManager turtleManager,
 		ConfigWindow configWindow
 	) : base(
 		Strings.MainWindowTitle,
@@ -49,6 +51,7 @@ public class MainWindow : Window, IDisposable {
 		_huntHelperManager = huntHelperManager;
 		_bearManager = bearManager;
 		_sirenManager = sirenManager;
+		_turtleManager = turtleManager;
 		_configWindow = configWindow;
 
 		_isCopyModeFullText = _conf.IsCopyModeFullText;
@@ -134,6 +137,9 @@ public class MainWindow : Window, IDisposable {
 		if (ImGui.Button(Strings.SirenButton, _buttonSize.Value)) GenerateSirenLink();
 		if (ImGui.IsItemHovered()) CreateTooltip(Strings.SirenButtonTooltip);
 
+		if (ImGui.Button(Strings.TurtleButton, _buttonSize.Value)) GenerateTurtleLink();
+		if (ImGui.IsItemHovered()) CreateTooltip(Strings.TurtleButtonTooltip);
+
 		ImGui.BeginDisabled(true);
 		ImGui.Button(Strings.PrimeButton, _buttonSize.Value);
 		ImGui.EndDisabled();
@@ -191,6 +197,37 @@ public class MainWindow : Window, IDisposable {
 								_chat.TaggedPrint($"Bear train link: {bearTrainLink.Url}");
 								_chat.TaggedPrint($"Train admin password: {bearTrainLink.Password}");
 								CopyLink(trainList, "bear", bearTrainLink.HighestPatch, bearTrainLink.Url);
+							},
+							errorMessage => { _chat.TaggedPrintError(errorMessage); }
+						);
+				}
+			);
+	}
+	
+	private void GenerateTurtleLink() {
+		_chat.TaggedPrint("Generating Turtle link...");
+		IList<TrainMob> trainList = null!;
+
+		_huntHelperManager
+			.GetTrainList()
+			.Ensure(
+				train => 0 < train.Count,
+				"No mobs in the train :T"
+			)
+			.Bind(
+				train => {
+					trainList = train;
+					return _turtleManager.GenerateTurtleLink(train);
+				}
+			)
+			.ContinueWith(
+				apiResponseTask => {
+					apiResponseTask
+						.Result.Match(
+							turtleTrainLink => {
+								_chat.TaggedPrint($"Turtle train link: {turtleTrainLink.ReadonlyUrl}");
+								_chat.TaggedPrint($"Turtle collaborate link: {turtleTrainLink.CollabUrl}");
+								CopyLink(trainList, "turtle", turtleTrainLink.HighestPatch, turtleTrainLink.ReadonlyUrl);
 							},
 							errorMessage => { _chat.TaggedPrintError(errorMessage); }
 						);

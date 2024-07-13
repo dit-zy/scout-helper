@@ -16,11 +16,15 @@ public class Configuration : IPluginConfiguration {
 
 	public string BearApiBaseUrl { get; set; } = "https://tracker-api.beartoolkit.com/public/";
 	public string BearApiTrainPath { get; set; } = "hunttrain";
-	public TimeSpan BearApiTimeout { get; set; } = TimeSpan.FromSeconds(10);
+	public TimeSpan BearApiTimeout { get; set; } = TimeSpan.FromSeconds(5);
 	public string BearSiteTrainUrl { get; set; } = "https://tracker.beartoolkit.com/train";
 	public string BearTrainName { get; set; } = "Scout Helper Train";
 
 	public string SirenBaseUrl { get; set; } = "https://sirenhunts.com/scouting/";
+	
+	public string TurtleApiBaseUrl { get; set; } = "https://scout.wobbuffet.net";
+	public string TurtleApiTrainPath { get; set; } = "/api/v1/scout";
+	public TimeSpan TurtleApiTimeout { get; set; } = TimeSpan.FromSeconds(5);
 
 	public string CopyTemplate { get; set; } = Constants.DefaultCopyTemplate;
 	public bool IsCopyModeFullText { get; set; } = false;

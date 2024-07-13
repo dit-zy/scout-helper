@@ -34,10 +34,10 @@
 		<EmbeddedResource Include="Data\Bear.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</EmbeddedResource>
-	</ItemGroup>
-
-	<ItemGroup>
 	  <EmbeddedResource Include="Data\Siren.json">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Data\Turtle.json">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </EmbeddedResource>
 	</ItemGroup>

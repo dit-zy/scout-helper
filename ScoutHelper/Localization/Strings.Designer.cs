@@ -266,5 +266,23 @@ namespace ScoutHelper.Localization {
                 return ResourceManager.GetString("SirenButtonTooltip", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Turtle Scouter.
+        /// </summary>
+        internal static string TurtleButton {
+            get {
+                return ResourceManager.GetString("TurtleButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Generate a Turtle Scouter link from the Hunt Helper train recorder data..
+        /// </summary>
+        internal static string TurtleButtonTooltip {
+            get {
+                return ResourceManager.GetString("TurtleButtonTooltip", resourceCulture);
+            }
+        }
     }
 }

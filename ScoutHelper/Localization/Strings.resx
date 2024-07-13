@@ -36,6 +36,12 @@
 	<data name="SirenButtonTooltip" xml:space="preserve">
 		<value>Generate a Siren Hunts link from the Hunt Helper train recorder data.</value>
 	</data>
+	<data name="TurtleButton" xml:space="preserve">
+		<value>Turtle Scouter</value>
+	</data>
+	<data name="TurtleButtonTooltip" xml:space="preserve">
+		<value>Generate a Turtle Scouter link from the Hunt Helper train recorder data.</value>
+	</data>
 	<data name="CopyModeLinkButton" xml:space="preserve">
 		<value>link</value>
 	</data>

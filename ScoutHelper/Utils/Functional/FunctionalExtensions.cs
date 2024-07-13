@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
-using System.Numerics;
 using CSharpFunctionalExtensions;
-using ScoutHelper.Models;
 
 namespace ScoutHelper.Utils.Functional;
 
@@ -36,6 +32,12 @@ public static class FunctionalExtensions {
 		}
 		return Maybe.None;
 	}
+
+	public static Maybe<(T first, U second)> Join<T, U>(this Maybe<T> value, U secondValue) =>
+		value.Select(t => (t, secondValue));
+
+	public static Maybe<(T first, U second)> Join<T, U>(this Maybe<T> value, Maybe<U> secondValue) =>
+		value.SelectMany(t => secondValue.Select(u => (t, u)));
 
 	#endregion
 

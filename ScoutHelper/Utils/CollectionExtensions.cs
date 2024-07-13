@@ -85,10 +85,9 @@ public static class CollectionExtensions {
 				.AsPairs()
 				.Concat(updateEntries)
 				.ToDict();
-		
+
 		updateEntries.ForEach(entry => source[entry.key] = entry.value);
 		return source;
-
 	}
 
 	public static IDictionary<K, V> UseToUpdate<K, V>(
@@ -96,6 +95,22 @@ public static class CollectionExtensions {
 		IDictionary<K, V> target
 	) where K : notnull =>
 		target.Update(updateEntries);
+
+	public static IDictionary<T, IList<U>> AsMultiDict<T, U>(this IEnumerable<(T t, U u)> source) where T : notnull =>
+		source.Reduce(
+				(acc, next) => {
+					if (!acc.TryGetValue(next.t, out var values)) {
+						values = new List<U>();
+						acc.Add(next.t, values);
+					}
+					values.Add(next.u);
+					return acc;
+				},
+				new Dictionary<T, IList<U>>()
+			)
+			.AsPairs()
+			.Select(entry => (entry.key, entry.val.AsList()))
+			.ToDict();
 
 	#endregion
 
@@ -106,6 +121,28 @@ public static class CollectionExtensions {
 	public static bool IsNotEmpty<T>(this ICollection<T> source) => 0 < source.Count;
 
 	public static IList<T> AsSingletonList<T>(this T value) => new List<T>() { value }.AsList();
+
+	public static (IEnumerable<T> ts, IEnumerable<U> us, IEnumerable<V> vs) Unzip<T, U, V>(
+		this IEnumerable<(T t, U u, V v)> source
+	) =>
+		source.Unzip((ts, us, vs) => (ts, us, vs));
+
+	public static R Unzip<T, U, V, R>(
+		this IEnumerable<(T t, U u, V v)> source,
+		Func<IEnumerable<T>, IEnumerable<U>, IEnumerable<V>, R> transform
+	) {
+		var (ts, us, vs) = source
+			.Reduce(
+				(acc, element) => {
+					acc.ts.Add(element.t);
+					acc.us.Add(element.u);
+					acc.vs.Add(element.v);
+					return acc;
+				},
+				(ts: new List<T>(), us: new List<U>(), vs: new List<V>())
+			);
+		return transform.Invoke(ts, us, vs);
+	}
 
 	public static (IEnumerable<T> ts, IEnumerable<U> us) Unzip<T, U>(this IEnumerable<(T t, U u)> source) =>
 		source.Unzip((ts, us) => (ts, us));
@@ -138,6 +175,19 @@ public static class CollectionExtensions {
 			.ToDict()
 			.AsPairs()
 			.AsList();
+
+	#endregion
+
+	#region tuples
+
+	public static (T1, T2, U) Flatten<T1, T2, U>(this ((T1 t1, T2 t2) t, U u) source) =>
+		(source.t.t1, source.t.t2, source.u);
+
+	public static (T1, T2, T3, U) Flatten<T1, T2, T3, U>(this ((T1 t1, T2 t2, T3 t3) t, U u) source) =>
+		(source.t.t1, source.t.t2, source.t.t3, source.u);
+
+	public static (T1, T2, T3, T4, U) Flatten<T1, T2, T3, T4, U>(this ((T1 t1, T2 t2, T3 t3, T4 t4) t, U u) source) =>
+		(source.t.t1, source.t.t2, source.t.t3, source.t.t4, source.u);
 
 	#endregion
 }
