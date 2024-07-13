@@ -7,6 +7,7 @@ using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
+using OtterGui.Widgets;
 using ScoutHelper.Config;
 using ScoutHelper.Localization;
 using ScoutHelper.Managers;
@@ -65,9 +66,9 @@ public class MainWindow : Window, IDisposable {
 		_buttonSize = new Lazy<Vector2>(
 			() => {
 				var buttonSize = new[] {
-						new[] { Strings.BearButton },
-						new[] { Strings.SirenButton },
-						new[] { Strings.PrimeButton },
+						[Strings.BearButton],
+						[Strings.SirenButton],
+						[Strings.TurtleButton, Strings.TurtleCollabButton],
 						new[] { Strings.CopyModeLinkButton, Strings.CopyModeFullTextButton, },
 					}
 					.Select(
@@ -137,13 +138,27 @@ public class MainWindow : Window, IDisposable {
 		if (ImGui.Button(Strings.SirenButton, _buttonSize.Value)) GenerateSirenLink();
 		if (ImGui.IsItemHovered()) CreateTooltip(Strings.SirenButtonTooltip);
 
-		if (ImGui.Button(Strings.TurtleButton, _buttonSize.Value)) GenerateTurtleLink();
+		var turtCollabButtonSize = _buttonSize.Value with { X = ImGuiHelpers.GetButtonSize(Strings.TurtleCollabButton).X };
+		var turtButtonSize = (_buttonSize.Value - turtCollabButtonSize) with { Y = _buttonSize.Value.Y };
+		var turtlePressed = ToggleButton.ButtonEx(
+			Strings.TurtleButton,
+			turtButtonSize,
+			ImGuiButtonFlags.MouseButtonDefault,
+			ImDrawFlags.RoundCornersLeft
+		);
+		if (turtlePressed) GenerateTurtleLink();
 		if (ImGui.IsItemHovered()) CreateTooltip(Strings.TurtleButtonTooltip);
 
+		ImGui.SameLine(); ImGui.SetCursorPosX(ImGui.GetCursorPosX() - ImGui.GetStyle().ItemSpacing.X);
 		ImGui.BeginDisabled(true);
-		ImGui.Button(Strings.PrimeButton, _buttonSize.Value);
+		ToggleButton.ButtonEx(
+			Strings.TurtleCollabButton,
+			turtCollabButtonSize,
+			ImGuiButtonFlags.MouseButtonDefault,
+			ImDrawFlags.RoundCornersRight
+		);
 		ImGui.EndDisabled();
-		if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) CreateTooltip(Strings.PrimeButtonTooltip);
+		if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) CreateTooltip(Strings.TurtleCollabButtonTooltip);
 	}
 
 	private void GenerateSirenLink() {
@@ -203,7 +218,7 @@ public class MainWindow : Window, IDisposable {
 				}
 			);
 	}
-	
+
 	private void GenerateTurtleLink() {
 		_chat.TaggedPrint("Generating Turtle link...");
 		IList<TrainMob> trainList = null!;

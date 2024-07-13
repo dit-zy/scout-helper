@@ -28,19 +28,19 @@
 		<value>SCOUT HELPER SETTINGS</value>
 	</data>
 	<data name="BearButtonTooltip" xml:space="preserve">
-		<value>Generate a Bear Toolkit link from the Hunt Helper train recorder.</value>
+		<value>generate a Bear Toolkit link from the Hunt Helper train recorder.</value>
 	</data>
 	<data name="SirenButton" xml:space="preserve">
 		<value>Siren Hunts</value>
 	</data>
 	<data name="SirenButtonTooltip" xml:space="preserve">
-		<value>Generate a Siren Hunts link from the Hunt Helper train recorder data.</value>
+		<value>generate a Siren Hunts link from the Hunt Helper train recorder data.</value>
 	</data>
 	<data name="TurtleButton" xml:space="preserve">
 		<value>Turtle Scouter</value>
 	</data>
 	<data name="TurtleButtonTooltip" xml:space="preserve">
-		<value>Generate a Turtle Scouter link from the Hunt Helper train recorder data.</value>
+		<value>generate a Turtle Scouter link from the Hunt Helper train recorder data.</value>
 	</data>
 	<data name="CopyModeLinkButton" xml:space="preserve">
 		<value>link</value>
@@ -58,7 +58,7 @@
 		<value>FULL-TEXT TEMPLATE</value>
 	</data>
 	<data name="CopyModeTooltipSummary" xml:space="preserve">
-		<value>The copy mode that tracker generators will use when generating tracker links.</value>
+		<value>the copy mode that tracker generators will use when generating tracker links.</value>
 	</data>
 	<data name="CopyModeTooltipLinkDesc" xml:space="preserve">
 		<value>only copies the generated tracker link to your clipboard</value>
@@ -94,12 +94,12 @@
 		<value>RESET</value>
 	</data>
 	<data name="ConfigWindowTemplateResetTooltip" xml:space="preserve">
-		<value>Sets the full-text template back to the default value</value>
+		<value>sets the full-text template back to the default value</value>
 	</data>
-	<data name="PrimeButton" xml:space="preserve">
-		<value>Prime Hunt Tools</value>
+	<data name="TurtleCollabButton" xml:space="preserve">
+		<value> COLLAB </value>
 	</data>
-	<data name="PrimeButtonTooltip" xml:space="preserve">
-		<value>Not currently available, but coming soon! (for real this time XD;;)</value>
+	<data name="TurtleCollabButtonTooltip" xml:space="preserve">
+		<value>collaborative scouting through turtle is not yet supported by scout helper, but is being explored :D.</value>
 	</data>
 </root>

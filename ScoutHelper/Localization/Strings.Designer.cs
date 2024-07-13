@@ -69,7 +69,7 @@ namespace ScoutHelper.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Generate a Bear Toolkit link from the Hunt Helper train recorder..
+        ///   Looks up a localized string similar to generate a Bear Toolkit link from the Hunt Helper train recorder..
         /// </summary>
         internal static string BearButtonTooltip {
             get {
@@ -123,7 +123,7 @@ namespace ScoutHelper.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Sets the full-text template back to the default value.
+        ///   Looks up a localized string similar to sets the full-text template back to the default value.
         /// </summary>
         internal static string ConfigWindowTemplateResetTooltip {
             get {
@@ -196,7 +196,7 @@ namespace ScoutHelper.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The copy mode that tracker generators will use when generating tracker links..
+        ///   Looks up a localized string similar to the copy mode that tracker generators will use when generating tracker links..
         /// </summary>
         internal static string CopyModeTooltipSummary {
             get {
@@ -232,24 +232,6 @@ namespace ScoutHelper.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Prime Hunt Tools.
-        /// </summary>
-        internal static string PrimeButton {
-            get {
-                return ResourceManager.GetString("PrimeButton", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Not currently available, but coming soon! (for real this time XD;;).
-        /// </summary>
-        internal static string PrimeButtonTooltip {
-            get {
-                return ResourceManager.GetString("PrimeButtonTooltip", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Siren Hunts.
         /// </summary>
         internal static string SirenButton {
@@ -259,7 +241,7 @@ namespace ScoutHelper.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Generate a Siren Hunts link from the Hunt Helper train recorder data..
+        ///   Looks up a localized string similar to generate a Siren Hunts link from the Hunt Helper train recorder data..
         /// </summary>
         internal static string SirenButtonTooltip {
             get {
@@ -277,11 +259,29 @@ namespace ScoutHelper.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Generate a Turtle Scouter link from the Hunt Helper train recorder data..
+        ///   Looks up a localized string similar to generate a Turtle Scouter link from the Hunt Helper train recorder data..
         /// </summary>
         internal static string TurtleButtonTooltip {
             get {
                 return ResourceManager.GetString("TurtleButtonTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to  COLLAB .
+        /// </summary>
+        internal static string TurtleCollabButton {
+            get {
+                return ResourceManager.GetString("TurtleCollabButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to collaborative scouting through turtle is not yet supported by scout helper, but is being explored :D..
+        /// </summary>
+        internal static string TurtleCollabButtonTooltip {
+            get {
+                return ResourceManager.GetString("TurtleCollabButtonTooltip", resourceCulture);
             }
         }
     }
