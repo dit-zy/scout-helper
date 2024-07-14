@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Numerics;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -121,7 +122,7 @@ public static partial class Utils {
 
 	public static SeString ToSeString(this string str) => new(str);
 
-	public static float AsFloat(this string str) => float.Parse(str);
+	public static float AsFloat(this string str) => float.Parse(str, CultureInfo.InvariantCulture);
 
 	#endregion
 }
