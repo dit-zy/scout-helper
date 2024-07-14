@@ -40,7 +40,10 @@
 		<value>Turtle Scouter</value>
 	</data>
 	<data name="TurtleButtonTooltip" xml:space="preserve">
-		<value>generate a Turtle Scouter link from the Hunt Helper train recorder data.</value>
+		<value>generate a turtle scouter link from the hunt helper train recorder data.</value>
+	</data>
+	<data name="TurtleButtonActiveCollabTooltip" xml:space="preserve">
+		<value>update the turtle collab session with the latest scouted marks in your hunt helper train recorder.</value>
 	</data>
 	<data name="CopyModeLinkButton" xml:space="preserve">
 		<value>link</value>
@@ -109,7 +112,10 @@
 		<value> COLLAB </value>
 	</data>
 	<data name="TurtleCollabButtonTooltip" xml:space="preserve">
-		<value>collaborative scouting through turtle is not yet supported by scout helper, but is being explored :D.</value>
+		<value>start or join a collaborative scouting session on turtle.</value>
+	</data>
+	<data name="TurtleCollabButtonActiveTooltip" xml:space="preserve">
+		<value>click to leave the current session.</value>
 	</data>
 	<data name="ConfigWindowTweaksSectionLabelInstances" xml:space="preserve">
 		<value>INSTANCES</value>

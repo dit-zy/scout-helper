@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Numerics;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using Dalamud.Plugin.Services;
@@ -12,22 +14,29 @@ using ScoutHelper.Config;
 using ScoutHelper.Models;
 using ScoutHelper.Models.Http;
 using ScoutHelper.Models.Json;
+using ScoutHelper.Utils;
 using ScoutHelper.Utils.Functional;
+using static ScoutHelper.Managers.TurtleHttpStatus;
 using static ScoutHelper.Utils.Utils;
 
 namespace ScoutHelper.Managers;
 
-using PatchDict = IDictionary<Patch, uint>;
 using MobDict = IDictionary<uint, (Patch patch, uint turtleMobId)>;
 using TerritoryDict = IDictionary<uint, TurtleMapData>;
 
-public class TurtleManager {
+public partial class TurtleManager {
+	[GeneratedRegex(@"(?:/scout)?/?(?<session>\w+)/(?<password>\w+)/?\s*$")]
+	private static partial Regex CollabLinkRegex();
+
 	private readonly IPluginLog _log;
 	private readonly Configuration _conf;
 	private static HttpClient HttpClient { get; } = new();
 
 	private MobDict MobIdToTurtleId { get; }
 	private TerritoryDict TerritoryIdToTurtleData { get; }
+
+	private string _currentCollabSession = "";
+	private string _currentCollabPassword = "";
 
 	public TurtleManager(
 		IPluginLog log,
@@ -47,56 +56,98 @@ public class TurtleManager {
 			= LoadData(options.TurtleDataFile, territoryManager, mobManager);
 	}
 
+	public Maybe<(string slug, string password)> JoinCollabSession(string sessionLink) {
+		var match = CollabLinkRegex().Match(sessionLink);
+		if (!match.Success) return Maybe.None;
+
+		_currentCollabSession = match.Groups["session"].Value;
+		_currentCollabPassword = match.Groups["password"].Value;
+		return (_currentCollabSession, _currentCollabPassword);
+	}
+
+	public async Task<TurtleHttpStatus> UpdateCurrentSession(IList<TrainMob> train) {
+		var turtleSupportedMobs = train.Where(mob => MobIdToTurtleId.ContainsKey(mob.MobId)).AsList();
+		if (turtleSupportedMobs.IsEmpty())
+			return NoSupportedMobs;
+
+		var httpResult = await
+			HttpUtils.DoRequest(
+				_log,
+				new TurtleTrainUpdateRequest(
+					_currentCollabPassword,
+					turtleSupportedMobs.Select(
+						mob =>
+							(TerritoryIdToTurtleData[mob.TerritoryId].TurtleId,
+								mob.Instance.AsTurtleInstance(),
+								MobIdToTurtleId[mob.MobId].turtleMobId,
+								mob.Position)
+					)
+				),
+				requestContent => HttpClient.PutAsync($"{_conf.TurtleApiTrainPath}/{_currentCollabSession}", requestContent)
+			).TapError(
+				error => {
+					if (error.ErrorType == HttpErrorType.Timeout) {
+						_log.Warning("timed out while trying to post updates to turtle session.");
+					} else if (error.ErrorType == HttpErrorType.Canceled) {
+						_log.Warning("operation canceled while trying to post updates to turtle session.");
+					} else if (error.ErrorType == HttpErrorType.HttpException) {
+						_log.Error(error.Exception, "http exception while trying to post updates to turtle session.");
+					} else {
+						_log.Error(error.Exception, "unknown exception while trying to post updates to turtle session.");
+					}
+				}
+			);
+
+		return httpResult.IsSuccess ? Success : TurtleHttpStatus.HttpError;
+	}
+
 	public async Task<Result<TurtleLinkData, string>> GenerateTurtleLink(
-		IList<TrainMob> trainMobs
+		IList<TrainMob> trainMobs,
+		bool allowEmpty = false
 	) {
 		var turtleSupportedMobs = trainMobs.Where(mob => MobIdToTurtleId.ContainsKey(mob.MobId)).AsList();
-		if (turtleSupportedMobs.IsEmpty())
+		if (!allowEmpty && turtleSupportedMobs.IsEmpty())
 			return "No mobs supported by Turtle Scouter were found in the Hunt Helper train recorder ;-;";
 
 		var spawnPoints = turtleSupportedMobs.SelectMaybe(GetRequestInfoForMob).ToList();
-		var highestPatch = turtleSupportedMobs
-			.Select(mob => MobIdToTurtleId[mob.MobId].patch)
-			.Max();
+		var highestPatch = allowEmpty
+			? Patch.DT
+			: turtleSupportedMobs
+				.Select(mob => MobIdToTurtleId[mob.MobId].patch)
+				.Max();
 
-		var requestPayload = JsonConvert.SerializeObject(TurtleTrainRequest.CreateRequest(spawnPoints));
-		_log.Debug("Request payload: {0}", requestPayload);
-		var requestContent = new StringContent(requestPayload, Encoding.UTF8, Constants.MediaTypeJson);
+		var trainResult = await HttpUtils.DoRequest<TurtleTrainRequest, TurtleTrainResponse>(
+			_log,
+			TurtleTrainRequest.CreateRequest(spawnPoints),
+			requestContent => HttpClient.PostAsync(_conf.TurtleApiTrainPath, requestContent)
+		);
 
-		try {
-			var response = await HttpClient.PostAsync(_conf.TurtleApiTrainPath, requestContent);
-			_log.Debug(
-				"Request: {0}\n\nResponse: {1}",
-				response.RequestMessage!.ToString(),
-				response.ToString()
+		return trainResult
+			.Map(trainInfo => TurtleLinkData.From(trainInfo, highestPatch))
+			.MapError<TurtleLinkData, HttpError, string>(
+				error => {
+					string message;
+					switch (error.ErrorType) {
+						case HttpErrorType.Timeout: {
+							message = "Timed out posting the train to Turtle ;-;";
+							_log.Error(message);
+							return message;
+						}
+						case HttpErrorType.Canceled: {
+							message = "Generating the Turtle link was canceled >_>";
+							_log.Warning(message);
+							return message;
+						}
+						case HttpErrorType.HttpException:
+							_log.Error(error.Exception, "Posting the train to Turtle failed.");
+							return "Something failed when communicating with Turtle :T";
+						default:
+							message = "An unknown error happened while generating the Turtle link D:";
+							_log.Error(error.Exception, message);
+							return message;
+					}
+				}
 			);
-
-			response.EnsureSuccessStatusCode();
-
-			var responseJson = await response.Content.ReadAsStringAsync();
-			var trainInfo = JsonConvert.DeserializeObject<TurtleTrainResponse>(responseJson)!;
-
-			return new TurtleLinkData(
-				trainInfo.ReadonlyUrl,
-				trainInfo.CollaborateUrl,
-				highestPatch
-			);
-		} catch (TimeoutException) {
-			const string message = "Timed out posting the train to Turtle ;-;";
-			_log.Error(message);
-			return message;
-		} catch (OperationCanceledException e) {
-			const string message = "Generating the Turtle link was canceled >_>";
-			_log.Warning(e, message);
-			return message;
-		} catch (HttpRequestException e) {
-			_log.Error(e, "Posting the train to Turtle failed.");
-			return "Something failed when communicating with Turtle :T";
-		} catch (Exception e) {
-			const string message = "An unknown error happened while generating the Turtle link D:";
-			_log.Error(e, message);
-			return message;
-		}
 	}
 
 	private Maybe<(uint mapId, uint instance, uint pointId, uint mobId)> GetRequestInfoForMob(TrainMob mob) =>
@@ -202,11 +253,28 @@ public class TurtleManager {
 	}
 }
 
+public enum TurtleHttpStatus {
+	Success,
+	NoSupportedMobs,
+	HttpError,
+}
+
 public record struct TurtleLinkData(
+	string Slug,
+	string CollabPassword,
 	string ReadonlyUrl,
 	string CollabUrl,
 	Patch HighestPatch
-);
+) {
+	public static TurtleLinkData From(TurtleTrainResponse response, Patch highestPatch) =>
+		new(
+			response.Slug,
+			response.CollaboratorPassword,
+			response.ReadonlyUrl,
+			response.CollaborateUrl,
+			highestPatch
+		);
+}
 
 public static class TurtleExtensions {
 	public static uint AsTurtleInstance(this uint? instance) {

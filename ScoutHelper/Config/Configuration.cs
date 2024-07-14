@@ -22,6 +22,8 @@ public class Configuration : IPluginConfiguration {
 
 	public string SirenBaseUrl { get; set; } = "https://sirenhunts.com/scouting/";
 	
+	public string TurtleBaseUrl { get; set; } = "https://scout.wobbuffet.net";
+	public string TurtleTrainPath { get; set; } = "/scout";
 	public string TurtleApiBaseUrl { get; set; } = "https://scout.wobbuffet.net";
 	public string TurtleApiTrainPath { get; set; } = "/api/v1/scout";
 	public TimeSpan TurtleApiTimeout { get; set; } = TimeSpan.FromSeconds(5);

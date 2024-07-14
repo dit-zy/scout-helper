@@ -52,8 +52,8 @@ public static class ImGuiPlus {
 	}
 
 	public class StyleWrapper {
-		private readonly IList<Action> _styleSetups = new List<Action>();
-		private readonly IList<Action> _styleTeardowns = new List<Action>();
+		private readonly List<Action> _styleSetups = new();
+		private readonly List<Action> _styleTeardowns = new();
 
 		public void Do(Action drawAction) =>
 			Do(drawAction.AsFunc());
@@ -71,6 +71,7 @@ public static class ImGuiPlus {
 			} finally {
 				_styleTeardowns
 					.Take(setupsApplied)
+					.Reverse()
 					.ForEach(teardown => teardown());
 			}
 		}
