@@ -21,15 +21,16 @@ public static class Constants {
 	public const string SirenDataFile = @"Data\Siren.json";
 	public const string TurtleDataFile = @"Data\Turtle.json";
 
-	public static readonly DateTime LatestPatchUpdate = DateTime.Parse("2024-07-03T00:00:00Z");
+	public static readonly DateTime LatestPatchUpdate = DateTime.Parse("2024-07-18T00:00:00Z");
+
 	public static readonly (Territory, uint)[] LatestPatchInstances = {
-    (Territory.Urqopacha, 6),
-    (Territory.Kozamauka, 6),
-    (Territory.YakTel, 3),
-    (Territory.Shaaloani, 3),
-    (Territory.HeritageFound, 3),
-    (Territory.LivingMemory, 3)
-    };
+		(Territory.Urqopacha, 3),
+		(Territory.Kozamauka, 3),
+		(Territory.YakTel, 3),
+		(Territory.Shaaloani, 3),
+		(Territory.HeritageFound, 3),
+		(Territory.LivingMemory, 3)
+	};
 
 	#endregion
 
