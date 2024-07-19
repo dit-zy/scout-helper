@@ -21,6 +21,16 @@ public static partial class Utils {
 
 	public static Vector2 V2(float x, float y) => new(x, y);
 
+	public static Vector4 V4(float x, float y, float z, float w) => new(x, y, z, w);
+
+	public static Vector4 Color(uint r, uint g, uint b) => Color(r, g, b, 256);
+	
+	public static Vector4 Color(uint r, uint g, uint b, uint a) => Color((float)r, g, b, a) / 256;
+
+	public static Vector4 Color(float r, float g, float b) => Color(r, g, b, 1f);
+	
+	public static Vector4 Color(float r, float g, float b, float a) => V4(r, g, b, a);
+
 	public static T[] GetEnumValues<T>() where T : struct, Enum =>
 		Enum.GetValuesAsUnderlyingType<T>() as T[] ?? Array.Empty<T>();
 

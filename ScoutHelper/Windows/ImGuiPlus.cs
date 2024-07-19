@@ -7,10 +7,13 @@ using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using OtterGui.Widgets;
+using ScoutHelper.Utils.Functional;
 
 namespace ScoutHelper.Windows;
 
 public static class ImGuiPlus {
+	#region wrappers
+
 	private static readonly Stack<Vector2> CursorPosStack = new(4);
 
 	public static Vector2 WithCursorPos(Action<Vector2> action) =>
@@ -48,7 +51,131 @@ public static class ImGuiPlus {
 		return finalCursorPos;
 	}
 
+	public class StyleWrapper {
+		private readonly IList<Action> _styleSetups = new List<Action>();
+		private readonly IList<Action> _styleTeardowns = new List<Action>();
+
+		public void Do(Action drawAction) =>
+			Do(drawAction.AsFunc());
+
+		public T Do<T>(Func<T> drawAction) {
+			var setupsApplied = 0;
+			try {
+				_styleSetups.ForEach(
+					setup => {
+						setup();
+						setupsApplied += 1;
+					}
+				);
+				return drawAction();
+			} finally {
+				_styleTeardowns
+					.Take(setupsApplied)
+					.ForEach(teardown => teardown());
+			}
+		}
+
+		public StyleWrapper WithStyle(ImGuiCol style, Vector4 value) =>
+			WithStyle((style, value));
+
+		public StyleWrapper WithStyle(params (ImGuiCol, Vector4)[] styles) =>
+			WithStyle((IEnumerable<(ImGuiCol, Vector4)>)styles);
+
+		public StyleWrapper WithStyle(IEnumerable<(ImGuiCol, Vector4)> styles) {
+			var styleCount = 0;
+			_styleSetups.Add(
+				() =>
+					styles.ForEach(
+						style => {
+							ImGui.PushStyleColor(style.Item1, style.Item2);
+							styleCount += 1;
+						}
+					)
+			);
+			_styleTeardowns.Add(() => ImGui.PopStyleColor(styleCount));
+			return this;
+		}
+
+		public StyleWrapper WithStyle(ImGuiStyleVar style, Vector2 value) =>
+			WithStyle((style, value));
+
+		public StyleWrapper WithStyle(params (ImGuiStyleVar, Vector2)[] styles) =>
+			WithStyle((IEnumerable<(ImGuiStyleVar, Vector2)>)styles);
+
+		public StyleWrapper WithStyle(IEnumerable<(ImGuiStyleVar, Vector2)> styles) {
+			var styleCount = 0;
+			_styleSetups.Add(
+				() =>
+					styles.ForEach(
+						style => {
+							ImGui.PushStyleVar(style.Item1, style.Item2);
+							styleCount += 1;
+						}
+					)
+			);
+			_styleTeardowns.Add(() => ImGui.PopStyleVar(styleCount));
+			return this;
+		}
+
+		public StyleWrapper WithStyle(ImGuiStyleVar style, float value) =>
+			WithStyle((style, value));
+
+		public StyleWrapper WithStyle(params (ImGuiStyleVar, float)[] styles) =>
+			WithStyle((IEnumerable<(ImGuiStyleVar, float)>)styles);
+
+		public StyleWrapper WithStyle(IEnumerable<(ImGuiStyleVar, float)> styles) {
+			var styleCount = 0;
+			_styleSetups.Add(
+				() =>
+					styles.ForEach(
+						style => {
+							ImGui.PushStyleVar(style.Item1, style.Item2);
+							styleCount += 1;
+						}
+					)
+			);
+			_styleTeardowns.Add(() => ImGui.PopStyleVar(styleCount));
+			return this;
+		}
+	}
+
+	public static StyleWrapper WithStyle(ImGuiCol style, Vector4 value) =>
+		new StyleWrapper().WithStyle((style, value));
+
+	public static StyleWrapper WithStyle(params (ImGuiCol, Vector4)[] styles) =>
+		new StyleWrapper().WithStyle(styles);
+
+	public static StyleWrapper WithStyle(IEnumerable<(ImGuiCol, Vector4)> styles) =>
+		new StyleWrapper().WithStyle(styles);
+
+	public static StyleWrapper WithStyle(ImGuiStyleVar style, Vector2 value) =>
+		new StyleWrapper().WithStyle((style, value));
+
+	public static StyleWrapper WithStyle(params (ImGuiStyleVar, Vector2)[] styles) =>
+		new StyleWrapper().WithStyle(styles);
+
+	public static StyleWrapper WithStyle(IEnumerable<(ImGuiStyleVar, Vector2)> styles) =>
+		new StyleWrapper().WithStyle(styles);
+
+	public static StyleWrapper WithStyle(ImGuiStyleVar style, float value) =>
+		new StyleWrapper().WithStyle((style, value));
+
+	public static StyleWrapper WithStyle(params (ImGuiStyleVar, float)[] styles) =>
+		new StyleWrapper().WithStyle(styles);
+
+	public static StyleWrapper WithStyle(IEnumerable<(ImGuiStyleVar, float)> styles) =>
+		new StyleWrapper().WithStyle(styles);
+
+	#endregion
+
 	public static float ScaledFontSize() => 4 * MathF.Pow(ImGui.GetFontSize(), 0.6f);
+
+	public static void Separator() {
+		var dummySize = new Vector2(0, ImGui.GetStyle().FramePadding.Y);
+		ImGui.Dummy(dummySize);
+		ImGui.Separator();
+		ImGui.Dummy(dummySize);
+	}
 
 	public static void Heading(string text, float scale = 1.25f, bool centered = false) {
 		var font = ImGui.GetFont();

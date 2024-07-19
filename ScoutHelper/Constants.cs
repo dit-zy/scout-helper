@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using System.Net.Http.Headers;
 using System.Reflection;
 using ScoutHelper.Models;
@@ -12,6 +13,15 @@ public static class Constants {
 	public static readonly string PluginVersion;
 	public static readonly string PluginNamespace = PluginName.Replace(" ", "");
 
+	public static readonly DateTime LatestPluginUpdate = DateTime.Parse("2024-07-01T00:00:00Z");
+
+	public static readonly IList<string> PluginUpdates = new string[] {
+		"updated to run on 7.0 Dawntrail.",
+		"added support for 7.0 hunt marks.",
+		"added an update notice popup (you're looking at it :P).",
+		"added a notice mechanism on the main ui, to alert users to persistent important issues.",
+	}.AsList();
+
 	#endregion
 
 	#region core constants
@@ -20,6 +30,17 @@ public static class Constants {
 	public const string BearDataFile = @"Data\Bear.json";
 	public const string SirenDataFile = @"Data\Siren.json";
 	public const string TurtleDataFile = @"Data\Turtle.json";
+	
+	#endregion
+
+	#region patch update constants
+
+	public static readonly DateTime LatestNoticeUpdate = DateTime.Parse("2024-07-05T00:00:00Z");
+
+	public static readonly IList<string> Notices = new string[] {
+		// "Something important we don't want the user forgetting.",
+		// "Something importanter we extra don't want the user forgetting for even longer.",
+	}.AsList();
 
 	public static readonly DateTime LatestPatchUpdate = DateTime.Parse("2024-07-18T00:00:00Z");
 
