@@ -105,9 +105,6 @@
 	<data name="ConfigWindowTweaksSectionLabelInstances" xml:space="preserve">
 		<value>INSTANCES</value>
 	</data>
-	<data name="ConfigWindowTweaksInstanceResetTooltip" xml:space="preserve">
-		<value>reset the configured instances to the current patch values.</value>
-	</data>
 	<data name="ConfigWindowTweaksInstanceDescription" xml:space="preserve">
 		<value>configure how many instances there are for each map. this allows users to set the number of instances to the correct values after a new patch change and before scout helper updates with the new values.</value>
 	</data>
