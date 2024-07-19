@@ -1,10 +1,8 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using CSharpFunctionalExtensions;
 using Dalamud.Plugin.Services;
 using ScoutHelper.Config;
 using ScoutHelper.Models;
-using ScoutHelper.Utils;
 using ScoutHelper.Utils.Functional;
 using static ScoutHelper.Utils.Utils;
 
@@ -25,8 +23,7 @@ public class InitializationManager {
 	public InitializationManager(
 		IPluginLog log,
 		Configuration conf,
-		TerritoryManager territoryManager,
-		MobManager mobManager
+		TerritoryManager territoryManager
 	) {
 		_log = log;
 		_conf = conf;
@@ -35,27 +32,20 @@ public class InitializationManager {
 
 	public void InitializeNecessaryComponents() {
 		InitializeInstanceMap();
+		InitializeTerritoryInstances();
 	}
 
 	private void InitializeInstanceMap() {
 		var patchUpdateNotYetApplied = _conf.LastInstancePatchUpdate < Constants.LatestPatchUpdate;
-		GetEnumValues<Patch>()
-			.ForEach(
-				patch => patch
-					.HuntMaps()
-					.SelectResults(
-						territory => _territoryManager
-							.GetTerritoryId(territory.Name())
-							.Map(territoryId => (territory, territoryId))
-					)
-					.ForEachError(error => _log.Debug(error))
-					.Value
-					.Where(map => patchUpdateNotYetApplied || !_conf.Instances.ContainsKey(map.territoryId))
-					.Select(map => (map.territoryId, map.territory.Instances()))
-					.UseToUpdate(_conf.Instances)
-			);
 
-		_conf.LastInstancePatchUpdate = Constants.LatestPatchUpdate;
+		_territoryManager.GetDefaultInstancesForIds()
+			.Where(map => patchUpdateNotYetApplied || !_conf.Instances.ContainsKey(map.territoryId))
+			.UseToUpdate(_conf.Instances);
+
+		if (patchUpdateNotYetApplied) _conf.LastInstancePatchUpdate = Constants.LatestPatchUpdate;
 		_conf.Save();
 	}
+
+	private void InitializeTerritoryInstances() =>
+		TerritoryExtensions.SetTerritoryInstances(_conf, _territoryManager.GetTerritoryIds());
 }

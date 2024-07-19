@@ -109,31 +109,30 @@ public class ConfigWindow : Window, IDisposable {
 	}
 
 	private void DrawTweaksTab() {
-		ImGuiPlus.Heading("INSTANCES");
+		ImGuiPlus.Heading(Strings.ConfigWindowTweaksSectionLabelInstances);
 		DrawParagraphSpacing();
 
-		ImGui.Text("Configure how many instances there are for each map:");
-
-		if (ImGui.Button("RESET")) {
-			GetEnumValues<Patch>()
-				.ForEach(
-					patch => patch
-						.HuntMaps()
-						.SelectResults(
-							territory => _territoryManager
-								.GetTerritoryId(territory.Name())
-								.Map(territoryId => (territoryId, territory.Instances()))
-						)
-						.ForEachError(error => _log.Debug(error))
-						.Value
-						.UseToUpdate(_conf.Instances)
-				);
+		ImGui.TextWrapped(Strings.ConfigWindowTweaksInstanceDescription);
+		DrawParagraphSpacing();
+		ImGui.TextWrapped(Strings.ConfigWindowTweaksInstanceDescriptionNote);
+		DrawParagraphSpacing();
+		
+		if (ImGui.Button(Strings.ConfigWindowTweaksInstanceResetButton)) {
+			GetEnumValues<Territory>()
+				.SelectResults(
+					territory => _territoryManager
+						.GetTerritoryId(territory.Name())
+						.Map(territoryId => (territoryId, territory.DefaultInstances()))
+				)
+				.ForEachError(error => _log.Debug(error))
+				.Value
+				.UseToUpdate(_conf.Instances);
 		}
 		if (ImGui.IsItemHovered()) {
-			ImGui.SetTooltip("Resets the configured instances to the current patch values.");
+			CreateTooltip(Strings.ConfigWindowTweaksInstanceResetTooltip);
 		}
 
-		var textSize = ImGui.CalcTextSize("8 (current patch: 8)");
+		var textSize = ImGui.CalcTextSize("8 ");
 		var buttonsSize = ImGuiHelpers.GetButtonSize(" +  ");
 		var spacing = ImGui.GetStyle().ItemSpacing;
 		var inputSize = (textSize + 2 * (buttonsSize + spacing)).X;
@@ -166,7 +165,7 @@ public class ConfigWindow : Window, IDisposable {
 							_conf.Instances.GetValuePointer(mapId),
 							stepSizePointer,
 							IntPtr.Zero,
-							$"%d (current patch: {_conf.Instances[mapId]})"
+							"%d"
 						)
 					)
 			);
@@ -187,7 +186,7 @@ public class ConfigWindow : Window, IDisposable {
 			UpdateConfig();
 		}
 		if (ImGui.IsItemHovered()) {
-			ImGui.SetTooltip($"{Strings.ConfigWindowTemplateResetTooltip}:\n    {Constants.DefaultCopyTemplate}");
+			CreateTooltip($"{Strings.ConfigWindowTemplateResetTooltip}:\n    {Constants.DefaultCopyTemplate}");
 		}
 	}
 

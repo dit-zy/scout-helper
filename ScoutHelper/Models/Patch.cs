@@ -44,17 +44,6 @@ public static class PatchExtensions {
 		.ToDict()
 		.VerifyEnumDictionary();
 
-	private static readonly IDictionary<Patch, uint> PatchMaxMarks = PatchHuntMaps
-		.Select(
-			patchMaps => (
-				patchMaps.Key,
-				(uint)patchMaps.Value.Sum(territory => 2 * territory.Instances())
-			)
-		)
-		.Append((Patch.ARR, 17U))
-		.ToDict()
-		.VerifyEnumDictionary();
-
 	private static readonly IDictionary<Patch, string> PatchEmotes = new Dictionary<Patch, string> {
 		{ Patch.ARR, ":2x:" },
 		{ Patch.HW, ":3x:" },
@@ -66,7 +55,10 @@ public static class PatchExtensions {
 
 	public static IList<Territory> HuntMaps(this Patch patch) => PatchHuntMaps[patch];
 
-	public static uint MaxMarks(this Patch patch) => PatchMaxMarks[patch];
+	public static uint MaxMarks(this Patch patch) {
+		if (patch == Patch.ARR) return 17;
+		return (uint)patch.HuntMaps().Sum(territory => 2 * territory.Instances());
+	}
 
 	public static string Emote(this Patch patch) => PatchEmotes[patch];
 }

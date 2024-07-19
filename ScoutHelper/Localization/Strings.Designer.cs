@@ -160,6 +160,51 @@ namespace ScoutHelper.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to configure how many instances there are for each map. this allows users to set the number of instances to the correct values after a new patch change and before scout helper updates with the new values..
+        /// </summary>
+        internal static string ConfigWindowTweaksInstanceDescription {
+            get {
+                return ResourceManager.GetString("ConfigWindowTweaksInstanceDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to NOTE: once scout helper deploys a new update with the latest patch instance values, any customizations you made here will be reset automatically..
+        /// </summary>
+        internal static string ConfigWindowTweaksInstanceDescriptionNote {
+            get {
+                return ResourceManager.GetString("ConfigWindowTweaksInstanceDescriptionNote", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to RESET.
+        /// </summary>
+        internal static string ConfigWindowTweaksInstanceResetButton {
+            get {
+                return ResourceManager.GetString("ConfigWindowTweaksInstanceResetButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to reset all configured instances to the current patch defaults..
+        /// </summary>
+        internal static string ConfigWindowTweaksInstanceResetTooltip {
+            get {
+                return ResourceManager.GetString("ConfigWindowTweaksInstanceResetTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to INSTANCES.
+        /// </summary>
+        internal static string ConfigWindowTweaksSectionLabelInstances {
+            get {
+                return ResourceManager.GetString("ConfigWindowTweaksSectionLabelInstances", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to full-text.
         /// </summary>
         internal static string CopyModeFullTextButton {

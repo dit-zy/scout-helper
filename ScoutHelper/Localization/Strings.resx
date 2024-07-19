@@ -102,4 +102,22 @@
 	<data name="TurtleCollabButtonTooltip" xml:space="preserve">
 		<value>collaborative scouting through turtle is not yet supported by scout helper, but is being explored :D.</value>
 	</data>
+	<data name="ConfigWindowTweaksSectionLabelInstances" xml:space="preserve">
+		<value>INSTANCES</value>
+	</data>
+	<data name="ConfigWindowTweaksInstanceResetTooltip" xml:space="preserve">
+		<value>reset the configured instances to the current patch values.</value>
+	</data>
+	<data name="ConfigWindowTweaksInstanceDescription" xml:space="preserve">
+		<value>configure how many instances there are for each map. this allows users to set the number of instances to the correct values after a new patch change and before scout helper updates with the new values.</value>
+	</data>
+	<data name="ConfigWindowTweaksInstanceDescriptionNote" xml:space="preserve">
+		<value>NOTE: once scout helper deploys a new update with the latest patch instance values, any customizations you made here will be reset automatically.</value>
+	</data>
+	<data name="ConfigWindowTweaksInstanceResetButton" xml:space="preserve">
+		<value>RESET</value>
+	</data>
+	<data name="ConfigWindowTweaksInstanceResetTooltip" xml:space="preserve">
+		<value>reset all configured instances to the current patch defaults.</value>
+	</data>
 </root>

@@ -170,6 +170,9 @@ public static class CollectionExtensions {
 	public static IEnumerable<(K key, V val)> AsPairs<K, V>(this IDictionary<K, V> source) =>
 		source.Select(entry => (entry.Key, entry.Value)).AsList();
 
+	public static IEnumerable<(B first, A second)> Flip<A, B>(this IEnumerable<(A first, B second)> source) =>
+		source.Select(entry => (entry.second, entry.first)).AsList();
+
 	public static IEnumerable<(A, B)> WithDistinctFirst<A, B>(this IEnumerable<(A, B)> source) where A : notnull =>
 		source
 			.ToDict()

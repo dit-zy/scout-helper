@@ -38,6 +38,21 @@ public class TerritoryManager {
 			.MaybeGet(_pluginInterface.UiLanguage)
 			.Bind(nameMap => nameMap.MaybeGet(territoryId));
 
+	public IEnumerable<(Territory territory, uint territoryId)> GetTerritoryIds() =>
+		GetEnumValues<Territory>()
+			.SelectResults(
+				territory => GetTerritoryId(territory.Name())
+					.Map(territoryId => (territory, territoryId))
+			)
+			.ForEachError(error => _log.Debug(error))
+			.Value;
+
+	public IEnumerable<(uint territoryId, uint instances)> GetDefaultInstancesForIds() =>
+		GetTerritoryIds()
+			.Select(
+				territory => (territory.territoryId, territory.territory.DefaultInstances())
+			);
+
 	private (IDictionary<string, uint> nameToId, IDictionary<string, IDictionary<uint, string>> idToName) LoadData(
 		IDataManager dataManager
 	) {
@@ -116,7 +131,7 @@ public class TerritoryManager {
 	}
 }
 
-internal static class TerritoryExtensions {
+internal static class TerritoryManagerExtensions {
 	private static IDictionary<ClientLanguage, string> _langCodes = new Dictionary<ClientLanguage, string>() {
 		{ ClientLanguage.Japanese, "jp" },
 		{ ClientLanguage.English, "en" },
