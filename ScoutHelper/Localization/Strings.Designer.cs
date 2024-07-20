@@ -331,7 +331,16 @@ namespace ScoutHelper.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to generate a Turtle Scouter link from the Hunt Helper train recorder data..
+        ///   Looks up a localized string similar to update the turtle collab session with the latest scouted marks in your hunt helper train recorder..
+        /// </summary>
+        internal static string TurtleButtonActiveCollabTooltip {
+            get {
+                return ResourceManager.GetString("TurtleButtonActiveCollabTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to generate a turtle scouter link from the hunt helper train recorder data..
         /// </summary>
         internal static string TurtleButtonTooltip {
             get {
@@ -349,7 +358,16 @@ namespace ScoutHelper.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to collaborative scouting through turtle is not yet supported by scout helper, but is being explored :D..
+        ///   Looks up a localized string similar to click to leave the current session..
+        /// </summary>
+        internal static string TurtleCollabButtonActiveTooltip {
+            get {
+                return ResourceManager.GetString("TurtleCollabButtonActiveTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to start or join a collaborative scouting session on turtle..
         /// </summary>
         internal static string TurtleCollabButtonTooltip {
             get {

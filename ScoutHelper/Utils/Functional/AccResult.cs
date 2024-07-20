@@ -15,6 +15,9 @@ public class AccResults<T, E> : IAccResults<T, E> {
 		_value = value;
 		_errors = errors.ToImmutableList();
 	}
+
+	public static implicit operator AccResults<T, E>(T value) => AccResults.From<T, E>(value);
+	public static implicit operator AccResults<T, E>(E error) => AccResults.From<T, E>(default, error.AsSingletonList());
 }
 
 public static class AccResults {

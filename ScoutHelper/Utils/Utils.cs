@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Numerics;
 using System.Text;
 using System.Text.RegularExpressions;
+using CSharpFunctionalExtensions;
 using ImGuiNET;
 using Lumina.Text;
 using ScoutHelper.Models;
@@ -19,20 +20,30 @@ public static partial class Utils {
 		ImGui.EndTooltip();
 	}
 
+	public static Vector2 V2(float x) => new(x, x);
+
 	public static Vector2 V2(float x, float y) => new(x, y);
 
 	public static Vector4 V4(float x, float y, float z, float w) => new(x, y, z, w);
 
 	public static Vector4 Color(uint r, uint g, uint b) => Color(r, g, b, 256);
-	
+
 	public static Vector4 Color(uint r, uint g, uint b, uint a) => Color((float)r, g, b, a) / 256;
 
 	public static Vector4 Color(float r, float g, float b) => Color(r, g, b, 1f);
-	
+
 	public static Vector4 Color(float r, float g, float b, float a) => V4(r, g, b, a);
 
 	public static T[] GetEnumValues<T>() where T : struct, Enum =>
 		Enum.GetValuesAsUnderlyingType<T>() as T[] ?? Array.Empty<T>();
+
+	public static Result<T, E> Try<T, E>(Func<T> action, Func<Exception, E> catchAction) {
+		try {
+			return action();
+		} catch (Exception e) {
+			return catchAction(e);
+		}
+	}
 
 	[GeneratedRegex(@"\\?\{((?!\\?\}).)+\\?\}", RegexOptions.IgnoreCase)]
 	private static partial Regex TemplateParseRegex();
@@ -133,6 +144,8 @@ public static partial class Utils {
 	public static SeString ToSeString(this string str) => new(str);
 
 	public static float AsFloat(this string str) => float.Parse(str, CultureInfo.InvariantCulture);
+
+	public static Vector2 Transpose(this Vector2 vec) => V2(vec.Y, vec.X);
 
 	#endregion
 }

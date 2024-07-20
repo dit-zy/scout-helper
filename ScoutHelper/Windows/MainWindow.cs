@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
@@ -34,6 +35,7 @@ public class MainWindow : Window, IDisposable {
 		(ImGuiCol.Text, DangerFgColor),
 	}.AsList();
 
+	private readonly IPluginLog _log;
 	private readonly IClientState _clientState;
 	private readonly Configuration _conf;
 	private readonly IChatGui _chat;
@@ -49,13 +51,21 @@ public class MainWindow : Window, IDisposable {
 	private readonly float _noticeFrameWrap;
 	private readonly float _noticeFrameBorderSize;
 	private readonly Lazy<Vector2> _noticeAckButtonPos;
+	private readonly ISet<int> _alreadyContributedMobs = new HashSet<int>();
 
 	private bool _isCopyModeFullText;
 	private uint _selectedMode;
 	private bool _latestNoticesAreAcknowledged;
 	private Vector4 _noticeAckButtonColor = DangerFgColor;
 
+	// turtle stuff
+	private bool _isTurtleCollabbing = false;
+	private string _collabInput = "";
+	private string _collabLink = "";
+	private bool _closeTurtleCollabPopup = false;
+
 	public MainWindow(
+		IPluginLog log,
 		IClientState clientState,
 		Configuration conf,
 		IChatGui chat,
@@ -68,6 +78,7 @@ public class MainWindow : Window, IDisposable {
 		Strings.MainWindowTitle,
 		ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoScrollbar
 	) {
+		_log = log;
 		_clientState = clientState;
 		_conf = conf;
 		_chat = chat;
@@ -262,122 +273,241 @@ public class MainWindow : Window, IDisposable {
 	private void DrawGeneratorButtons() {
 		ImGuiHelpers.CenteredText(Strings.MainWindowSectionLabelGenerators);
 
-		if (ImGui.Button(Strings.BearButton, _buttonSize.Value)) GenerateBearLink();
+		if (ImGui.Button(Strings.BearButton, _buttonSize.Value)) {
+			_chat.TaggedPrint("Generating Bear link...");
+			GenerateLinkAsync(
+				train => _bearManager.GenerateBearLink(_clientState.WorldName(), train),
+				(trainList, bearTrainLink) => {
+					_chat.TaggedPrint($"Bear train link: {bearTrainLink.Url}");
+					_chat.TaggedPrint($"Train admin password: {bearTrainLink.Password}");
+					CopyLink(trainList, "bear", bearTrainLink.HighestPatch, bearTrainLink.Url);
+				}
+			);
+		}
 		if (ImGui.IsItemHovered()) CreateTooltip(Strings.BearButtonTooltip);
 
-		if (ImGui.Button(Strings.SirenButton, _buttonSize.Value)) GenerateSirenLink();
+		if (ImGui.Button(Strings.SirenButton, _buttonSize.Value)) {
+			_chat.TaggedPrint("Generating Siren link...");
+			GenerateLink(
+				train => _sirenManager.GenerateSirenLink(train),
+				(trainList, sirenLink) => {
+					sirenLink
+						.ForEachError(errorMessage => _chat.TaggedPrintError(errorMessage))
+						.Value
+						.Execute(linkData => CopyLink(trainList, "siren", linkData.HighestPatch, linkData.Url));
+				}
+			);
+		}
 		if (ImGui.IsItemHovered()) CreateTooltip(Strings.SirenButtonTooltip);
 
-		var turtCollabButtonSize = _buttonSize.Value with { X = ImGuiHelpers.GetButtonSize(Strings.TurtleCollabButton).X };
-		var turtButtonSize = (_buttonSize.Value - turtCollabButtonSize) with { Y = _buttonSize.Value.Y };
+		DrawTurtleButtons();
+		if (ImGui.BeginPopup("turtle collab popup")) {
+			if (_closeTurtleCollabPopup) {
+				_closeTurtleCollabPopup = false;
+				ImGui.CloseCurrentPopup();
+			} else {
+				DrawTurtleCollabPopup();
+			}
+			ImGui.EndPopup();
+		}
+	}
+
+	private unsafe void DrawTurtleButtons() {
+		var itemSpacing = ImGui.GetStyle().ItemSpacing;
+		var turtCollabButtonSize = _buttonSize.Value with {
+			X = ImGuiHelpers.GetButtonSize(Strings.TurtleCollabButton).X - itemSpacing.Y
+		};
+		var turtButtonSize = (_buttonSize.Value - turtCollabButtonSize - itemSpacing.Transpose()) with {
+			Y = _buttonSize.Value.Y
+		};
+
 		var turtlePressed = ToggleButton.ButtonEx(
 			Strings.TurtleButton,
 			turtButtonSize,
 			ImGuiButtonFlags.MouseButtonDefault,
 			ImDrawFlags.RoundCornersLeft
 		);
-		if (turtlePressed) GenerateTurtleLink();
-		if (ImGui.IsItemHovered()) CreateTooltip(Strings.TurtleButtonTooltip);
+		if (ImGui.IsItemHovered())
+			CreateTooltip(_isTurtleCollabbing ? Strings.TurtleCollabButtonActiveTooltip : Strings.TurtleButtonTooltip);
+		if (turtlePressed) {
+			if (_isTurtleCollabbing) {
+				PushLatestMobsToTurtle();
+			} else {
+				_chat.TaggedPrint("Generating Turtle link...");
+				GenerateLinkAsync(
+					train => _turtleManager.GenerateTurtleLink(train),
+					(trainList, turtleTrainLink) => {
+						_chat.TaggedPrint($"Turtle train link: {turtleTrainLink.ReadonlyUrl}");
+						_chat.TaggedPrint($"Turtle collaborate link: {turtleTrainLink.CollabUrl}");
+						CopyLink(trainList, "turtle", turtleTrainLink.HighestPatch, turtleTrainLink.ReadonlyUrl);
+					}
+				);
+			}
+		}
 
-		ImGui.SameLine(); ImGui.SetCursorPosX(ImGui.GetCursorPosX() - ImGui.GetStyle().ItemSpacing.X);
-		ImGui.BeginDisabled(true);
-		ToggleButton.ButtonEx(
-			Strings.TurtleCollabButton,
-			turtCollabButtonSize,
-			ImGuiButtonFlags.MouseButtonDefault,
-			ImDrawFlags.RoundCornersRight
-		);
-		ImGui.EndDisabled();
-		if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)) CreateTooltip(Strings.TurtleCollabButtonTooltip);
+		ImGui.SameLine();
+		ImGui.SetCursorPosX(ImGui.GetCursorPosX() - itemSpacing.X + itemSpacing.Y);
+		var collabColor = _isTurtleCollabbing
+			? *ImGui.GetStyleColorVec4(ImGuiCol.ButtonActive)
+			: *ImGui.GetStyleColorVec4(ImGuiCol.Button);
+		var turtleCollabPressed = ImGuiPlus
+			.WithStyle(ImGuiCol.Button, collabColor)
+			.Do(
+				() => ToggleButton.ButtonEx(
+					Strings.TurtleCollabButton,
+					turtCollabButtonSize,
+					ImGuiButtonFlags.MouseButtonDefault,
+					ImDrawFlags.RoundCornersRight
+				)
+			);
+		if (ImGui.IsItemHovered())
+			CreateTooltip(_isTurtleCollabbing ? Strings.TurtleCollabButtonActiveTooltip : Strings.TurtleCollabButtonTooltip);
+		if (turtleCollabPressed) {
+			if (_isTurtleCollabbing) _isTurtleCollabbing = false;
+			else {
+				ImGui.OpenPopup("turtle collab popup");
+			}
+		}
 	}
 
-	private void GenerateSirenLink() {
-		_chat.TaggedPrint("Generating Siren link...");
-		IList<TrainMob> trainList = null!;
+	private void DrawTurtleCollabPopup() {
+		var contentWidth = 1.5f * _buttonSize.Value.X;
+		ImGui.PushTextWrapPos(contentWidth);
 
-		_huntHelperManager
-			.GetTrainList()
-			.Ensure(
-				train => 0 < train.Count,
-				"No mobs in the train :T"
-			)
+		ImGuiPlus.Heading("NEW", centered: true);
+		ImGui.TextWrapped("start a new scout session on turtle for other scouters to join and contribute to.");
+		if (ImGui.Button("START NEW SESSION", _buttonSize.Value with { X = contentWidth })) {
+			_turtleManager
+				.GenerateTurtleLink(new List<TrainMob>(), allowEmpty: true)
+				.Then(
+					result => result.Match(
+						linkData => {
+							_collabInput = $"{linkData.Slug}/{linkData.CollabPassword}";
+							if (JoinTurtleCollabSession(_collabInput)) _closeTurtleCollabPopup = true;
+						},
+						errorMessage => _chat.TaggedPrintError(errorMessage)
+					)
+				);
+		}
+		if (ImGui.IsItemHovered())
+			CreateTooltip(
+				"generate a link to a new session, and immediately join it so you can start contributing. share the link with other scouters so they can also contribute :3"
+			);
+
+		ImGuiPlus.Separator();
+		ImGuiPlus.Heading("CONTRIBUTE", centered: true);
+		ImGui.TextWrapped("contribute scouted marks to an existing turtle session.");
+		ImGui.SetNextItemWidth(contentWidth - ImGuiHelpers.GetButtonSize("JOIN").X - ImGui.GetStyle().ItemSpacing.X);
+		var linkInputted = ImGui.InputTextWithHint(
+			"",
+			"https://scout.wobbuffet.net/scout/2WAZMI3DeZ/e5b2ede5",
+			ref _collabInput,
+			256,
+			ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue
+		);
+		if (ImGui.IsItemHovered())
+			CreateTooltip("paste a collaborator link here and join the session to start contributing marks.");
+		ImGui.SameLine();
+		linkInputted = linkInputted || ImGui.Button("JOIN");
+		if (linkInputted) {
+			if (JoinTurtleCollabSession(_collabInput)) _closeTurtleCollabPopup = true;
+		}
+
+		ImGui.PopTextWrapPos();
+	}
+
+	private bool JoinTurtleCollabSession(string collabLink) {
+		var collabInfo = _turtleManager.JoinCollabSession(collabLink);
+
+		_collabLink = "";
+		collabInfo
+			.Match(
+				sessionInfo => {
+					_collabLink = $"{_conf.TurtleBaseUrl}{_conf.TurtleTrainPath}/{sessionInfo.slug}/{sessionInfo.password}";
+					_chat.TaggedPrint($"joined turtle session: {_collabLink}");
+					_isTurtleCollabbing = true;
+					_alreadyContributedMobs.Clear();
+				},
+				() => _chat.TaggedPrintError($"failed to parse collab link. please ensure it is a valid link.\n{collabLink}")
+			);
+
+		return collabInfo.HasValue;
+	}
+
+	private void PushLatestMobsToTurtle() {
+		// _chat.TaggedPrint($"Contributing marks to turtle session: {_collabLink}");
+		GetTrainMobs(out _)
 			.Map(
 				train => {
-					trainList = train;
-					return _sirenManager.GenerateSirenLink(train);
+					var trainSet = train.ToHashSet();
+					trainSet.RemoveWhere(mob => _alreadyContributedMobs.Contains(mob.GetHashCode()));
+					return trainSet.AsList();
 				}
 			)
+			.Tap(train => _chat.TaggedPrint($"pushing {train.Count} new marks to: {_collabInput}"))
+			.Bind(
+				train => _turtleManager.UpdateCurrentSession(train)
+					.Then(
+						updateStatus => {
+							if (updateStatus == TurtleHttpStatus.NoSupportedMobs)
+								_chat.TaggedPrint("no mobs supported by turtle were in the newest batch of mobs.");
+
+							return updateStatus is TurtleHttpStatus.Success or TurtleHttpStatus.NoSupportedMobs
+								? Result.Success<IList<TrainMob>, string>(train)
+								: "an error occurred while trying to update the marks in the current turtle session. please try again later.";
+						}
+					)
+			)
 			.Match(
-				sirenLink => {
-					sirenLink
-						.ForEachError(errorMessage => _chat.TaggedPrintError(errorMessage))
-						.Value
-						.Execute(linkData => CopyLink(trainList, "siren", linkData.HighestPatch, linkData.Url));
+				train => {
+					train.ForEach(mob => _alreadyContributedMobs.Add(mob.GetHashCode()));
+					_chat.TaggedPrint("turtle session updated!");
 				},
+				errorMessage => _chat.TaggedPrintError(errorMessage)
+			)
+			.ContinueWith(
+				task => {
+					if (task.IsCompletedSuccessfully) return;
+					_log.Error(task.Exception, "uncaught exception when updating turtle session.");
+				}
+			);
+	}
+
+	private void GenerateLink<T>(
+		Func<List<TrainMob>, AccResults<T, string>> linkGenerator,
+		Action<IList<TrainMob>, AccResults<T, string>> onSuccess
+	) {
+		GetTrainMobs(out var trainList)
+			.Map(linkGenerator)
+			.Match(
+				link => onSuccess(trainList, link),
 				errorMessage => _chat.TaggedPrintError(errorMessage)
 			);
 	}
 
-	private void GenerateBearLink() {
-		_chat.TaggedPrint("Generating Bear link...");
-		IList<TrainMob> trainList = null!;
-
-		_huntHelperManager
-			.GetTrainList()
-			.Ensure(
-				train => 0 < train.Count,
-				"No mobs in the train :T"
-			)
-			.Bind(
-				train => {
-					trainList = train;
-					return _bearManager.GenerateBearLink(_clientState.WorldName(), train);
-				}
-			)
-			.ContinueWith(
-				apiResponseTask => {
-					apiResponseTask
-						.Result.Match(
-							bearTrainLink => {
-								_chat.TaggedPrint($"Bear train link: {bearTrainLink.Url}");
-								_chat.TaggedPrint($"Train admin password: {bearTrainLink.Password}");
-								CopyLink(trainList, "bear", bearTrainLink.HighestPatch, bearTrainLink.Url);
-							},
-							errorMessage => { _chat.TaggedPrintError(errorMessage); }
-						);
-				}
+	private void GenerateLinkAsync<T>(
+		Func<List<TrainMob>, Task<Result<T, string>>> linkGenerator,
+		Action<IList<TrainMob>, T> onSuccess
+	) {
+		GetTrainMobs(out var trainList)
+			.Bind(linkGenerator)
+			.Match(
+				link => onSuccess(trainList, link),
+				errorMessage => { _chat.TaggedPrintError(errorMessage); }
 			);
 	}
 
-	private void GenerateTurtleLink() {
-		_chat.TaggedPrint("Generating Turtle link...");
-		IList<TrainMob> trainList = null!;
-
-		_huntHelperManager
+	private Result<List<TrainMob>, string> GetTrainMobs(out IList<TrainMob> trainList) {
+		var obtainedTrain = new List<TrainMob>();
+		var result = _huntHelperManager
 			.GetTrainList()
 			.Ensure(
-				train => 0 < train.Count,
+				train => train.IsNotEmpty(),
 				"No mobs in the train :T"
 			)
-			.Bind(
-				train => {
-					trainList = train;
-					return _turtleManager.GenerateTurtleLink(train);
-				}
-			)
-			.ContinueWith(
-				apiResponseTask => {
-					apiResponseTask
-						.Result.Match(
-							turtleTrainLink => {
-								_chat.TaggedPrint($"Turtle train link: {turtleTrainLink.ReadonlyUrl}");
-								_chat.TaggedPrint($"Turtle collaborate link: {turtleTrainLink.CollabUrl}");
-								CopyLink(trainList, "turtle", turtleTrainLink.HighestPatch, turtleTrainLink.ReadonlyUrl);
-							},
-							errorMessage => { _chat.TaggedPrintError(errorMessage); }
-						);
-				}
-			);
+			.Tap(mobs => obtainedTrain = mobs);
+		trainList = obtainedTrain.AsList();
+		return result;
 	}
 
 	private void CopyLink(IList<TrainMob> trainList, string tracker, Patch highestPatch, string link) {
