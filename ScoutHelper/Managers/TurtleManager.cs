@@ -83,7 +83,11 @@ public partial class TurtleManager {
 								mob.Position)
 					)
 				),
-				requestContent => HttpClient.PutAsync($"{_conf.TurtleApiTrainPath}/{_currentCollabSession}", requestContent)
+				requestContent => {
+					var url = $"{_conf.TurtleApiTrainPath}/{_currentCollabSession}";
+					_log.Debug($"url: {url} | apiPath: {_conf.TurtleApiTrainPath} | slug: {_currentCollabSession}");
+					return HttpClient.PutAsync(url, requestContent);
+				}
 			).TapError(
 				error => {
 					if (error.ErrorType == HttpErrorType.Timeout) {

@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using CSharpFunctionalExtensions;
 using Dalamud.Plugin.Services;
+using Newtonsoft.Json;
 using ScoutHelper.Config;
 using ScoutHelper.Models;
 using ScoutHelper.Utils.Functional;
@@ -28,6 +29,7 @@ public class InitializationManager {
 		_log = log;
 		_conf = conf;
 		_territoryManager = territoryManager;
+		_log.Debug($"conf: {JsonConvert.SerializeObject(_conf)}");
 	}
 
 	public void InitializeNecessaryComponents() {

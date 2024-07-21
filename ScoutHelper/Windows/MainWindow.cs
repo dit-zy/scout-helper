@@ -328,7 +328,7 @@ public class MainWindow : Window, IDisposable {
 			ImDrawFlags.RoundCornersLeft
 		);
 		if (ImGui.IsItemHovered())
-			CreateTooltip(_isTurtleCollabbing ? Strings.TurtleCollabButtonActiveTooltip : Strings.TurtleButtonTooltip);
+			CreateTooltip(_isTurtleCollabbing ? Strings.TurtleButtonActiveCollabTooltip : Strings.TurtleButtonTooltip);
 		if (turtlePressed) {
 			if (_isTurtleCollabbing) {
 				PushLatestMobsToTurtle();
