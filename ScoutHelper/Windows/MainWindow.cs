@@ -96,24 +96,29 @@ public class MainWindow : Window, IDisposable {
 			MaximumSize = new Vector2(float.MaxValue, float.MaxValue),
 		};
 
-		_buttonSize = new Lazy<Vector2>(
-			() => {
-				var buttonSize = new[] {
-						[Strings.BearButton],
-						[Strings.SirenButton],
-						[Strings.TurtleButton, Strings.TurtleCollabButton],
-						new[] { Strings.CopyModeLinkButton, Strings.CopyModeFullTextButton, },
-					}
-					.Select(
-						labels => labels
-							.Select(ImGuiHelpers.GetButtonSize)
-							.Aggregate((a, b) => new Vector2(Math.Max(a.X, b.X), Math.Max(a.Y, b.Y)))
-					)
-					.MaxBy(size => size.X);
-				buttonSize.X += 4 * ImGui.GetFontSize(); // add some horizontal padding
-				return buttonSize;
-			}
-		);
+		try {
+			_buttonSize = new Lazy<Vector2>(
+				() => {
+					var buttonSize = new[] {
+							[Strings.BearButton],
+							[Strings.SirenButton],
+							[Strings.TurtleButton, Strings.TurtleCollabButton],
+							new[] { Strings.CopyModeLinkButton, Strings.CopyModeFullTextButton, },
+						}
+						.Select(
+							labels => labels
+								.Select(ImGuiHelpers.GetButtonSize)
+								.Aggregate((a, b) => new Vector2(Math.Max(a.X, b.X), Math.Max(a.Y, b.Y)))
+						)
+						.MaxBy(size => size.X);
+					buttonSize.X += 4 * ImGui.GetFontSize(); // add some horizontal padding
+					return buttonSize;
+				}
+			);
+		} catch (Exception e) {
+			_log.Error(e, "error while determining button size.");
+			throw;
+		}
 
 		_notices = Constants.Notices;
 
