@@ -96,9 +96,9 @@ public class MainWindow : Window, IDisposable {
 			MaximumSize = new Vector2(float.MaxValue, float.MaxValue),
 		};
 
-		try {
-			_buttonSize = new Lazy<Vector2>(
-				() => {
+		_buttonSize = new Lazy<Vector2>(
+			() => {
+				try {
 					var buttonSize = new[] {
 							[Strings.BearButton],
 							[Strings.SirenButton],
@@ -113,12 +113,12 @@ public class MainWindow : Window, IDisposable {
 						.MaxBy(size => size.X);
 					buttonSize.X += 4 * ImGui.GetFontSize(); // add some horizontal padding
 					return buttonSize;
+				} catch (Exception e) {
+					_log.Error(e, "error while determining button size.");
+					throw;
 				}
-			);
-		} catch (Exception e) {
-			_log.Error(e, "error while determining button size.");
-			throw;
-		}
+			}
+		);
 
 		_notices = Constants.Notices;
 
