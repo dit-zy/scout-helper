@@ -10,8 +10,12 @@ using static ScoutHelper.Utils.Utils;
 
 namespace ScoutHelperTests.Utils;
 
-public class UtilsTests {
+public class UtilsTests : IClassFixture<TestFixture> {
+	private readonly TestFixture _fixture;
 
+	public UtilsTests(TestFixture fixture) {
+		_fixture = fixture;
+	}
 
 	[Fact]
 	public void WorldName_NoPlayer() {

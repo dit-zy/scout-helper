@@ -179,6 +179,12 @@ public static class CollectionExtensions {
 			.AsPairs()
 			.AsList();
 
+	public static IEnumerable<(A first, B second)> PairWith<A, B>(
+		this IEnumerable<A> source,
+		Func<A, B> secondSelector
+	) =>
+		source.Select(first => (first, secondSelector(first)));
+
 	#endregion
 
 	#region tuples
