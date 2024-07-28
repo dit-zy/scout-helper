@@ -1,4 +1,5 @@
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
+using System.Numerics;
 using CSharpFunctionalExtensions;
 using FsCheck;
 using ScoutHelper;
@@ -18,6 +19,26 @@ public static class Arbs {
 		String()
 			.Generator
 			.Where(s => !string.IsNullOrEmpty(s))
+			.ToArbitrary();
+
+	public static Arbitrary<float> Float() => Arb.Default.Float32();
+
+	public static Arbitrary<Vector2> Vector2() =>
+		Float()
+			.Choose2()
+			.Select(vals => new Vector2(vals.Item1, vals.Item2))
+			.ToArbitrary();
+
+	public static Arbitrary<Vector3> Vector3() =>
+		Float()
+			.Choose3()
+			.Select(vals => new Vector3(vals.Item1, vals.Item2, vals.Item3))
+			.ToArbitrary();
+
+	public static Arbitrary<Vector4> Vector4() =>
+		Float()
+			.Choose4()
+			.Select(vals => new Vector4(vals.Item1, vals.Item2, vals.Item3, vals.Item4))
 			.ToArbitrary();
 
 	public static Arbitrary<IDictionary<K, V>> DictOf<K, V>(Gen<K> keyGen, Gen<V> valueGen) where K : notnull =>
@@ -227,6 +248,27 @@ public static class ArbExtensions {
 	public static Gen<T> Where<T>(this Arbitrary<T> arb, Func<T, bool> predicate) => arb.Generator.Where(predicate);
 
 	public static Gen<A> KeepFirst<A, B>(this Gen<(A, B)> source) => source.Select(pair => pair.Item1);
-	
+
 	public static Gen<B> KeepSecond<A, B>(this Gen<(A, B)> source) => source.Select(pair => pair.Item2);
+
+	public static Arbitrary<(A a, A b)> Choose2<A>(this Arbitrary<A> source) =>
+		source
+			.Generator
+			.Two()
+			.Select(vals => (vals.Item1, vals.Item2))
+			.ToArbitrary();
+
+	public static Arbitrary<(A a, A b, A c)> Choose3<A>(this Arbitrary<A> source) =>
+		source
+			.Generator
+			.Three()
+			.Select(vals => (vals.Item1, vals.Item2, vals.Item3))
+			.ToArbitrary();
+
+	public static Arbitrary<(A a, A b, A c, A d)> Choose4<A>(this Arbitrary<A> source) =>
+		source
+			.Generator
+			.Four()
+			.Select(vals => (vals.Item1, vals.Item2, vals.Item3, vals.Item4))
+			.ToArbitrary();
 }

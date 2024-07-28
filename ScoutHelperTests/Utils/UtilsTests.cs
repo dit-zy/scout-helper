@@ -1,3 +1,4 @@
+using System.Numerics;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Plugin.Services;
 using FluentAssertions;
@@ -15,6 +16,70 @@ public class UtilsTests : IClassFixture<TestFixture> {
 
 	public UtilsTests(TestFixture fixture) {
 		_fixture = fixture;
+	}
+
+	[Property]
+	public Property V2_Single() => FsCheckUtils.ForAll(
+		Arbs.Float(),
+		xy =>
+			ScoutHelper.Utils.Utils.V2(xy).Should().Be(new Vector2(xy, xy))
+	);
+
+	[Property]
+	public Property V2() => FsCheckUtils.ForAll(
+		Arbs.Vector2(),
+		expected =>
+			ScoutHelper.Utils.Utils.V2(expected.X, expected.Y).Should().Be(expected)
+	);
+
+	[Property]
+	public Property V4() => FsCheckUtils.ForAll(
+		Arbs.Vector4(),
+		expected =>
+			ScoutHelper.Utils.Utils.V4(expected.X, expected.Y, expected.Z, expected.W).Should().Be(expected)
+	);
+
+	[Property]
+	public Property Color() => FsCheckUtils.ForAll(
+		Arbs.Vector4(),
+		expected =>
+			ScoutHelper.Utils.Utils.Color(expected.X, expected.Y, expected.Z, expected.W).Should().Be(expected)
+	);
+
+	[Property]
+	public Property Color_3() => FsCheckUtils.ForAll(
+		Arbs.Vector3(),
+		expected =>
+			ScoutHelper.Utils.Utils.Color(expected.X, expected.Y, expected.Z)
+				.Should().Be(new Vector4(expected.X, expected.Y, expected.Z, 1f))
+	);
+
+	[Property]
+	public Property Color_Uint() => FsCheckUtils.ForAll(
+		Arb.Default.UInt32().Choose4(),
+		components =>
+			ScoutHelper.Utils.Utils.Color(components.a, components.b, components.c, components.d)
+				.Should().Be(new Vector4(components.a / 256f, components.b / 256f, components.c / 256f, components.d / 256f))
+	);
+
+	[Property]
+	public Property Color_Uint3() => FsCheckUtils.ForAll(
+		Arb.Default.UInt32().Choose3(),
+		components =>
+			ScoutHelper.Utils.Utils.Color(components.a, components.b, components.c)
+				.Should().Be(new Vector4(components.a / 256f, components.b / 256f, components.c / 256f, 1f))
+	);
+
+	[Fact]
+	public void GetEnumValues() {
+		// DATA
+		var expected = new[] { TestEnum.A, TestEnum.B, TestEnum.C, TestEnum.D, TestEnum.E };
+
+		// WHEN
+		var actual = GetEnumValues<TestEnum>();
+
+		// THEN
+		actual.Should().Equal(expected);
 	}
 
 	[Fact]
