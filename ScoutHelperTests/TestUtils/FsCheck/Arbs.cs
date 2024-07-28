@@ -1,4 +1,4 @@
-﻿using System.Collections.Immutable;
+using System.Collections.Immutable;
 using CSharpFunctionalExtensions;
 using FsCheck;
 using ScoutHelper;
@@ -127,6 +127,11 @@ public static class Arbs {
 	public static Arbitrary<T> RandomFreq<T>(params Gen<T>[] gens) =>
 		Gen.Choose(0, 100)
 			.ListOf(gens.Length)
+			.SelectMany(
+				freqs =>
+					Gen.Choose(0, freqs.Count - 1)
+						.Select(index => freqs.With((index, freqs[index] + 1)))
+			)
 			.SelectMany(
 				freqs =>
 					Gen.Frequency(freqs.Zip(gens).Select(f => Tuple.Create(f.First, f.Second)))
