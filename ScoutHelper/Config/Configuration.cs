@@ -16,7 +16,7 @@ public class Configuration : IPluginConfiguration {
 
 	public int Version { get; set; } = 0;
 
-	public string BearApiBaseUrl { get; set; } = "https://tracker-api.beartoolkit.com/public/";
+	public string BearApiBaseUrl { get; set; } = "https://tracker.beartoolkit.com/api/";
 	public string BearApiTrainPath { get; set; } = "hunttrain";
 	public TimeSpan BearApiTimeout { get; set; } = TimeSpan.FromSeconds(5);
 	public string BearSiteTrainUrl { get; set; } = "https://tracker.beartoolkit.com/train";
