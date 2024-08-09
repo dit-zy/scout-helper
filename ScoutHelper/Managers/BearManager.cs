@@ -18,6 +18,12 @@ namespace ScoutHelper.Managers;
 public class BearManager : IDisposable {
 	private readonly IPluginLog _log;
 	private readonly Configuration _conf;
+
+	private static readonly JsonSerializerSettings JsonSerializerSettings = new JsonSerializerSettings() {
+		DateFormatString = "yyyy'-'MM'-'dd'T'HH':'mm':'ssK",
+		DateTimeZoneHandling = DateTimeZoneHandling.Utc
+	};
+
 	private static HttpClient HttpClient { get; } = new();
 
 	private IDictionary<uint, (Patch patch, string name)> MobIdToBearName { get; init; }
@@ -54,9 +60,10 @@ public class BearManager : IDisposable {
 			.Max();
 
 		var requestPayload = JsonConvert.SerializeObject(
-			new BearApiTrainRequest(worldName, _conf.BearTrainName, highestPatch.BearName(), spawnPoints)
+			new BearApiTrainRequest(worldName, _conf.BearTrainName, highestPatch.BearName(), spawnPoints),
+			JsonSerializerSettings
 		);
-		_log.Debug("Request payload: {0}", requestPayload);
+		_log.Debug("Request payload: {0:l}", requestPayload);
 		var requestContent = new StringContent(requestPayload, Encoding.UTF8, Constants.MediaTypeJson);
 
 		try {
