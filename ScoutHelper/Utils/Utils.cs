@@ -5,7 +5,6 @@ using System.Numerics;
 using System.Text;
 using System.Text.RegularExpressions;
 using CSharpFunctionalExtensions;
-using ImGuiNET;
 using Lumina.Text;
 using Newtonsoft.Json;
 using ScoutHelper.Models;
@@ -13,14 +12,6 @@ using ScoutHelper.Models;
 namespace ScoutHelper.Utils;
 
 public static partial class Utils {
-	public static void CreateTooltip(string text, float width = 12f) {
-		ImGui.BeginTooltip();
-		ImGui.PushTextWrapPos(ImGui.GetFontSize() * width);
-		ImGui.TextUnformatted(text);
-		ImGui.PopTextWrapPos();
-		ImGui.EndTooltip();
-	}
-
 	public static Vector2 V2(float x) => new(x, x);
 
 	public static Vector2 V2(float x, float y) => new(x, y);

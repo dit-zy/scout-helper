@@ -4,6 +4,7 @@ using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
+using Dalamud.Interface;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
@@ -95,6 +96,14 @@ public class MainWindow : Window, IDisposable {
 			MinimumSize = new Vector2(64, 32),
 			MaximumSize = new Vector2(float.MaxValue, float.MaxValue),
 		};
+		TitleBarButtons.Add(
+			new TitleBarButton() {
+				Click = _ => _configWindow.IsOpen = true,
+				Icon = FontAwesomeIcon.Cog,
+				IconOffset = V2(2, 1),
+				ShowTooltip = () => ImGuiPlus.CreateTooltip("open the scout helper settings window"),
+			}
+		);
 
 		_buttonSize = new Lazy<Vector2>(
 			() => {
@@ -234,7 +243,7 @@ public class MainWindow : Window, IDisposable {
 					ImGuiPlus.WithStyle(ImGuiCol.Text, textColor).Do(
 						() => {
 							if (ImGui.IsItemHovered()) {
-								CreateTooltip(Strings.MainWindowNoticesAckTooltip);
+								ImGuiPlus.CreateTooltip(Strings.MainWindowNoticesAckTooltip);
 								_noticeAckButtonColor = DangerBgColor;
 							} else {
 								_noticeAckButtonColor = DangerFgColor;
@@ -253,7 +262,9 @@ public class MainWindow : Window, IDisposable {
 		ImGuiHelpers.CenteredText(Strings.MainWindowSectionLabelMode);
 
 		ImGui.SameLine();
-		if (ImGuiPlus.ClickableHelpMarker(DrawModeTooltipContents)) _configWindow.IsOpen = true;
+		if (ImGuiPlus.ClickableHelpMarker(DrawModeTooltipContents)) {
+			_configWindow.IsOpen = true;
+		}
 
 		var modes = new[] { Strings.CopyModeLinkButton, Strings.CopyModeFullTextButton };
 		if (ImGuiPlus.ToggleBar("mode", ref _selectedMode, _buttonSize.Value, modes))
@@ -292,7 +303,7 @@ public class MainWindow : Window, IDisposable {
 				}
 			);
 		}
-		if (ImGui.IsItemHovered()) CreateTooltip(Strings.BearButtonTooltip);
+		if (ImGui.IsItemHovered()) ImGuiPlus.CreateTooltip(Strings.BearButtonTooltip);
 
 		if (ImGui.Button(Strings.SirenButton, _buttonSize.Value)) {
 			_chat.TaggedPrint("Generating Siren link...");
@@ -306,7 +317,7 @@ public class MainWindow : Window, IDisposable {
 				}
 			);
 		}
-		if (ImGui.IsItemHovered()) CreateTooltip(Strings.SirenButtonTooltip);
+		if (ImGui.IsItemHovered()) ImGuiPlus.CreateTooltip(Strings.SirenButtonTooltip);
 
 		DrawTurtleButtons();
 		if (ImGui.BeginPopup("turtle collab popup")) {
@@ -336,7 +347,9 @@ public class MainWindow : Window, IDisposable {
 			ImDrawFlags.RoundCornersLeft
 		);
 		if (ImGui.IsItemHovered())
-			CreateTooltip(_isTurtleCollabbing ? Strings.TurtleButtonActiveCollabTooltip : Strings.TurtleButtonTooltip);
+			ImGuiPlus.CreateTooltip(
+				_isTurtleCollabbing ? Strings.TurtleButtonActiveCollabTooltip : Strings.TurtleButtonTooltip
+			);
 		if (turtlePressed) {
 			if (_isTurtleCollabbing) {
 				PushLatestMobsToTurtle();
@@ -369,7 +382,9 @@ public class MainWindow : Window, IDisposable {
 				)
 			);
 		if (ImGui.IsItemHovered())
-			CreateTooltip(_isTurtleCollabbing ? Strings.TurtleCollabButtonActiveTooltip : Strings.TurtleCollabButtonTooltip);
+			ImGuiPlus.CreateTooltip(
+				_isTurtleCollabbing ? Strings.TurtleCollabButtonActiveTooltip : Strings.TurtleCollabButtonTooltip
+			);
 		if (turtleCollabPressed) {
 			if (_isTurtleCollabbing) _isTurtleCollabbing = false;
 			else {
@@ -398,7 +413,7 @@ public class MainWindow : Window, IDisposable {
 				);
 		}
 		if (ImGui.IsItemHovered())
-			CreateTooltip(
+			ImGuiPlus.CreateTooltip(
 				"generate a link to a new session, and immediately join it so you can start contributing. share the link with other scouters so they can also contribute :3"
 			);
 
@@ -414,7 +429,7 @@ public class MainWindow : Window, IDisposable {
 			ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue
 		);
 		if (ImGui.IsItemHovered())
-			CreateTooltip("paste a collaborator link here and join the session to start contributing marks.");
+			ImGuiPlus.CreateTooltip("paste a collaborator link here and join the session to start contributing marks.");
 		ImGui.SameLine();
 		linkInputted = linkInputted || ImGui.Button("JOIN");
 		if (linkInputted) {
