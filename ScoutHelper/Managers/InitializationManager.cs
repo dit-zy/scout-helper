@@ -1,16 +1,14 @@
 ﻿using System.Linq;
-using CSharpFunctionalExtensions;
 using Dalamud.Plugin.Services;
 using ScoutHelper.Config;
 using ScoutHelper.Models;
-using ScoutHelper.Utils.Functional;
 using static ScoutHelper.Utils.Utils;
 
 namespace ScoutHelper.Managers;
 
 /**
  * A manager for initializing system components that require it *after*
- * dependency injection is stood up. It is safe to assume that this manager will
+ * dependency injection is stood up. It is safe to assume that this manager
  * was run before any other components are used.
  */
 public class InitializationManager {
@@ -18,12 +16,13 @@ public class InitializationManager {
 	private readonly Configuration _conf;
 	private readonly TerritoryManager _territoryManager;
 
-	// mobManager is unused, but including it in the constructor forces it to be
-	// initialized right away, rather than waiting for a dependant to be used.
 	public InitializationManager(
 		IPluginLog log,
 		Configuration conf,
-		TerritoryManager territoryManager
+		TerritoryManager territoryManager,
+		// mobManager is unused, but including it in the constructor forces it to be
+		// initialized right away, rather than waiting for a dependant to be used.
+		MobManager mobManager
 	) {
 		_log = log;
 		_conf = conf;
@@ -36,13 +35,17 @@ public class InitializationManager {
 	}
 
 	private void InitializeInstanceMap() {
-		var patchUpdateNotYetApplied = _conf.LastInstancePatchUpdate < Constants.LatestPatchUpdate;
+		var patchUpdateNotYetApplied = !ActualValuesEqualBecauseMicrosoftHasBrainDamage(
+			_conf.LatestPatchInstances,
+			Constants.LatestPatchInstances
+		);
+		_log.Debug("initializing instance map. patch instances updated since last update: {0}", patchUpdateNotYetApplied);
 
 		_territoryManager.GetDefaultInstancesForIds()
 			.Where(map => patchUpdateNotYetApplied || !_conf.Instances.ContainsKey(map.territoryId))
 			.UseToUpdate(_conf.Instances);
 
-		if (patchUpdateNotYetApplied) _conf.LastInstancePatchUpdate = Constants.LatestPatchUpdate;
+		if (patchUpdateNotYetApplied) _conf.LatestPatchInstances = Constants.LatestPatchInstances;
 		_conf.Save();
 	}
 
