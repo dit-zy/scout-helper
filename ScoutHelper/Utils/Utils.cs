@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using CSharpFunctionalExtensions;
 using ImGuiNET;
 using Lumina.Text;
+using Newtonsoft.Json;
 using ScoutHelper.Models;
 
 namespace ScoutHelper.Utils;
@@ -146,6 +147,11 @@ public static partial class Utils {
 	public static float AsFloat(this string str) => float.Parse(str, CultureInfo.InvariantCulture);
 
 	public static Vector2 Transpose(this Vector2 vec) => V2(vec.Y, vec.X);
+
+	public static bool NotEquals<T>(this T objA, T objB) => !Equals(objA, objB);
+
+	public static bool ActualValuesEqualBecauseMicrosoftHasBrainDamage(object? objA, object? objB) =>
+		Equals(objA, objB) || Equals(JsonConvert.SerializeObject(objA), JsonConvert.SerializeObject(objB));
 
 	#endregion
 }

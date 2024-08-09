@@ -42,8 +42,6 @@ public static class Constants {
 		// "Something importanter we extra don't want the user forgetting for even longer.",
 	}.AsList();
 
-	public static readonly DateTime LatestPatchUpdate = DateTime.Parse("2024-07-18T00:00:00Z");
-
 	public static readonly (Territory, uint)[] LatestPatchInstances = {
 		(Territory.Urqopacha, 3),
 		(Territory.Kozamauka, 3),
