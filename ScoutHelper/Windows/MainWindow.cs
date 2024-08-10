@@ -47,9 +47,9 @@ public class MainWindow : Window, IDisposable {
 
 	private readonly Lazy<Vector2> _buttonSize;
 	private readonly IList<string> _notices;
-	private readonly float _noticeFrameHeight;
-	private readonly float _noticeFrameWrap;
-	private readonly float _noticeFrameBorderSize;
+	private readonly Lazy<float> _noticeFrameHeight;
+	private readonly Lazy<float> _noticeFrameWrap;
+	private readonly Lazy<float> _noticeFrameBorderSize;
 	private readonly Lazy<Vector2> _noticeAckButtonPos;
 	private readonly ISet<int> _alreadyContributedMobs = new HashSet<int>();
 
@@ -122,32 +122,36 @@ public class MainWindow : Window, IDisposable {
 
 		_notices = Constants.Notices;
 
-		var style = ImGui.GetStyle();
-		_noticeFrameBorderSize = ImGuiHelpers.GlobalScale * (NoticeHasBorder ? 1 : 0);
-		_noticeFrameWrap = new[] {
-			_buttonSize.Value.X,
-			-2 * style.FramePadding.X,
-			-ImGui.CalcTextSize(NoticeBulletChar).X,
-		}.Sum();
-		var noticeAckButtonSize = ImGuiHelpers.GetButtonSize(Strings.MainWindowNoticesAck);
-		_noticeFrameHeight = new[] {
-			2 * style.FramePadding.Y,
-			ImGui.CalcTextSize(Strings.MainWindowSectionLabelNotices).Y,
-			4 * style.ItemSpacing.Y,
-			noticeAckButtonSize.Y,
-			2 * _noticeFrameBorderSize,
-			_notices
-				.Select(
-					notice =>
-						ImGui.CalcTextSize(notice, _noticeFrameWrap).Y
-						+ style.ItemSpacing.Y
-				)
-				.Sum(),
-		}.Sum();
+		_noticeFrameBorderSize = new Lazy<float>(() => ImGuiHelpers.GlobalScaleSafe * (NoticeHasBorder ? 1 : 0));
+		_noticeFrameWrap = new Lazy<float>(
+			() => new[] {
+				_buttonSize.Value.X,
+				-2 * ImGui.GetStyle().FramePadding.X,
+				-ImGui.CalcTextSize(NoticeBulletChar).X,
+			}.Sum()
+		);
+		var noticeAckButtonSize = new Lazy<Vector2>(() => ImGuiHelpers.GetButtonSize(Strings.MainWindowNoticesAck));
+		_noticeFrameHeight = new Lazy<float>(
+			() => new[] {
+				2 * ImGui.GetStyle().FramePadding.Y,
+				ImGui.CalcTextSize(Strings.MainWindowSectionLabelNotices).Y,
+				4 * ImGui.GetStyle().ItemSpacing.Y,
+				noticeAckButtonSize.Value.Y,
+				2 * _noticeFrameBorderSize.Value,
+				_notices
+					.Select(
+						notice =>
+							ImGui.CalcTextSize(notice, _noticeFrameWrap.Value).Y
+							+ ImGui.GetStyle().ItemSpacing.Y
+					)
+					.Sum(),
+			}.Sum()
+		);
 		_noticeAckButtonPos = new Lazy<Vector2>(
 			() => V2(
-				(_buttonSize.Value.X - noticeAckButtonSize.X) / 2,
-				_noticeFrameHeight - noticeAckButtonSize.Y - style.FramePadding.Y - 2 * _noticeFrameBorderSize
+				(_buttonSize.Value.X - noticeAckButtonSize.Value.X) / 2,
+				_noticeFrameHeight.Value - noticeAckButtonSize.Value.Y - ImGui.GetStyle().FramePadding.Y -
+				2 * _noticeFrameBorderSize.Value
 			)
 		);
 
@@ -183,7 +187,7 @@ public class MainWindow : Window, IDisposable {
 				() => {
 					var startedChildFrame = ImGui.BeginChildFrame(
 						ImGui.GetID("notice panel"),
-						_buttonSize.Value.WithY(_noticeFrameHeight),
+						_buttonSize.Value.WithY(_noticeFrameHeight.Value),
 						ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.AlwaysAutoResize
 					);
 					if (!startedChildFrame) return;
@@ -203,7 +207,7 @@ public class MainWindow : Window, IDisposable {
 										ImGui.Text(NoticeBulletChar);
 
 										ImGui.TableNextColumn();
-										ImGui.PushTextWrapPos(_noticeFrameWrap + ImGui.GetCursorPosX());
+										ImGui.PushTextWrapPos(_noticeFrameWrap.Value + ImGui.GetCursorPosX());
 										ImGui.TextWrapped(notice);
 										ImGui.PopTextWrapPos();
 									}
@@ -216,10 +220,9 @@ public class MainWindow : Window, IDisposable {
 					ImGui.Dummy(2 * V2(0, ImGui.GetStyle().ItemSpacing.Y));
 					ImGuiPlus
 						.WithStyle(ImGuiCol.Text, _noticeAckButtonColor)
-						.WithStyle(ImGuiStyleVar.FrameBorderSize, _noticeFrameBorderSize)
+						.WithStyle(ImGuiStyleVar.FrameBorderSize, _noticeFrameBorderSize.Value)
 						.Do(
 							() => {
-								var buttonSize = ImGuiHelpers.GetButtonSize(Strings.MainWindowNoticesAck);
 								ImGui.SetCursorPos(_noticeAckButtonPos.Value);
 								if (!ImGui.Button(Strings.MainWindowNoticesAck)) return;
 
