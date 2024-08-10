@@ -4,7 +4,7 @@
 		<Authors>ditzy</Authors>
 		<Version>1.5.5.0</Version>
 		<Description>A helper plugin for pre-populating hunt train scout tracker links</Description>
-		<PackageProjectUrl>https://github.com/im-scared/scout-helper</PackageProjectUrl>
+		<PackageProjectUrl>https://github.com/dit-zy/scout-helper</PackageProjectUrl>
 		<PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
 		<IsPackable>false</IsPackable>
 	</PropertyGroup>
