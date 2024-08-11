@@ -5,6 +5,8 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using CSharpFunctionalExtensions;
+using Dalamud.Interface;
+using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
@@ -29,6 +31,7 @@ public class ConfigWindow : Window, IDisposable {
 		.ToImmutableList();
 
 	private static readonly uint InputScalarStep = 1U;
+	private static readonly Configuration DefaultConf = new();
 
 	private readonly IClientState _clientState;
 	private readonly IPluginLog _log;
@@ -109,6 +112,71 @@ public class ConfigWindow : Window, IDisposable {
 	}
 
 	private void DrawTweaksTab() {
+		DrawTweaksTrackerConfigs();
+		ImGuiPlus.Separator();
+		DrawTweaksInstances();
+	}
+
+	private void DrawTweaksTrackerConfigs() {
+		ImGuiPlus.Heading("TRACKERS");
+		DrawParagraphSpacing();
+
+		ImGui.TextWrapped("reconfigure various internal values associated with the different trackers.");
+		DrawParagraphSpacing();
+		ImGui.TextWrapped(
+			"NOTE: when scout helper updates one of these values in a new version, those new values will override any customizations you have here."
+		);
+		DrawParagraphSpacing();
+
+		if (ImGui.Button("RESET ALL")) {
+			_conf.BearApiBaseUrl = DefaultConf.BearApiBaseUrl;
+			_conf.BearApiTrainPath = DefaultConf.BearApiTrainPath;
+			_conf.BearSiteTrainUrl = DefaultConf.BearSiteTrainUrl;
+			_conf.BearTrainName = DefaultConf.BearTrainName;
+			_conf.SirenBaseUrl = DefaultConf.SirenBaseUrl;
+			_conf.TurtleApiBaseUrl = DefaultConf.TurtleApiBaseUrl;
+			_conf.TurtleApiTrainPath = DefaultConf.TurtleApiTrainPath;
+			_conf.TurtleBaseUrl = DefaultConf.TurtleBaseUrl;
+			_conf.TurtleTrainPath = DefaultConf.TurtleTrainPath;
+		}
+		if (ImGui.IsItemHovered()) ImGuiPlus.CreateTooltip("reset all tracker configs to their defaults.");
+
+		if (ImGui.TreeNode("BEAR")) {
+			DrawConfigTextInput(nameof(Configuration.BearApiBaseUrl), ref _conf.BearApiBaseUrl);
+			DrawConfigTextInput(nameof(Configuration.BearApiTrainPath), ref _conf.BearApiTrainPath);
+			DrawConfigTextInput(nameof(Configuration.BearSiteTrainUrl), ref _conf.BearSiteTrainUrl);
+			DrawConfigTextInput(nameof(Configuration.BearTrainName), ref _conf.BearTrainName);
+			ImGui.TreePop();
+		}
+
+		if (ImGui.TreeNode("SIREN")) {
+			DrawConfigTextInput(nameof(Configuration.SirenBaseUrl), ref _conf.SirenBaseUrl);
+			ImGui.TreePop();
+		}
+
+		if (ImGui.TreeNode("TURTLE")) {
+			DrawConfigTextInput(nameof(Configuration.TurtleApiBaseUrl), ref _conf.TurtleApiBaseUrl);
+			DrawConfigTextInput(nameof(Configuration.TurtleApiTrainPath), ref _conf.TurtleApiTrainPath);
+			DrawConfigTextInput(nameof(Configuration.TurtleBaseUrl), ref _conf.TurtleBaseUrl);
+			DrawConfigTextInput(nameof(Configuration.TurtleTrainPath), ref _conf.TurtleTrainPath);
+			ImGui.TreePop();
+		}
+	}
+
+	private static void DrawConfigTextInput(string configName, ref string configRef) {
+		var defaultValue = (string)typeof(Configuration).GetField(configName)!.GetValue(DefaultConf)!;
+		ImGui.BeginDisabled(defaultValue == configRef);
+		if (ImGuiComponents.IconButton(FontAwesomeIcon.Undo)) {
+			configRef = defaultValue;
+		}
+		ImGui.EndDisabled();
+		if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+			ImGuiPlus.CreateTooltip($"reset to default:\n{defaultValue}", 20);
+		ImGui.SameLine();
+		ImGui.InputText(configName, ref configRef, 256);
+	}
+
+	private void DrawTweaksInstances() {
 		ImGuiPlus.Heading(Strings.ConfigWindowTweaksSectionLabelInstances);
 		DrawParagraphSpacing();
 
@@ -116,7 +184,7 @@ public class ConfigWindow : Window, IDisposable {
 		DrawParagraphSpacing();
 		ImGui.TextWrapped(Strings.ConfigWindowTweaksInstanceDescriptionNote);
 		DrawParagraphSpacing();
-		
+
 		if (ImGui.Button(Strings.ConfigWindowTweaksInstanceResetButton)) {
 			GetEnumValues<Territory>()
 				.SelectResults(
@@ -129,7 +197,7 @@ public class ConfigWindow : Window, IDisposable {
 				.UseToUpdate(_conf.Instances);
 		}
 		if (ImGui.IsItemHovered()) {
-			CreateTooltip(Strings.ConfigWindowTweaksInstanceResetTooltip);
+			ImGuiPlus.CreateTooltip(Strings.ConfigWindowTweaksInstanceResetTooltip);
 		}
 
 		var textSize = ImGui.CalcTextSize("8 ");
@@ -186,7 +254,7 @@ public class ConfigWindow : Window, IDisposable {
 			UpdateConfig();
 		}
 		if (ImGui.IsItemHovered()) {
-			CreateTooltip($"{Strings.ConfigWindowTemplateResetTooltip}:\n    {Constants.DefaultCopyTemplate}");
+			ImGuiPlus.CreateTooltip($"{Strings.ConfigWindowTemplateResetTooltip}:\n    {Constants.DefaultCopyTemplate}");
 		}
 	}
 

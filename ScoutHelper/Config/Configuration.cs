@@ -16,34 +16,34 @@ public class Configuration : IPluginConfiguration {
 
 	public int Version { get; set; } = 0;
 
-	public string BearApiBaseUrl { get; set; } = "https://tracker.beartoolkit.com/api/";
-	public string BearApiTrainPath { get; set; } = "hunttrain";
-	public TimeSpan BearApiTimeout { get; set; } = TimeSpan.FromSeconds(5);
-	public string BearSiteTrainUrl { get; set; } = "https://tracker.beartoolkit.com/train";
-	public string BearTrainName { get; set; } = "Scout Helper Train";
+	public string BearApiBaseUrl = "https://tracker.beartoolkit.com/api/";
+	public string BearApiTrainPath = "hunttrain";
+	public TimeSpan BearApiTimeout = TimeSpan.FromSeconds(5);
+	public string BearSiteTrainUrl = "https://tracker.beartoolkit.com/train";
+	public string BearTrainName = "Scout Helper Train";
 
-	public string SirenBaseUrl { get; set; } = "https://sirenhunts.com/scouting/";
+	public string SirenBaseUrl = "https://sirenhunts.com/scouting/";
 
-	public string TurtleBaseUrl { get; set; } = "https://scout.wobbuffet.net";
-	public string TurtleTrainPath { get; set; } = "/scout";
-	public string TurtleApiBaseUrl { get; set; } = "https://scout.wobbuffet.net";
-	public string TurtleApiTrainPath { get; set; } = "/api/v1/scout";
-	public TimeSpan TurtleApiTimeout { get; set; } = TimeSpan.FromSeconds(5);
+	public string TurtleBaseUrl = "https://scout.wobbuffet.net";
+	public string TurtleTrainPath = "/scout";
+	public string TurtleApiBaseUrl = "https://scout.wobbuffet.net";
+	public string TurtleApiTrainPath = "/api/v1/scout";
+	public TimeSpan TurtleApiTimeout = TimeSpan.FromSeconds(5);
 
-	public string CopyTemplate { get; set; } = Constants.DefaultCopyTemplate;
-	public bool IsCopyModeFullText { get; set; } = false;
+	public string CopyTemplate = Constants.DefaultCopyTemplate;
+	public bool IsCopyModeFullText = false;
 
-	[NotManaged] public DateTime LastPluginUpdate { get; set; } = DateTime.UnixEpoch;
-	[NotManaged] public DateTime LastNoticeAcknowledged { get; set; } = DateTime.UnixEpoch;
+	[NotManaged] public DateTime LastPluginUpdate = DateTime.UnixEpoch;
+	[NotManaged] public DateTime LastNoticeAcknowledged = DateTime.UnixEpoch;
 
 	[NotManaged]
 	[Obsolete("field no longer needed, but must remain for backwards compatibility")]
-	public DateTime LastInstancePatchUpdate { get; set; } = DateTime.UnixEpoch;
+	public DateTime LastInstancePatchUpdate = DateTime.UnixEpoch;
 
-	[NotManaged] public Dictionary<uint, uint> Instances { get; set; } = new();
-	[NotManaged] public (Territory, uint)[] LatestPatchInstances { get; set; } = Constants.LatestPatchInstances;
+	[NotManaged] public Dictionary<uint, uint> Instances = new();
+	[NotManaged] public (Territory, uint)[] LatestPatchInstances = Constants.LatestPatchInstances;
 
-	[NotManaged] public Dictionary<string, string?> ConfigDefaults { get; set; } = new();
+	[NotManaged] public Dictionary<string, string?> ConfigDefaults = new();
 
 	public void Initialize(IPluginLog log, IDalamudPluginInterface pluginInterface) {
 		_pluginInterface = pluginInterface;
@@ -56,13 +56,13 @@ public class Configuration : IPluginConfiguration {
 		var defaultConf = new Configuration();
 
 		typeof(Configuration)
-			.GetProperties()
-			.Where(propInfo => propInfo.CustomAttributes.All(attrData => attrData.AttributeType != typeof(NotManaged)))
+			.GetFields()
+			.Where(info => info.CustomAttributes.All(attrData => attrData.AttributeType != typeof(NotManaged)))
 			.ForEach(
-				propInfo => {
-					var currentDefault = propInfo.GetValue(defaultConf);
+				info => {
+					var currentDefault = info.GetValue(defaultConf);
 					var currentDefaultStr = currentDefault?.ToString();
-					var propName = propInfo.Name;
+					var propName = info.Name;
 
 					if (ConfigDefaults.TryGetValue(propName, out var prevDefault)
 						&& ActualValuesEqualBecauseMicrosoftHasBrainDamage(prevDefault, currentDefaultStr)
@@ -73,7 +73,7 @@ public class Configuration : IPluginConfiguration {
 
 					log.Debug("updating config [{0:l}] to the new default.", propName);
 					ConfigDefaults[propName] = currentDefaultStr;
-					propInfo.SetValue(this, currentDefault);
+					info.SetValue(this, currentDefault);
 				}
 			);
 

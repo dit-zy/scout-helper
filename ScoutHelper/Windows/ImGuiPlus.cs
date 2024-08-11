@@ -178,6 +178,14 @@ public static class ImGuiPlus {
 		ImGui.Dummy(dummySize);
 	}
 
+	public static void CreateTooltip(string text, float width = 12f) {
+		ImGui.BeginTooltip();
+		ImGui.PushTextWrapPos(ImGui.GetFontSize() * width);
+		ImGui.TextUnformatted(text);
+		ImGui.PopTextWrapPos();
+		ImGui.EndTooltip();
+	}
+
 	public static void Heading(string text, float scale = 1.25f, bool centered = false) {
 		var font = ImGui.GetFont();
 		var originalScale = font.Scale;
