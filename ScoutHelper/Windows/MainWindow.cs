@@ -5,6 +5,7 @@ using System.Numerics;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using Dalamud.Interface;
+using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
@@ -60,7 +61,6 @@ public class MainWindow : Window, IDisposable {
 	private Vector4 _noticeAckButtonColor = DangerFgColor;
 
 	// turtle stuff
-	private bool _isTurtleCollabbing = false;
 	private string _collabInput = "";
 	private string _collabLink = "";
 	private bool _closeTurtleCollabPopup = false;
@@ -348,10 +348,10 @@ public class MainWindow : Window, IDisposable {
 		);
 		if (ImGui.IsItemHovered())
 			ImGuiPlus.CreateTooltip(
-				_isTurtleCollabbing ? Strings.TurtleButtonActiveCollabTooltip : Strings.TurtleButtonTooltip
+				_turtleManager.IsTurtleCollabbing ? Strings.TurtleButtonActiveCollabTooltip : Strings.TurtleButtonTooltip
 			);
 		if (turtlePressed) {
-			if (_isTurtleCollabbing) {
+			if (_turtleManager.IsTurtleCollabbing) {
 				PushLatestMobsToTurtle();
 			} else {
 				_chat.TaggedPrint("Generating Turtle link...");
@@ -368,7 +368,7 @@ public class MainWindow : Window, IDisposable {
 
 		ImGui.SameLine();
 		ImGui.SetCursorPosX(ImGui.GetCursorPosX() - itemSpacing.X + itemSpacing.Y);
-		var collabColor = _isTurtleCollabbing
+		var collabColor = _turtleManager.IsTurtleCollabbing
 			? *ImGui.GetStyleColorVec4(ImGuiCol.ButtonActive)
 			: *ImGui.GetStyleColorVec4(ImGuiCol.Button);
 		var turtleCollabPressed = ImGuiPlus
@@ -381,22 +381,25 @@ public class MainWindow : Window, IDisposable {
 					ImDrawFlags.RoundCornersRight
 				)
 			);
-		if (ImGui.IsItemHovered())
-			ImGuiPlus.CreateTooltip(
-				_isTurtleCollabbing ? Strings.TurtleCollabButtonActiveTooltip : Strings.TurtleCollabButtonTooltip
-			);
-		if (turtleCollabPressed) {
-			if (_isTurtleCollabbing) _isTurtleCollabbing = false;
-			else {
-				ImGui.OpenPopup("turtle collab popup");
-			}
-		}
+		if (ImGui.IsItemHovered()) ImGuiPlus.CreateTooltip(Strings.TurtleCollabButtonTooltip);
+		if (turtleCollabPressed) ImGui.OpenPopup("turtle collab popup");
 	}
 
 	private void DrawTurtleCollabPopup() {
 		var contentWidth = 1.5f * _buttonSize.Value.X;
 		ImGui.PushTextWrapPos(contentWidth);
 
+		ImGuiPlus.Heading("SESSION", centered: true);
+		
+		ImGui.Checkbox("include name", ref _conf.IncludeNameInTurtleSession);
+		ImGui.SameLine();
+		ImGuiComponents.HelpMarker("share your character name in the turtle session, so others can see that you contributed.");
+		
+		ImGui.BeginDisabled(!_turtleManager.IsTurtleCollabbing);
+		if (ImGui.Button("LEAVE SESSION")) _turtleManager.LeaveCollabSession();
+		ImGui.EndDisabled();
+
+		ImGuiPlus.Separator();
 		ImGuiPlus.Heading("NEW", centered: true);
 		ImGui.TextWrapped("start a new scout session on turtle for other scouters to join and contribute to.");
 		if (ImGui.Button("START NEW SESSION", _buttonSize.Value with { X = contentWidth })) {
@@ -448,7 +451,6 @@ public class MainWindow : Window, IDisposable {
 				sessionInfo => {
 					_collabLink = $"{_conf.TurtleBaseUrl}{_conf.TurtleTrainPath}/{sessionInfo.slug}/{sessionInfo.password}";
 					_chat.TaggedPrint($"joined turtle session: {_collabLink}");
-					_isTurtleCollabbing = true;
 					_alreadyContributedMobs.Clear();
 				},
 				() => _chat.TaggedPrintError($"failed to parse collab link. please ensure it is a valid link.\n{collabLink}")

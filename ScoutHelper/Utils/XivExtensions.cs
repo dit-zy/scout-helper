@@ -15,6 +15,18 @@ public static partial class XivExtensions {
 	public static string WorldName(this IClientState clientState) =>
 		clientState.LocalPlayer?.CurrentWorld.GameData?.Name.ToString() ?? "Not Found";
 
+	public static Maybe<string> PlayerTag(this IClientState clientState) =>
+		clientState
+			.LocalPlayer
+			.AsMaybe()
+			.Select(
+				player => {
+					var playerName = player.Name.TextValue;
+					var worldName = player.HomeWorld.GameData?.Name?.RawString ?? "Unknown World";
+					return $"{playerName}@{worldName}";
+				}
+			);
+
 	public static string PluginFilePath(this IDalamudPluginInterface pluginInterface, string dataFilename) => Path.Combine(
 		pluginInterface.AssemblyLocation.Directory?.FullName!,
 		dataFilename

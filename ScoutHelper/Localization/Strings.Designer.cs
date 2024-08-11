@@ -358,16 +358,7 @@ namespace ScoutHelper.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to click to leave the current session..
-        /// </summary>
-        internal static string TurtleCollabButtonActiveTooltip {
-            get {
-                return ResourceManager.GetString("TurtleCollabButtonActiveTooltip", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to start or join a collaborative scouting session on turtle..
+        ///   Looks up a localized string similar to manage or join a collaborative turtle session..
         /// </summary>
         internal static string TurtleCollabButtonTooltip {
             get {

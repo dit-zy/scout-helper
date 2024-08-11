@@ -112,10 +112,7 @@
 		<value> COLLAB </value>
 	</data>
 	<data name="TurtleCollabButtonTooltip" xml:space="preserve">
-		<value>start or join a collaborative scouting session on turtle.</value>
-	</data>
-	<data name="TurtleCollabButtonActiveTooltip" xml:space="preserve">
-		<value>click to leave the current session.</value>
+		<value>manage or join a collaborative turtle session.</value>
 	</data>
 	<data name="ConfigWindowTweaksSectionLabelInstances" xml:space="preserve">
 		<value>INSTANCES</value>
