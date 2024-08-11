@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Numerics;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using Dalamud.Plugin.Services;
+using Dalamud.Utility;
 using Newtonsoft.Json;
 using ScoutHelper.Config;
 using ScoutHelper.Models;
@@ -27,10 +26,11 @@ using TerritoryDict = IDictionary<uint, TurtleMapData>;
 public partial class TurtleManager {
 	[GeneratedRegex(@"(?:/scout)?/?(?<session>\w+)/(?<password>\w+)/?\s*$")]
 	private static partial Regex CollabLinkRegex();
+	private static HttpClient HttpClient { get; } = new();
 
 	private readonly IPluginLog _log;
 	private readonly Configuration _conf;
-	private static HttpClient HttpClient { get; } = new();
+	private readonly IClientState _clientState;
 
 	private MobDict MobIdToTurtleId { get; }
 	private TerritoryDict TerritoryIdToTurtleData { get; }
@@ -38,15 +38,19 @@ public partial class TurtleManager {
 	private string _currentCollabSession = "";
 	private string _currentCollabPassword = "";
 
+	public bool IsTurtleCollabbing { get; private set; } = false;
+
 	public TurtleManager(
 		IPluginLog log,
 		Configuration conf,
+		IClientState clientState,
 		ScoutHelperOptions options,
 		TerritoryManager territoryManager,
 		MobManager mobManager
 	) {
 		_log = log;
 		_conf = conf;
+		_clientState = clientState;
 
 		HttpClient.BaseAddress = new Uri(_conf.TurtleApiBaseUrl);
 		HttpClient.DefaultRequestHeaders.UserAgent.Add(Constants.UserAgent);
@@ -62,8 +66,17 @@ public partial class TurtleManager {
 
 		_currentCollabSession = match.Groups["session"].Value;
 		_currentCollabPassword = match.Groups["password"].Value;
+		IsTurtleCollabbing = true;
 		return (_currentCollabSession, _currentCollabPassword);
 	}
+
+	public void RejoinLastCollabSession() {
+		if (_currentCollabSession.IsNullOrEmpty() || _currentCollabPassword.IsNullOrEmpty())
+			throw new Exception("cannot rejoin the last turtle collab session as there is no last session.");
+		IsTurtleCollabbing = true;
+	}
+
+	public void LeaveCollabSession() => IsTurtleCollabbing = false;
 
 	public async Task<TurtleHttpStatus> UpdateCurrentSession(IList<TrainMob> train) {
 		var turtleSupportedMobs = train.Where(mob => MobIdToTurtleId.ContainsKey(mob.MobId)).AsList();
@@ -75,6 +88,7 @@ public partial class TurtleManager {
 				_log,
 				new TurtleTrainUpdateRequest(
 					_currentCollabPassword,
+					_clientState.PlayerTag().Where(_ => _conf.IncludeNameInTurtleSession),
 					turtleSupportedMobs.Select(
 						mob =>
 							(TerritoryIdToTurtleData[mob.TerritoryId].TurtleId,
@@ -83,7 +97,7 @@ public partial class TurtleManager {
 								mob.Position)
 					)
 				),
-				requestContent => HttpClient.PutAsync($"{_conf.TurtleApiTrainPath}/{_currentCollabSession}", requestContent)
+				requestContent => HttpClient.PatchAsync($"{_conf.TurtleApiTrainPath}/{_currentCollabSession}", requestContent)
 			).TapError(
 				error => {
 					if (error.ErrorType == HttpErrorType.Timeout) {

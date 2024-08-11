@@ -10,6 +10,12 @@ using ScoutHelper.Models.Http;
 namespace ScoutHelper.Utils;
 
 public static class HttpUtils {
+	private static readonly JsonSerializerSettings JsonSerializerSettings = new() {
+		DateFormatString = "yyyy'-'MM'-'dd'T'HH':'mm':'ssK",
+		DateTimeZoneHandling = DateTimeZoneHandling.Utc,
+		NullValueHandling = NullValueHandling.Ignore,
+	};
+
 	public static Task<Result<U, HttpError>> DoRequest<T, U>(
 		IPluginLog log,
 		T requestObject,
@@ -31,13 +37,13 @@ public static class HttpUtils {
 		Func<HttpContent, Task<HttpResponseMessage>> requestAction
 	) {
 		try {
-			var requestPayload = JsonConvert.SerializeObject(requestObject);
-			log.Debug("Request body: {0}", requestPayload);
+			var requestPayload = JsonConvert.SerializeObject(requestObject, JsonSerializerSettings);
+			log.Debug("Request body: {0:l}", requestPayload);
 			var requestContent = new StringContent(requestPayload, Encoding.UTF8, Constants.MediaTypeJson);
 
 			var response = await requestAction(requestContent);
 			log.Debug(
-				"Request: {0}\n\nResponse: {1}",
+				"Request: {0:l}\n\nResponse: {1:l}",
 				response.RequestMessage!.ToString(),
 				response.ToString()
 			);
@@ -45,7 +51,7 @@ public static class HttpUtils {
 			response.EnsureSuccessStatusCode();
 
 			var responseJson = await response.Content.ReadAsStringAsync();
-			log.Debug("Response body: {0}", responseJson);
+			log.Debug("Response body: {0:l}", responseJson);
 			return responseJson;
 		} catch (TimeoutException) {
 			return new HttpError(HttpErrorType.Timeout);

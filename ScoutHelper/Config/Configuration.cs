@@ -29,6 +29,7 @@ public class Configuration : IPluginConfiguration {
 	public string TurtleApiBaseUrl = "https://scout.wobbuffet.net";
 	public string TurtleApiTrainPath = "/api/v1/scout";
 	public TimeSpan TurtleApiTimeout = TimeSpan.FromSeconds(5);
+	public bool IncludeNameInTurtleSession = true;
 
 	public string CopyTemplate = Constants.DefaultCopyTemplate;
 	public bool IsCopyModeFullText = false;
