@@ -23,14 +23,14 @@ namespace ScoutHelper.Managers;
 using MobDict = IDictionary<uint, (Patch patch, uint turtleMobId)>;
 using TerritoryDict = IDictionary<uint, TurtleMapData>;
 
-public partial class TurtleManager {
+public partial class TurtleManager : IDisposable {
 	[GeneratedRegex(@"(?:/scout)?/?(?<session>\w+)/(?<password>\w+)/?\s*$")]
 	private static partial Regex CollabLinkRegex();
-	private static HttpClient HttpClient { get; } = new();
 
 	private readonly IPluginLog _log;
 	private readonly Configuration _conf;
 	private readonly IClientState _clientState;
+	private readonly HttpClient _httpClient = new();
 
 	private MobDict MobIdToTurtleId { get; }
 	private TerritoryDict TerritoryIdToTurtleData { get; }
@@ -52,12 +52,14 @@ public partial class TurtleManager {
 		_conf = conf;
 		_clientState = clientState;
 
-		HttpClient.BaseAddress = new Uri(_conf.TurtleApiBaseUrl);
-		HttpClient.DefaultRequestHeaders.UserAgent.Add(Constants.UserAgent);
-		HttpClient.Timeout = _conf.TurtleApiTimeout;
-
 		(MobIdToTurtleId, TerritoryIdToTurtleData)
 			= LoadData(options.TurtleDataFile, territoryManager, mobManager);
+	}
+
+	public void Dispose() {
+		_httpClient.Dispose();
+
+		GC.SuppressFinalize(this);
 	}
 
 	public Maybe<(string slug, string password)> JoinCollabSession(string sessionLink) {
@@ -86,6 +88,8 @@ public partial class TurtleManager {
 		var httpResult = await
 			HttpUtils.DoRequest(
 				_log,
+				_httpClient,
+				_conf.TurtleApiBaseUrl,
 				new TurtleTrainUpdateRequest(
 					_currentCollabPassword,
 					_clientState.PlayerTag().Where(_ => _conf.IncludeNameInTurtleSession),
@@ -97,7 +101,10 @@ public partial class TurtleManager {
 								mob.Position)
 					)
 				),
-				requestContent => HttpClient.PatchAsync($"{_conf.TurtleApiTrainPath}/{_currentCollabSession}", requestContent)
+				(client, content) => {
+					client.Timeout = _conf.TurtleApiTimeout;
+					return client.PatchAsync($"{_conf.TurtleApiTrainPath}/{_currentCollabSession}", content);
+				}
 			).TapError(
 				error => {
 					if (error.ErrorType == HttpErrorType.Timeout) {
@@ -130,37 +137,23 @@ public partial class TurtleManager {
 				.Select(mob => MobIdToTurtleId[mob.MobId].patch)
 				.Max();
 
-		var trainResult = await HttpUtils.DoRequest<TurtleTrainRequest, TurtleTrainResponse>(
-			_log,
-			TurtleTrainRequest.CreateRequest(spawnPoints),
-			requestContent => HttpClient.PostAsync(_conf.TurtleApiTrainPath, requestContent)
-		);
-
-		return trainResult
-			.Map(trainInfo => TurtleLinkData.From(trainInfo, highestPatch))
-			.MapError<TurtleLinkData, HttpError, string>(
-				error => {
-					string message;
-					switch (error.ErrorType) {
-						case HttpErrorType.Timeout: {
-							message = "Timed out posting the train to Turtle ;-;";
-							_log.Error(message);
-							return message;
-						}
-						case HttpErrorType.Canceled: {
-							message = "Generating the Turtle link was canceled >_>";
-							_log.Warning(message);
-							return message;
-						}
-						case HttpErrorType.HttpException:
-							_log.Error(error.Exception, "Posting the train to Turtle failed.");
-							return "Something failed when communicating with Turtle :T";
-						default:
-							message = "An unknown error happened while generating the Turtle link D:";
-							_log.Error(error.Exception, message);
-							return message;
-					}
-				}
+		return await HttpUtils.DoRequest<TurtleTrainRequest, TurtleTrainResponse, TurtleLinkData>(
+				_log,
+				_httpClient,
+				_conf.TurtleApiBaseUrl,
+				TurtleTrainRequest.CreateRequest(spawnPoints),
+				(client, content) => {
+					client.Timeout = _conf.TurtleApiTimeout;
+					return client.PostAsync(_conf.TurtleApiTrainPath, content);
+				},
+				trainResponse => TurtleLinkData.From(trainResponse, highestPatch)
+			)
+			.HandleHttpError(
+				_log,
+				"timed out posting the train to turtle ;-;",
+				"generating the turtle link was canceled >_>",
+				"something failed when communicating with turtle :T",
+				"an unknown error happened while generating the turtle link D:"
 			);
 	}
 
@@ -292,6 +285,6 @@ public record struct TurtleLinkData(
 
 public static class TurtleExtensions {
 	public static uint AsTurtleInstance(this uint? instance) {
-		return instance is null or 0 ? 1 : (uint)instance!;
+		return instance is null or 0 ? 1 : (uint)instance;
 	}
 }
