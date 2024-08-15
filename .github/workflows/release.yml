@@ -1,0 +1,98 @@
+name: release plugin
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'what kind of release is this?'
+        type: choice
+        required: true
+        default: 'PATCH'
+        options:
+        - MAJOR
+        - MINOR
+        - PATCH
+        - promote to stable
+      open_pr:
+        description: 'should a pr be opened for the deployment?'
+        type: boolean
+        required: false
+        default: false
+
+env:
+  public_name: 'ScoutHelper'
+  internal_name: 'ScoutHelper'
+  project_dir: 'ScoutHelper'
+  project_name: 'ScoutHelper'
+  owners: 'dit-zy,zw3lf'
+  github_username: 'dit-zy'
+  github_email: 'dit.zy@pm.com'
+  force_push: true
+
+jobs:
+  prepare-release:
+    runs-on: ubuntu-latest
+    steps:
+    - name: configure inputs
+      id: configure-inputs
+      env:
+        RELEASE_TYPE: ${{ inputs.release_type }}
+      run: |
+        if [[ $RELEASE_TYPE == promote* ]]; then
+          echo "version_change=NONE" >> $GITHUB_OUTPUT
+          echo "deployment_type=stable" >> $GITHUB_OUTPUT
+        else
+          echo "version_change=$RELEASE_TYPE" >> $GITHUB_OUTPUT
+          echo "deployment_type=testing" >> $GITHUB_OUTPUT
+        fi
+    outputs:
+      version_change: ${{ steps.configure-inputs.outputs.version_change }}
+      deployment_type: ${{ steps.configure-inputs.outputs.deployment_type }}
+
+  release-plugin:
+    uses: dit-zy/DalamudPluginDeploy/.github/workflows/create_release.yml@v1
+    needs: prepare-deploy
+    with:
+      public_name: ${{ env.public_name }}
+      internal_name: ${{ env.internal_name }}
+      project_dir: ${{ env.project_dir }}
+      project_name: ${{ env.project_name }}
+      version_change: ${{ needs.prepare-deploy.outputs.version_change }}
+      github_username: ${{ env.github_username }}
+      github_email: ${{ env.github_email }}
+      force_push: ${{ env.force_push }}
+  
+  deploy-plugin:
+    runs-on: ubuntu-latest
+    needs: [ prepare-deploy, release-plugin ]
+    env:
+      repo_owner: dit-zy
+      repo_name: DalamudPluginsD17
+      event_type: trigger-workflow
+      new_version: ${{ needs.release-plugin.outputs.new_version }}
+      release_sha: ${{ needs.release-plugin.outputs.release_sha }}
+      deployment_type: ${{ needs.prepare-deploy.outputs.deployment_type }}
+    steps:
+    - name: trigger 
+      uses: actions/github-script@v7
+      env:
+        GITHUB_TOKEN: ${{ secrets.PAT }}
+      with:
+        script: |
+          github.rest.repos.createDispatchEvent({
+            ${{ env.repo_owner }},
+            ${{ env.repo_name }},
+            ${{ env.event_type }},
+            client_payload: {
+              public_name: ${{ env.public_name }}
+              internal_name: ${{ env.internal_name }}
+              project_name: ${{ env.project_name }}
+              project_repo: ${{ env.project_repo }}
+              release_sha: ${{ env.release_sha }}
+              deployment_type: ${{ env.deployment_type }}
+              owners: ${{ env.owners }}
+              open_pr: ${{ env.open_pr }}
+              github_username: ${{ env.github_username }}
+              github_email: ${{ env.github_email }}
+            }
+          });
