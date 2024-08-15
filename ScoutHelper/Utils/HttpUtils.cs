@@ -16,16 +16,19 @@ public static class HttpUtils {
 		NullValueHandling = NullValueHandling.Ignore,
 	};
 
-	public static Task<Result<U, HttpError>> DoRequest<T, U>(
+	public static Task<Result<R, HttpError>> DoRequest<T, U, R>(
 		IPluginLog log,
+		HttpClient client,
+		string baseUrl,
 		T requestObject,
-		Func<HttpContent, Task<HttpResponseMessage>> requestAction
+		Func<HttpClient, HttpContent, Task<HttpResponseMessage>> requestAction,
+		Func<U, R> responseTransform
 	) =>
-		DoRequest(log, requestObject, requestAction)
+		DoRequest(log, client, baseUrl, requestObject, requestAction)
 			.Then(
-				result => result.Bind<string, U, HttpError>(
+				result => result.Bind<string, R, HttpError>(
 					responseJson => Utils.Try(
-						() => JsonConvert.DeserializeObject<U>(responseJson)!,
+						() => responseTransform(JsonConvert.DeserializeObject<U>(responseJson)!),
 						e => new HttpError(HttpErrorType.Unknown, e)
 					)
 				)
@@ -33,15 +36,20 @@ public static class HttpUtils {
 
 	public static async Task<Result<string, HttpError>> DoRequest<T>(
 		IPluginLog log,
+		HttpClient client,
+		string baseUrl,
 		T requestObject,
-		Func<HttpContent, Task<HttpResponseMessage>> requestAction
+		Func<HttpClient, HttpContent, Task<HttpResponseMessage>> requestAction
 	) {
 		try {
 			var requestPayload = JsonConvert.SerializeObject(requestObject, JsonSerializerSettings);
 			log.Debug("Request body: {0:l}", requestPayload);
 			var requestContent = new StringContent(requestPayload, Encoding.UTF8, Constants.MediaTypeJson);
 
-			var response = await requestAction(requestContent);
+			client.BaseAddress = new Uri(baseUrl);
+			client.DefaultRequestHeaders.UserAgent.Add(Constants.UserAgent);
+			client.DefaultRequestHeaders.Accept.Add(Constants.MediaTypeJson);
+			var response = await requestAction(client, requestContent);
 			log.Debug(
 				"Request: {0:l}\n\nResponse: {1:l}",
 				response.RequestMessage!.ToString(),

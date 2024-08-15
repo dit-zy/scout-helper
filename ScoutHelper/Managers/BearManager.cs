@@ -4,7 +4,6 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using Dalamud.Plugin.Services;
@@ -12,19 +11,15 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ScoutHelper.Config;
 using ScoutHelper.Models;
+using ScoutHelper.Models.Http;
+using ScoutHelper.Utils;
 
 namespace ScoutHelper.Managers;
 
 public class BearManager : IDisposable {
 	private readonly IPluginLog _log;
 	private readonly Configuration _conf;
-
-	private static readonly JsonSerializerSettings JsonSerializerSettings = new JsonSerializerSettings() {
-		DateFormatString = "yyyy'-'MM'-'dd'T'HH':'mm':'ssK",
-		DateTimeZoneHandling = DateTimeZoneHandling.Utc
-	};
-
-	private static HttpClient HttpClient { get; } = new();
+	private readonly HttpClient _httpClient = new();
 
 	private IDictionary<uint, (Patch patch, string name)> MobIdToBearName { get; init; }
 
@@ -32,15 +27,11 @@ public class BearManager : IDisposable {
 		_log = log;
 		_conf = conf;
 
-		HttpClient.BaseAddress = new Uri(_conf.BearApiBaseUrl);
-		HttpClient.DefaultRequestHeaders.UserAgent.Add(Constants.UserAgent);
-		HttpClient.Timeout = _conf.BearApiTimeout;
-
 		MobIdToBearName = LoadData(options.BearDataFile);
 	}
 
 	public void Dispose() {
-		HttpClient.Dispose();
+		_httpClient.Dispose();
 
 		GC.SuppressFinalize(this);
 	}
@@ -51,7 +42,7 @@ public class BearManager : IDisposable {
 	) {
 		var bearSupportedMobs = trainMobs.Where(mob => MobIdToBearName.ContainsKey(mob.MobId)).ToList();
 		if (bearSupportedMobs.Count == 0)
-			return "No mobs supported by Bear Toolkit were found in the Hunt Helper train recorder ;-;";
+			return "no mobs supported by bear toolkit were found in the hunt helper train recorder ;-;";
 
 		var spawnPoints = bearSupportedMobs.Select(CreateRequestSpawnPoint).ToList();
 		var highestPatch = bearSupportedMobs
@@ -59,44 +50,28 @@ public class BearManager : IDisposable {
 			.Distinct()
 			.Max();
 
-		var requestPayload = JsonConvert.SerializeObject(
-			new BearApiTrainRequest(worldName, _conf.BearTrainName, highestPatch.BearName(), spawnPoints),
-			JsonSerializerSettings
-		);
-		_log.Debug("Request payload: {0:l}", requestPayload);
-		var requestContent = new StringContent(requestPayload, Encoding.UTF8, Constants.MediaTypeJson);
-
-		try {
-			var response = await HttpClient.PostAsync(_conf.BearApiTrainPath, requestContent);
-			_log.Debug(
-				"Request: {0}\n\nResponse: {1}",
-				response.RequestMessage!.ToString(),
-				response.ToString()
+		return await HttpUtils.DoRequest<BearApiTrainRequest, BearApiTrainResponse, BearLinkData>(
+				_log,
+				_httpClient,
+				_conf.BearApiBaseUrl,
+				new BearApiTrainRequest(worldName, _conf.BearTrainName, highestPatch.BearName(), spawnPoints),
+				(client, content) => {
+					client.Timeout = _conf.BearApiTimeout;
+					return client.PostAsync(_conf.BearApiTrainPath, content);
+				},
+				bearResponse => new BearLinkData(
+					$"{_conf.BearSiteTrainUrl}/{bearResponse.Trains.First().TrainId}",
+					bearResponse.Trains.First().Password,
+					highestPatch
+				)
+			)
+			.HandleHttpError(
+				_log,
+				"timed out posting the train to bear ;-;",
+				"generating the bear link was canceled >_>",
+				"something failed when communicating with bear :T",
+				"an unknown error happened while generating the bear link D:"
 			);
-
-			response.EnsureSuccessStatusCode();
-
-			var responseJson = await response.Content.ReadAsStringAsync();
-			var trainInfo = JsonConvert.DeserializeObject<BearApiTrainResponse>(responseJson).Trains.First();
-
-			var url = $"{_conf.BearSiteTrainUrl}/{trainInfo.TrainId}";
-			return new BearLinkData(url, trainInfo.Password, highestPatch);
-		} catch (TimeoutException) {
-			const string message = "Timed out posting the train to Bear ;-;";
-			_log.Error(message);
-			return message;
-		} catch (OperationCanceledException e) {
-			const string message = "Generating the Bear link was canceled >_>";
-			_log.Warning(e, message);
-			return message;
-		} catch (HttpRequestException e) {
-			_log.Error(e, "Posting the train to Bear failed.");
-			return "Something failed when communicating with Bear :T";
-		} catch (Exception e) {
-			const string message = "An unknown error happened while generating the Bear link D:";
-			_log.Error(e, message);
-			return message;
-		}
 	}
 
 	private BearApiSpawnPoint CreateRequestSpawnPoint(TrainMob mob) {
