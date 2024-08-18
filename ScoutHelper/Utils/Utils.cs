@@ -144,5 +144,7 @@ public static partial class Utils {
 	public static bool ActualValuesEqualBecauseMicrosoftHasBrainDamage(object? objA, object? objB) =>
 		Equals(objA, objB) || Equals(JsonConvert.SerializeObject(objA), JsonConvert.SerializeObject(objB));
 
+	public static Uri AsUri(this string str) => new(str);
+
 	#endregion
 }
