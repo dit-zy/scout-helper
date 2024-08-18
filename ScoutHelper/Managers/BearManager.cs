@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using Dalamud.Plugin.Services;
@@ -19,7 +18,7 @@ namespace ScoutHelper.Managers;
 public class BearManager : IDisposable {
 	private readonly IPluginLog _log;
 	private readonly Configuration _conf;
-	private readonly HttpClient _httpClient = new();
+	private readonly HttpClientGenerator _httpClientGenerator;
 
 	private IDictionary<uint, (Patch patch, string name)> MobIdToBearName { get; init; }
 
@@ -27,11 +26,17 @@ public class BearManager : IDisposable {
 		_log = log;
 		_conf = conf;
 
+		_httpClientGenerator = new HttpClientGenerator(
+			_log,
+			() => _conf.BearApiBaseUrl,
+			client => client.Timeout = _conf.BearApiTimeout
+		);
+
 		MobIdToBearName = LoadData(options.BearDataFile);
 	}
 
 	public void Dispose() {
-		_httpClient.Dispose();
+		_httpClientGenerator.Dispose();
 
 		GC.SuppressFinalize(this);
 	}
@@ -52,13 +57,8 @@ public class BearManager : IDisposable {
 
 		return await HttpUtils.DoRequest<BearApiTrainRequest, BearApiTrainResponse, BearLinkData>(
 				_log,
-				_httpClient,
-				_conf.BearApiBaseUrl,
 				new BearApiTrainRequest(worldName, _conf.BearTrainName, highestPatch.BearName(), spawnPoints),
-				(client, content) => {
-					client.Timeout = _conf.BearApiTimeout;
-					return client.PostAsync(_conf.BearApiTrainPath, content);
-				},
+				(content) => _httpClientGenerator.Client.PostAsync(_conf.BearApiTrainPath, content),
 				bearResponse => new BearLinkData(
 					$"{_conf.BearSiteTrainUrl}/{bearResponse.Trains.First().TrainId}",
 					bearResponse.Trains.First().Password,

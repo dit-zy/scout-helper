@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
@@ -30,7 +29,7 @@ public partial class TurtleManager : IDisposable {
 	private readonly IPluginLog _log;
 	private readonly Configuration _conf;
 	private readonly IClientState _clientState;
-	private readonly HttpClient _httpClient = new();
+	private readonly HttpClientGenerator _httpClientGenerator;
 
 	private MobDict MobIdToTurtleId { get; }
 	private TerritoryDict TerritoryIdToTurtleData { get; }
@@ -52,12 +51,18 @@ public partial class TurtleManager : IDisposable {
 		_conf = conf;
 		_clientState = clientState;
 
+		_httpClientGenerator = new HttpClientGenerator(
+			_log,
+			() => _conf.TurtleApiBaseUrl,
+			client => client.Timeout = _conf.TurtleApiTimeout
+		);
+
 		(MobIdToTurtleId, TerritoryIdToTurtleData)
 			= LoadData(options.TurtleDataFile, territoryManager, mobManager);
 	}
 
 	public void Dispose() {
-		_httpClient.Dispose();
+		_httpClientGenerator.Dispose();
 
 		GC.SuppressFinalize(this);
 	}
@@ -88,8 +93,6 @@ public partial class TurtleManager : IDisposable {
 		var httpResult = await
 			HttpUtils.DoRequest(
 				_log,
-				_httpClient,
-				_conf.TurtleApiBaseUrl,
 				new TurtleTrainUpdateRequest(
 					_currentCollabPassword,
 					_clientState.PlayerTag().Where(_ => _conf.IncludeNameInTurtleSession),
@@ -101,10 +104,7 @@ public partial class TurtleManager : IDisposable {
 								mob.Position)
 					)
 				),
-				(client, content) => {
-					client.Timeout = _conf.TurtleApiTimeout;
-					return client.PatchAsync($"{_conf.TurtleApiTrainPath}/{_currentCollabSession}", content);
-				}
+				( content) => _httpClientGenerator.Client.PatchAsync($"{_conf.TurtleApiTrainPath}/{_currentCollabSession}", content)
 			).TapError(
 				error => {
 					if (error.ErrorType == HttpErrorType.Timeout) {
@@ -139,13 +139,8 @@ public partial class TurtleManager : IDisposable {
 
 		return await HttpUtils.DoRequest<TurtleTrainRequest, TurtleTrainResponse, TurtleLinkData>(
 				_log,
-				_httpClient,
-				_conf.TurtleApiBaseUrl,
 				TurtleTrainRequest.CreateRequest(spawnPoints),
-				(client, content) => {
-					client.Timeout = _conf.TurtleApiTimeout;
-					return client.PostAsync(_conf.TurtleApiTrainPath, content);
-				},
+				( content) => _httpClientGenerator.Client.PostAsync(_conf.TurtleApiTrainPath, content),
 				trainResponse => TurtleLinkData.From(trainResponse, highestPatch)
 			)
 			.HandleHttpError(
