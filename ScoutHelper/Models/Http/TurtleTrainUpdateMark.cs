@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
 using FFXIVClientStructs.FFXIV.Common.Math;
 using Newtonsoft.Json;
 
@@ -15,7 +16,7 @@ public record struct TurtleTrainUpdateMark {
 		ZoneId = zoneId;
 		Instance = (uint)((instance ?? 0) < 1 ? 1 : instance!);
 		MobId = mobId;
-		X = position.X.ToString("F2");
-		Y = position.Y.ToString("F2");
+		X = position.X.ToString("F2", CultureInfo.InvariantCulture);
+		Y = position.Y.ToString("F2", CultureInfo.InvariantCulture);
 	}
 }
