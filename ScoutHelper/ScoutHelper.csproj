@@ -10,8 +10,12 @@
 	</PropertyGroup>
 
 	<ItemGroup Label="dependencies">
-		<PackageReference Include="CSharpFunctionalExtensions" Version="2.40.3"/>
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0"/>
+
+		<PackageReference Include="CSharpFunctionalExtensions" Version="2.42.5"/>
+		<PackageReference Include="DitzyExtensions" Version="1.2.0"/>
+		<PackageReference Include="XIVHuntUtils" Version="1.1.0"/>
+		
 		<ProjectReference Include="..\OtterGui\OtterGui.csproj"/>
 	</ItemGroup>
 

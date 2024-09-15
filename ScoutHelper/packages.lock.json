@@ -4,15 +4,24 @@
     "net8.0-windows7.0": {
       "CSharpFunctionalExtensions": {
         "type": "Direct",
-        "requested": "[2.40.3, )",
-        "resolved": "2.40.3",
-        "contentHash": "G+t+bf39aixVFN3O3Q5LoE0zy3o8QlV3mv3ATw76XwDRWkE9eFRLzZdx9HH9fgbPpasfP4kr8cnnXIP+Z7GcrQ=="
+        "requested": "[2.42.5, )",
+        "resolved": "2.42.5",
+        "contentHash": "Do9Q7Nyfx2G4HRt96aB6yoP5Z9ic3jqBHLrf35tULzsWlFoBlkQZT62aXCiv7UmVmF56OUR+a3JoSSs140hfHQ=="
       },
       "DalamudPackager": {
         "type": "Direct",
         "requested": "[2.1.13, )",
         "resolved": "2.1.13",
         "contentHash": "rMN1omGe8536f4xLMvx9NwfvpAc9YFFfeXJ1t4P4PE6Gu8WCIoFliR1sh07hM+bfODmesk/dvMbji7vNI+B/pQ=="
+      },
+      "DitzyExtensions": {
+        "type": "Direct",
+        "requested": "[1.2.0, )",
+        "resolved": "1.2.0",
+        "contentHash": "j0FCJW/xrKAvAaj3jjD9+aYcJZrZ6TsYYGV650siiuvi5GzZ5zz8pe3MsJO0hy+k69RXnZW8ErIKezQZXzmgYQ==",
+        "dependencies": {
+          "CSharpFunctionalExtensions": "2.42.5"
+        }
       },
       "DotNet.ReproducibleBuilds": {
         "type": "Direct",
@@ -54,6 +63,16 @@
           "Microsoft.Extensions.Logging.EventLog": "8.0.0",
           "Microsoft.Extensions.Logging.EventSource": "8.0.0",
           "Microsoft.Extensions.Options": "8.0.0"
+        }
+      },
+      "XIVHuntUtils": {
+        "type": "Direct",
+        "requested": "[1.1.0, )",
+        "resolved": "1.1.0",
+        "contentHash": "yNlpsEYgqM4Bj8z5sjRMBJCC5nI0vlGe4jlpcIFhjTfzi5ultGfMNgS+weFQ8jSVoG/R+qbHuwmZK4TR909G7Q==",
+        "dependencies": {
+          "CSharpFunctionalExtensions": "2.42.5",
+          "DitzyExtensions": "1.2.0"
         }
       },
       "JetBrains.Annotations": {

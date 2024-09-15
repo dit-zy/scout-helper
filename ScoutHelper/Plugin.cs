@@ -11,6 +11,7 @@ using ScoutHelper.Localization;
 using ScoutHelper.Managers;
 using ScoutHelper.Utils;
 using ScoutHelper.Windows;
+using XIVHuntUtils.Managers;
 
 namespace ScoutHelper;
 

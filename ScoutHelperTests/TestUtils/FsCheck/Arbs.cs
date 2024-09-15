@@ -2,8 +2,9 @@
 using CSharpFunctionalExtensions;
 using FsCheck;
 using ScoutHelper;
-using ScoutHelper.Models;
 using ScoutHelper.Utils;
+using XIVHuntUtils.Models;
+using TrainMob = ScoutHelper.Models.TrainMob;
 
 namespace ScoutHelperTests.TestUtils.FsCheck;
 

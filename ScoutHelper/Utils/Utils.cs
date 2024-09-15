@@ -7,16 +7,13 @@ using System.Text.RegularExpressions;
 using CSharpFunctionalExtensions;
 using Lumina.Text;
 using Newtonsoft.Json;
-using ScoutHelper.Models;
+using XIVHuntUtils.Models;
+using static DitzyExtensions.MathUtils;
+using TrainMob = ScoutHelper.Models.TrainMob;
 
 namespace ScoutHelper.Utils;
 
 public static partial class Utils {
-	public static Vector2 V2(float x) => new(x, x);
-
-	public static Vector2 V2(float x, float y) => new(x, y);
-
-	public static Vector4 V4(float x, float y, float z, float w) => new(x, y, z, w);
 
 	public static Vector4 Color(uint r, uint g, uint b) => Color(r, g, b, 256);
 
@@ -136,8 +133,6 @@ public static partial class Utils {
 	public static SeString ToSeString(this string str) => new(str);
 
 	public static float AsFloat(this string str) => float.Parse(str, CultureInfo.InvariantCulture);
-
-	public static Vector2 Transpose(this Vector2 vec) => V2(vec.Y, vec.X);
 
 	public static bool NotEquals<T>(this T objA, T objB) => !Equals(objA, objB);
 

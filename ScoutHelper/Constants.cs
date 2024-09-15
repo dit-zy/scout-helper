@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net.Http.Headers;
 using System.Reflection;
 using ScoutHelper.Models;
+using XIVHuntUtils.Models;
 
 namespace ScoutHelper;
 

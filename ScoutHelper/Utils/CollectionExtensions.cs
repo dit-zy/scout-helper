@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using ScoutHelper.Utils.Functional;
+using DitzyExtensions.Functional;
 
 namespace ScoutHelper;
 

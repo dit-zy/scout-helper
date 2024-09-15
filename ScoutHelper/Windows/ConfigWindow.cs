@@ -10,14 +10,16 @@ using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
+using DitzyExtensions.Functional;
 using ImGuiNET;
 using ScoutHelper.Config;
 using ScoutHelper.Localization;
-using ScoutHelper.Managers;
-using ScoutHelper.Models;
 using ScoutHelper.Utils;
-using ScoutHelper.Utils.Functional;
+using XIVHuntUtils.Managers;
+using XIVHuntUtils.Models;
+using static DitzyExtensions.MathUtils;
 using static ScoutHelper.Utils.Utils;
+using TrainMob = ScoutHelper.Models.TrainMob;
 
 namespace ScoutHelper.Windows;
 

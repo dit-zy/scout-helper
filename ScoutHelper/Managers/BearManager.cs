@@ -12,6 +12,8 @@ using ScoutHelper.Config;
 using ScoutHelper.Models;
 using ScoutHelper.Models.Http;
 using ScoutHelper.Utils;
+using XIVHuntUtils.Models;
+using TrainMob = ScoutHelper.Models.TrainMob;
 
 namespace ScoutHelper.Managers;
 
