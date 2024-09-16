@@ -5,6 +5,7 @@ using Dalamud.Configuration;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using ScoutHelper.Models;
+using XIVHuntUtils.Models;
 using static ScoutHelper.Utils.Utils;
 
 namespace ScoutHelper.Config;

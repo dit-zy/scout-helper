@@ -1,7 +1,8 @@
 ﻿using System.Linq;
 using Dalamud.Plugin.Services;
 using ScoutHelper.Config;
-using ScoutHelper.Models;
+using XIVHuntUtils.Managers;
+using XIVHuntUtils.Models;
 using static ScoutHelper.Utils.Utils;
 
 namespace ScoutHelper.Managers;
@@ -50,5 +51,5 @@ public class InitializationManager {
 	}
 
 	private void InitializeTerritoryInstances() =>
-		TerritoryExtensions.SetTerritoryInstances(_conf, _territoryManager.GetTerritoryIds());
+		TerritoryExtensions.SetTerritoryInstances(_conf.Instances, _territoryManager.GetTerritoryIds());
 }

@@ -10,15 +10,17 @@ using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
 using Dalamud.Utility.Numerics;
+using DitzyExtensions.Functional;
 using ImGuiNET;
 using OtterGui.Widgets;
 using ScoutHelper.Config;
 using ScoutHelper.Localization;
 using ScoutHelper.Managers;
-using ScoutHelper.Models;
 using ScoutHelper.Utils;
-using ScoutHelper.Utils.Functional;
+using XIVHuntUtils.Models;
+using static DitzyExtensions.MathUtils;
 using static ScoutHelper.Utils.Utils;
+using TrainMob = ScoutHelper.Models.TrainMob;
 
 namespace ScoutHelper.Windows;
 
@@ -499,8 +501,8 @@ public class MainWindow : Window, IDisposable {
 	}
 
 	private void GenerateLink<T>(
-		Func<List<TrainMob>, AccResults<T, string>> linkGenerator,
-		Action<IList<TrainMob>, AccResults<T, string>> onSuccess
+		Func<List<TrainMob>, AccumulatedResults<T, string>> linkGenerator,
+		Action<IList<TrainMob>, AccumulatedResults<T, string>> onSuccess
 	) {
 		GetTrainMobs(out var trainList)
 			.Map(linkGenerator)

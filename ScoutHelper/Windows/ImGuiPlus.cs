@@ -5,9 +5,9 @@ using System.Numerics;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
+using DitzyExtensions.Functional;
 using ImGuiNET;
 using OtterGui.Widgets;
-using ScoutHelper.Utils.Functional;
 
 namespace ScoutHelper.Windows;
 

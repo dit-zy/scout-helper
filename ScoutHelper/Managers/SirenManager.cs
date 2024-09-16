@@ -9,14 +9,17 @@ using System.Text;
 using CSharpFunctionalExtensions;
 using Dalamud.Plugin.Services;
 using Dalamud.Utility;
+using DitzyExtensions.Functional;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using ScoutHelper.Config;
 using ScoutHelper.Models;
 using ScoutHelper.Models.Json;
 using ScoutHelper.Utils;
-using ScoutHelper.Utils.Functional;
+using XIVHuntUtils.Managers;
+using XIVHuntUtils.Models;
+using static DitzyExtensions.MathUtils;
 using static ScoutHelper.Utils.Utils;
+using TrainMob = ScoutHelper.Models.TrainMob;
 
 namespace ScoutHelper.Managers;
 
@@ -40,7 +43,9 @@ public class SirenManager {
 		(_patchData, _mobToPatch) = LoadData(options.SirenDataFile, territoryManager, mobManager);
 	}
 
-	public AccResults<Maybe<(string Url, Patch HighestPatch)>, string> GenerateSirenLink(IList<TrainMob> mobList) {
+	public AccumulatedResults<Maybe<(string Url, Patch HighestPatch)>, string> GenerateSirenLink(
+		IList<TrainMob> mobList
+	) {
 		_log.Debug("Generating a siren link for mob list: {0}", mobList);
 
 		var patches = mobList
@@ -53,9 +58,9 @@ public class SirenManager {
 		_log.Debug("Patches represented in mob list: {0}", patches);
 
 		if (patches.IsEmpty())
-			return AccResults.From(
+			return AccumulatedResults.From(
 				Maybe<(string, Patch)>.None,
-				"No mobs in the train are supported by Siren Hunts ;-;".AsSingletonList()
+				"No mobs in the train are supported by Siren Hunts ;-;"
 			);
 
 		return patches
@@ -140,7 +145,7 @@ public class SirenManager {
 		return (patchesData.Value, mobToPatch);
 	}
 
-	private static AccResults<(Patch patch, SirenPatchData), string> ParsePatchData(
+	private static AccumulatedResults<(Patch patch, SirenPatchData), string> ParsePatchData(
 		TerritoryManager territoryManager,
 		MobManager mobManager,
 		KeyValuePair<string, SirenJsonPatchData> patchData
@@ -159,11 +164,7 @@ public class SirenManager {
 					.Map(
 						mapId => mapMobs
 							.Mobs
-							.SelectResults(
-								mobName => mobManager
-									.GetMobId(mobName)
-									.ToResult($"No mobId found for mobName: {mobName}")
-							)
+							.SelectResults(mobManager.GetMobId)
 							.WithValue(mobIds => SirenMapData.From(mapId, mobIds))
 					)
 			);
@@ -200,7 +201,7 @@ public class SirenManager {
 			)
 			.WithValue(value => value.ToDict());
 
-		return parsedMobOrder.Join(
+		return parsedMobOrder.JoinWith(
 			mapResults,
 			(mobOrder, maps) => (patch, SirenPatchData.From(mobOrder, maps))
 		);

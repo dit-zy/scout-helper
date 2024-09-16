@@ -7,15 +7,19 @@ using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using Dalamud.Plugin.Services;
 using Dalamud.Utility;
+using DitzyExtensions.Functional;
 using Newtonsoft.Json;
 using ScoutHelper.Config;
 using ScoutHelper.Models;
 using ScoutHelper.Models.Http;
 using ScoutHelper.Models.Json;
 using ScoutHelper.Utils;
-using ScoutHelper.Utils.Functional;
+using XIVHuntUtils.Managers;
+using XIVHuntUtils.Models;
+using static DitzyExtensions.MathUtils;
 using static ScoutHelper.Managers.TurtleHttpStatus;
 using static ScoutHelper.Utils.Utils;
+using TrainMob = ScoutHelper.Models.TrainMob;
 
 namespace ScoutHelper.Managers;
 
@@ -104,7 +108,10 @@ public partial class TurtleManager : IDisposable {
 								mob.Position)
 					)
 				),
-				( content) => _httpClientGenerator.Client.PatchAsync($"{_conf.TurtleApiTrainPath}/{_currentCollabSession}", content)
+				(content) => _httpClientGenerator.Client.PatchAsync(
+					$"{_conf.TurtleApiTrainPath}/{_currentCollabSession}",
+					content
+				)
 			).TapError(
 				error => {
 					if (error.ErrorType == HttpErrorType.Timeout) {
@@ -140,7 +147,7 @@ public partial class TurtleManager : IDisposable {
 		return await HttpUtils.DoRequest<TurtleTrainRequest, TurtleTrainResponse, TurtleLinkData>(
 				_log,
 				TurtleTrainRequest.CreateRequest(spawnPoints),
-				( content) => _httpClientGenerator.Client.PostAsync(_conf.TurtleApiTrainPath, content),
+				(content) => _httpClientGenerator.Client.PostAsync(_conf.TurtleApiTrainPath, content),
 				trainResponse => TurtleLinkData.From(trainResponse, highestPatch)
 			)
 			.HandleHttpError(
@@ -155,12 +162,17 @@ public partial class TurtleManager : IDisposable {
 	private Maybe<(uint mapId, uint instance, uint pointId, uint mobId)> GetRequestInfoForMob(TrainMob mob) =>
 		TerritoryIdToTurtleData
 			.MaybeGet(mob.TerritoryId)
-			.Select(mapData => mapData.TurtleId)
-			.Join(mob.Instance.AsTurtleInstance())
-			.Join(GetNearestSpawnPoint(mob))
-			.Select(tuple => tuple.Flatten())
-			.Join(MobIdToTurtleId[mob.MobId].turtleMobId)
-			.Select(tuple => tuple.Flatten());
+			.SelectMany(
+				mapData => GetNearestSpawnPoint(mob)
+					.Select(
+						nearestSpawnPoint => (
+							mapData.TurtleId,
+							mob.Instance.AsTurtleInstance(),
+							nearestSpawnPoint,
+							MobIdToTurtleId[mob.MobId].turtleMobId
+						)
+					)
+			);
 
 	private Maybe<uint> GetNearestSpawnPoint(TrainMob mob) =>
 		TerritoryIdToTurtleData
@@ -207,7 +219,7 @@ public partial class TurtleManager : IDisposable {
 	}
 
 	private static
-		AccResults<(MobDict, TerritoryDict), string> ParsePatchData(
+		AccumulatedResults<(MobDict, TerritoryDict), string> ParsePatchData(
 			TerritoryManager territoryManager,
 			MobManager mobManager,
 			KeyValuePair<string, TurtleJsonPatchData> patchData
@@ -222,7 +234,6 @@ public partial class TurtleManager : IDisposable {
 			.SelectResults(
 				patchMob => mobManager
 					.GetMobId(patchMob.Key)
-					.ToResult<uint, string>($"No mobId found for mobName: {patchMob.Key}")
 					.Map(mobId => (mobId, (patch, patchMob.Value)))
 			)
 			.WithValue(mobs => mobs.ToDict());
@@ -251,7 +262,7 @@ public partial class TurtleManager : IDisposable {
 			)
 			.WithValue(territoriesAsPairs => territoriesAsPairs.ToDict());
 
-		return parsedMobs.Join(parsedTerritories, (mobs, territories) => (mobs, territories));
+		return parsedMobs.JoinWith(parsedTerritories, (mobs, territories) => (mobs, territories));
 	}
 }
 
