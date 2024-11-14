@@ -1,24 +1,24 @@
 ﻿{
-	"arr": {
+	"arr" : {
 		"id": 2,
 		"mobs": {
-			"vogaal ja": 29,
-			"unktehi": 32,
-			"hellsclaw": 35,
-			"nahn": 38,
-			"marberry": 41,
-			"cornu": 44,
-			"forneus": 2,
-			"melt": 5,
-			"ghede ti malice": 8,
-			"girtab": 11,
-			"alectryon": 14,
-			"sabotender bailarina": 17,
-			"maahes": 20,
-			"zanig'oh": 23,
-			"dalvag's final flame": 26,
-			"marraco": 47,
-			"kurrea": 50
+			"vogaal ja" : 29,
+			"unktehi" : 32,
+			"hellsclaw" : 35,
+			"nahn" : 38,
+			"marberry" : 41,
+			"cornu" : 44,
+			"forneus" : 2,
+			"melt" : 5,
+			"ghede ti malice" : 8,
+			"girtab" : 11,
+			"alectryon" : 14,
+			"sabotender bailarina" : 17,
+			"maahes" : 20,
+			"zanig'oh" : 23,
+			"dalvag's final flame" : 26,
+			"marraco" : 47,
+			"kurrea" : 50
 		},
 		"maps": {
 			"middle la noscea": {
@@ -581,21 +581,21 @@
 			}
 		}
 	},
-	"hw": {
+	"hw" : {
 		"id": 3,
 		"mobs": {
-			"mirka": 54,
-			"lyuba": 55,
-			"enkelados": 74,
-			"sisiutl": 75,
-			"campacti": 79,
-			"stench blossom": 80,
-			"pylraster": 59,
-			"lord of the wyverns": 60,
-			"slipkinx steeljoints": 64,
-			"stolas": 65,
-			"bune": 69,
-			"agathos": 70
+			"mirka" : 54,
+			"lyuba" : 55,
+			"enkelados" : 74,
+			"sisiutl" : 75,
+			"campacti" : 79,
+			"stench blossom" : 80,
+			"pylraster" : 59,
+			"lord of the wyverns" : 60,
+			"slipkinx steeljoints" : 64,
+			"stolas" : 65,
+			"bune" : 69,
+			"agathos" : 70
 		},
 		"maps": {
 			"coerthas western highlands": {
@@ -759,21 +759,21 @@
 			}
 		}
 	},
-	"sb": {
+	"sb" : {
 		"id": 4,
 		"mobs": {
-			"orcus": 99,
-			"erle": 100,
-			"vochstein": 104,
-			"aqrabuamelu": 105,
-			"mahisha": 109,
-			"luminare": 110,
-			"funa yurei": 84,
-			"oni yumemi": 85,
-			"gajasura": 89,
-			"angada": 90,
-			"girimekhala": 94,
-			"sum": 95
+			"orcus" : 99,
+			"erle" : 100,
+			"vochstein" : 104,
+			"aqrabuamelu" : 105,
+			"mahisha" : 109,
+			"luminare" : 110,
+			"funa yurei" : 84,
+			"oni yumemi" : 85,
+			"gajasura" : 89,
+			"angada" : 90,
+			"girimekhala" : 94,
+			"sum" : 95
 		},
 		"maps": {
 			"the fringes": {
@@ -889,21 +889,21 @@
 			}
 		}
 	},
-	"shb": {
+	"shb" : {
 		"id": 5,
 		"mobs": {
-			"nuckelavee": 114,
-			"nariphon": 115,
-			"li'l murderer": 119,
-			"huracan": 120,
-			"maliktender": 124,
-			"sugaar": 125,
-			"the mudman": 129,
-			"o poorest pauldia": 130,
-			"supay": 134,
-			"grassman": 135,
-			"rusalka": 139,
-			"baal": 140
+			"nuckelavee" : 114,
+			"nariphon" : 115,
+			"li'l murderer" : 119,
+			"huracan" : 120,
+			"maliktender" : 124,
+			"sugaar" : 125,
+			"the mudman" : 129,
+			"o poorest pauldia" : 130,
+			"supay" : 134,
+			"grassman" : 135,
+			"rusalka" : 139,
+			"baal" : 140
 		},
 		"maps": {
 			"lakeland": {
@@ -1039,21 +1039,21 @@
 			}
 		}
 	},
-	"ew": {
+	"ew" : {
 		"id": 6,
 		"mobs": {
-			"hulder": 174,
-			"storsie": 175,
-			"yilan": 184,
-			"sugriva": 185,
-			"minerva": 194,
-			"aegeiros": 195,
-			"mousse princess": 204,
-			"lunatender queen": 205,
-			"arch-eta": 224,
-			"fan ail": 225,
-			"petalodus": 214,
-			"gurangatch": 215
+			"hulder" : 174,
+			"storsie" : 175,
+			"yilan" : 184,
+			"sugriva" : 185,
+			"minerva" : 194,
+			"aegeiros" : 195,
+			"mousse princess" : 204,
+			"lunatender queen" : 205,
+			"arch-eta" : 224,
+			"fan ail" : 225,
+			"petalodus" : 214,
+			"gurangatch" : 215
 		},
 		"maps": {
 			"labyrinthos": {
@@ -1146,21 +1146,21 @@
 			}
 		}
 	},
-	"dt": {
+	"dt" : {
 		"id": 7,
 		"mobs": {
-			"queen hawk": 234,
-			"nechuciho": 235,
-			"the raintriller": 244,
-			"pkuucha": 245,
-			"rrax yity'a": 254,
-			"starcrier": 255,
-			"yehehetoaua'pyo": 264,
-			"keheniheyamewi": 265,
-			"heshuala": 274,
-			"urna variabilis": 275,
-			"sally the sweeper": 284,
-			"cat's eye": 285
+			"queen hawk" : 234,
+			"nechuciho" : 235,
+			"the raintriller" : 244,
+			"pkuucha" : 245,
+			"rrax yity'a" : 254,
+			"starcrier" : 255,
+			"yehehetoaua'pyo" : 264,
+			"keheniheyamewi" : 265,
+			"heshuala" : 274,
+			"urna variabilis" : 275,
+			"sally the sweeper" : 284,
+			"cat's eye" : 285
 		},
 		"maps": {
 			"urqopacha": {
@@ -1185,7 +1185,7 @@
 					"886": {"x": "16.40", "y": "17.20"},
 					"887": {"x": "20.30", "y": "28.40"},
 					"888": {"x": "24.00", "y": "36.60"},
-					"889": {"x": "36.50", "y": "17.20"}
+					"889": {"x": "36.50", "y": "20.00"}
 				}
 			},
 			"yak t'el": {
@@ -1217,7 +1217,6 @@
 				"id": 1191,
 				"points": {
 					"905": {"x": " 8.50", "y": "33.30"},
-					"906": {"x": "12.80", "y": "21.40"},
 					"907": {"x": "14.60", "y": "26.00"},
 					"908": {"x": "23.60", "y": "19.70"},
 					"909": {"x": "27.10", "y": "33.70"},
