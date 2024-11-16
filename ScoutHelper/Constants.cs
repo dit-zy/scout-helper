@@ -44,12 +44,9 @@ public static class Constants {
 	}.AsList();
 
 	public static readonly (Territory, uint)[] LatestPatchInstances = {
-		(Territory.Urqopacha, 3),
 		(Territory.Kozamauka, 3),
-		(Territory.YakTel, 3),
-		(Territory.Shaaloani, 3),
-		(Territory.HeritageFound, 3),
-		(Territory.LivingMemory, 3)
+		(Territory.Shaaloani, 2),
+		(Territory.HeritageFound, 2),
 	};
 
 	#endregion
