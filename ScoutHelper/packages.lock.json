@@ -4,23 +4,23 @@
     "net8.0-windows7.0": {
       "CSharpFunctionalExtensions": {
         "type": "Direct",
-        "requested": "[2.42.5, )",
-        "resolved": "2.42.5",
-        "contentHash": "Do9Q7Nyfx2G4HRt96aB6yoP5Z9ic3jqBHLrf35tULzsWlFoBlkQZT62aXCiv7UmVmF56OUR+a3JoSSs140hfHQ=="
+        "requested": "[3.1.0, )",
+        "resolved": "3.1.0",
+        "contentHash": "cLVWFoYqn7xI7LVAIgnxr1CNCPFjqM8Q5ya8pbYST1ZdDg6SZxEoyQx8tpe5hkib0+cVyruv82IUiKk3fMEG7w=="
       },
       "DalamudPackager": {
         "type": "Direct",
-        "requested": "[2.1.13, )",
-        "resolved": "2.1.13",
-        "contentHash": "rMN1omGe8536f4xLMvx9NwfvpAc9YFFfeXJ1t4P4PE6Gu8WCIoFliR1sh07hM+bfODmesk/dvMbji7vNI+B/pQ=="
+        "requested": "[11.0.0, )",
+        "resolved": "11.0.0",
+        "contentHash": "bjT7XUlhIJSmsE/O76b7weUX+evvGQctbQB8aKXt94o+oPWxHpCepxAGMs7Thow3AzCyqWs7cOpp9/2wcgRRQA=="
       },
       "DitzyExtensions": {
         "type": "Direct",
-        "requested": "[1.2.0, )",
-        "resolved": "1.2.0",
-        "contentHash": "j0FCJW/xrKAvAaj3jjD9+aYcJZrZ6TsYYGV650siiuvi5GzZ5zz8pe3MsJO0hy+k69RXnZW8ErIKezQZXzmgYQ==",
+        "requested": "[1.2.1, )",
+        "resolved": "1.2.1",
+        "contentHash": "jCXtyOTkLAJ71+I000ybUwy1dup0Lr+VK6tMwrDbaVwl7owABuICBUndsXTHHhsZX1ZFasUSzacuMLFW8qcd3A==",
         "dependencies": {
-          "CSharpFunctionalExtensions": "2.42.5"
+          "CSharpFunctionalExtensions": "3.1.0"
         }
       },
       "DotNet.ReproducibleBuilds": {
@@ -67,18 +67,18 @@
       },
       "XIVHuntUtils": {
         "type": "Direct",
-        "requested": "[1.1.0, )",
-        "resolved": "1.1.0",
-        "contentHash": "yNlpsEYgqM4Bj8z5sjRMBJCC5nI0vlGe4jlpcIFhjTfzi5ultGfMNgS+weFQ8jSVoG/R+qbHuwmZK4TR909G7Q==",
+        "requested": "[1.2.0, )",
+        "resolved": "1.2.0",
+        "contentHash": "ktp/2HCRzlGoeauJM3gzidjzktihPDXmqFZBvzBRKM0h3QziHagIhig+8aP8TZ9xsPeICQVKY9V4lA5uDJciHw==",
         "dependencies": {
-          "CSharpFunctionalExtensions": "2.42.5",
-          "DitzyExtensions": "1.2.0"
+          "CSharpFunctionalExtensions": "3.1.0",
+          "DitzyExtensions": "1.2.1"
         }
       },
       "JetBrains.Annotations": {
         "type": "Transitive",
-        "resolved": "2023.3.0",
-        "contentHash": "PHfnvdBUdGaTVG9bR/GEfxgTwWM0Z97Y6X3710wiljELBISipSfF5okn/vz+C2gfO+ihoEyVPjaJwn8ZalVukA=="
+        "resolved": "2024.2.0",
+        "contentHash": "GNnqCFW/163p1fOehKx0CnAqjmpPrUSqrgfHM6qca+P+RN39C9rhlfZHQpJhxmQG/dkOYe/b3Z0P8b6Kv5m1qw=="
       },
       "Microsoft.Build.Tasks.Git": {
         "type": "Transitive",
@@ -405,7 +405,7 @@
       "ottergui": {
         "type": "Project",
         "dependencies": {
-          "JetBrains.Annotations": "[2023.3.0, )",
+          "JetBrains.Annotations": "[2024.2.0, )",
           "Microsoft.Extensions.DependencyInjection": "[8.0.0, )"
         }
       }
