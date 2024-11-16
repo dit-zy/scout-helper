@@ -13,7 +13,7 @@ public static partial class XivExtensions {
 	[GeneratedRegex(@" \d{1,2}$")] private static partial Regex InstanceRegex();
 
 	public static string WorldName(this IClientState clientState) =>
-		clientState.LocalPlayer?.CurrentWorld.GameData?.Name.ToString() ?? "Not Found";
+		clientState.LocalPlayer?.CurrentWorld.ValueNullable?.Name.ToString() ?? "Not Found";
 
 	public static Maybe<string> PlayerTag(this IClientState clientState) =>
 		clientState
@@ -22,7 +22,7 @@ public static partial class XivExtensions {
 			.Select(
 				player => {
 					var playerName = player.Name.TextValue;
-					var worldName = player.HomeWorld.GameData?.Name?.RawString ?? "Unknown World";
+					var worldName = player.HomeWorld.ValueNullable?.Name.ToString() ?? "Unknown World";
 					return $"{playerName}@{worldName}";
 				}
 			);
