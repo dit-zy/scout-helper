@@ -43,7 +43,8 @@ public class MainWindow : Window, IDisposable {
 	private readonly IClientState _clientState;
 	private readonly Configuration _conf;
 	private readonly IChatGui _chat;
-	private readonly HuntHelperManager _huntHelperManager;
+    private readonly VNavMeshManager _vNavMeshManager;
+    private readonly HuntHelperManager _huntHelperManager;
 	private readonly BearManager _bearManager;
 	private readonly SirenManager _sirenManager;
 	private readonly TurtleManager _turtleManager;
@@ -67,12 +68,15 @@ public class MainWindow : Window, IDisposable {
 	private string _collabLink = "";
 	private bool _closeTurtleCollabPopup = false;
 
-	public MainWindow(
+    private bool _closeNavPopup = false;
+
+    public MainWindow(
 		IPluginLog log,
 		IClientState clientState,
 		Configuration conf,
 		IChatGui chat,
-		HuntHelperManager huntHelperManager,
+        VNavMeshManager vNavMeshManager,
+        HuntHelperManager huntHelperManager,
 		BearManager bearManager,
 		SirenManager sirenManager,
 		TurtleManager turtleManager,
@@ -85,7 +89,8 @@ public class MainWindow : Window, IDisposable {
 		_clientState = clientState;
 		_conf = conf;
 		_chat = chat;
-		_huntHelperManager = huntHelperManager;
+        _vNavMeshManager = vNavMeshManager;
+        _huntHelperManager = huntHelperManager;
 		_bearManager = bearManager;
 		_sirenManager = sirenManager;
 		_turtleManager = turtleManager;
@@ -319,9 +324,14 @@ public class MainWindow : Window, IDisposable {
 				}
 			);
 		}
-		if (ImGui.IsItemHovered()) ImGuiPlus.CreateTooltip(Strings.SirenButtonTooltip);
+        if (ImGui.IsItemHovered()) ImGuiPlus.CreateTooltip(Strings.SirenButtonTooltip);
 
-		DrawTurtleButtons();
+		if (ImGui.Button("Navigation", _buttonSize.Value))
+		{
+			ImGui.OpenPopup("nav popup");
+		}
+
+            DrawTurtleButtons();
 		if (ImGui.BeginPopup("turtle collab popup")) {
 			if (_closeTurtleCollabPopup) {
 				_closeTurtleCollabPopup = false;
@@ -331,7 +341,20 @@ public class MainWindow : Window, IDisposable {
 			}
 			ImGui.EndPopup();
 		}
-	}
+        if (ImGui.BeginPopup("nav popup"))
+        {
+            if (_closeNavPopup)
+            {
+                _closeNavPopup = false;
+                ImGui.CloseCurrentPopup();
+            }
+            else
+            {
+                DrawNavPopup();
+            }
+            ImGui.EndPopup();
+        }
+    }
 
 	private unsafe void DrawTurtleButtons() {
 		var itemSpacing = ImGui.GetStyle().ItemSpacing;
@@ -387,7 +410,75 @@ public class MainWindow : Window, IDisposable {
 		if (turtleCollabPressed) ImGui.OpenPopup("turtle collab popup");
 	}
 
-	private void DrawTurtleCollabPopup() {
+    private void DrawNavPopup()
+    {
+        var contentWidth = 1.5f * _buttonSize.Value.X;
+        ImGui.PushTextWrapPos(contentWidth);
+
+        ImGuiPlus.Heading("NAVIGATION", centered: true);
+
+		if (ImGui.Button("Go!"))
+		{
+            //_chat.TaggedPrint("Generating Siren link...");
+            _log.Debug("KLICK!");
+            _vNavMeshManager.SimpleMoveTo(new Vector3((float)-120.6, (float)2.1, (float)-141.3), false);
+            _log.Debug("KLACK!");
+        }
+
+        if (ImGui.Button("Is run?"))
+        {
+            //_chat.TaggedPrint("Generating Siren link...");
+            _log.Debug("KLICK!");
+            _log.Debug("Are we running? "+_vNavMeshManager.IsRunning());
+            _log.Debug("KLACK!");
+        }
+
+        ImGuiPlus.Separator();
+        ImGuiPlus.Heading("NEW", centered: true);
+        ImGui.TextWrapped("start a new scout session on turtle for other scouters to join and contribute to.");
+        if (ImGui.Button("START NEW SESSION", _buttonSize.Value with { X = contentWidth }))
+        {
+            _turtleManager
+                .GenerateTurtleLink(new List<TrainMob>(), allowEmpty: true)
+                .Then(
+                    result => result.Match(
+                        linkData => {
+                            _collabInput = $"{linkData.Slug}/{linkData.CollabPassword}";
+                            if (JoinTurtleCollabSession(_collabInput)) _closeTurtleCollabPopup = true;
+                        },
+                        errorMessage => _chat.TaggedPrintError(errorMessage)
+                    )
+                );
+        }
+        if (ImGui.IsItemHovered())
+            ImGuiPlus.CreateTooltip(
+                "generate a link to a new session, and immediately join it so you can start contributing. share the link with other scouters so they can also contribute :3"
+            );
+
+        ImGuiPlus.Separator();
+        ImGuiPlus.Heading("CONTRIBUTE", centered: true);
+        ImGui.TextWrapped("contribute scouted marks to an existing turtle session.");
+        ImGui.SetNextItemWidth(contentWidth - ImGuiHelpers.GetButtonSize("JOIN").X - ImGui.GetStyle().ItemSpacing.X);
+        var linkInputted = ImGui.InputTextWithHint(
+            "",
+            "https://scout.wobbuffet.net/scout/2WAZMI3DeZ/e5b2ede5",
+            ref _collabInput,
+            256,
+            ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue
+        );
+        if (ImGui.IsItemHovered())
+            ImGuiPlus.CreateTooltip("paste a collaborator link here and join the session to start contributing marks.");
+        ImGui.SameLine();
+        linkInputted = linkInputted || ImGui.Button("JOIN");
+        if (linkInputted)
+        {
+            if (JoinTurtleCollabSession(_collabInput)) _closeTurtleCollabPopup = true;
+        }
+
+        ImGui.PopTextWrapPos();
+    }
+
+    private void DrawTurtleCollabPopup() {
 		var contentWidth = 1.5f * _buttonSize.Value.X;
 		ImGui.PushTextWrapPos(contentWidth);
 
