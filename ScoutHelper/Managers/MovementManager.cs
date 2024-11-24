@@ -38,6 +38,11 @@ public class MovementManager : IDisposable {
         new Vector3((float) 423.4,(float) 26.8,(float) 420.3) // "30.0, 30.0"
     };
 
+    public List<Vector3> NuckelaveeWaypoints = new()
+    {
+
+    };
+
     public List<Vector3> LakelandWaypoints = new() {
         new Vector3((float) -489.6,(float) 88.7,(float) -444.5), // "11.7, 12.6"
         new Vector3((float) -94.4,(float) 108.1,(float) -594.9), // "19.7, 9.7"
@@ -221,18 +226,52 @@ public class MovementManager : IDisposable {
         new Vector3((float) -430.3,(float) 320.4,(float) -587.1) // "12.8, 9.8"
     };
 
+    public List<uint> _ARankbNPCIds = new()
+    {
+        // Shadowbringers
+        8906, // Nuckelavee
+        8907, // Nariphon
+        8911, // Li'l Murderer
+        8912, // Huracan
+        8901, // Maliktender
+        8902, // Sugaar
+        8654, // the mudman
+        8655, // O poorest pauldia
+        8891, // Supay
+        8892, // Grassman
+        8896, // Rusalka
+        8897, // Baal
+        // Endwalker
+        10623, // Storsie
+        10624, // Hulder
+        10625, // Yilan
+        10626, // Sugriva
+        10627, // Minerva
+        10628, // Aegeiros
+        10629, // Lunatender queen
+        10630, // Mousse princess
+        10631, // Gurangatch
+        10632, // Petalodus
+        10633, // Fan ail
+        10634 // Arch-eta
+    };
+
+    private readonly IChatGui _chat;
     private readonly IPluginLog _log;
     private readonly ICallGateSubscriber<bool> _vnavIsReady;
     private readonly ICallGateSubscriber<int> _vnavNumWaypoints;
     private readonly ICallGateSubscriber<Vector3, bool, bool> _vnavSimpleMoveTo;
+    private readonly ICallGateSubscriber<bool> _vnavStop;
     private readonly ICallGateSubscriber<bool> _vnavIsRunning;
     private readonly ICallGateSubscriber<string, bool> _lifestreamExecuteCommand;
     private readonly ICallGateSubscriber<bool> _lifestreamIsBusy;
     private TimeSpan _lastUpdate = new(0);
     private TimeSpan _execDelay = new(0, 0, 1);
     private ushort _targetTerritory = 0;
+    private int _marksFoundInArea = 0;
 
-    public List<Vector3> EnqueuedWaypoints = new();
+    private List<Vector3> EnqueuedWaypoints = new();
+    private int WaypointCount = 0;
 
     public bool Available { get; private set; } = false;
 
@@ -262,13 +301,16 @@ public class MovementManager : IDisposable {
 
     public MovementManager(
 		IDalamudPluginInterface pluginInterface,
-		IPluginLog log
+        IChatGui chat,
+        IPluginLog log
 	) {
+        _chat = chat;
 		_log = log;
 		Available = true;
         _vnavIsReady = pluginInterface.GetIpcSubscriber<bool>("vnavmesh.Nav.IsReady");
         _vnavNumWaypoints = pluginInterface.GetIpcSubscriber<int>("vnavmesh.Path.NumWaypoints");
         _vnavSimpleMoveTo = pluginInterface.GetIpcSubscriber<Vector3, bool, bool>("vnavmesh.SimpleMove.PathfindAndMoveTo");
+        _vnavStop = pluginInterface.GetIpcSubscriber<bool>("vnavmesh.Path.Stop");
         _vnavIsRunning = pluginInterface.GetIpcSubscriber<bool>("vnavmesh.Path.IsRunning");
         _lifestreamExecuteCommand = pluginInterface.GetIpcSubscriber<string,bool>("Lifestream.ExecuteCommand");
         _lifestreamIsBusy = pluginInterface.GetIpcSubscriber<bool>("Lifestream.IsBusy");
@@ -276,9 +318,25 @@ public class MovementManager : IDisposable {
         Dalamud.Framework.Update += Tick;
     }
 
+    public void OnMarkSeen(TrainMob mark)
+    {
+        _chat.TaggedPrint("We saw " + mark.Name + "("+ mark.MobId+ ")");
+        if(_ARankbNPCIds.Contains(mark.MobId))
+        {
+            _marksFoundInArea += 1;
+            _chat.TaggedPrint(_marksFoundInArea+"/2 marks found in area.");
+        }
+    }
+
     private unsafe void DoUpdate(IFramework framework)
     {
-        _log.Debug("DoUpdate! ways " + EnqueuedWaypoints.Count + " !rdy " + !IsReady() + " run " + IsRunning() + " busy " + IsBusy() + " !canact" + !CanAct);
+        _log.Debug("DoUpdate! numwp "+ NumWaypoints() +" ways " + EnqueuedWaypoints.Count + " !rdy " + !IsReady() + " run " + IsRunning() + " busy " + IsBusy() + " !canact " + !CanAct);
+        if (_marksFoundInArea > 1)
+        {
+            _chat.TaggedPrint("Found all marks in area. Stopping.");
+            Stop();
+            return;
+        }
         if (EnqueuedWaypoints.Count < 1 || !IsReady() || IsRunning() || IsBusy() || !CanAct) {
             return;
         }
@@ -296,13 +354,13 @@ public class MovementManager : IDisposable {
             _log.Debug("We are not mounted, mounting...");
             am->UseAction(ActionType.GeneralAction, 24);
             return;
-        }
-        _log.Debug("DoUpdate! NumWaypoints " + NumWaypoints());
+        }        
         var res = SimpleMoveTo(EnqueuedWaypoints[0], true);
         _log.Debug("DoUpdate! path find to " + EnqueuedWaypoints[0] +" was " + res);
         if (res)
         {
             EnqueuedWaypoints.RemoveAt(0);
+            _chat.TaggedPrint("Going to waypoint (" + (WaypointCount - EnqueuedWaypoints.Count) + "/"+WaypointCount + ")");
             _log.Debug(EnqueuedWaypoints.Count + " Waypoints left...");
         } else
         {
@@ -313,6 +371,9 @@ public class MovementManager : IDisposable {
     public void Stop()
     {
         EnqueuedWaypoints = new();
+        WaypointCount = 0;
+        _marksFoundInArea = 0;
+        _vnavStop.InvokeAction();
     }
 
     private void Tick(IFramework framework)
@@ -335,6 +396,7 @@ public class MovementManager : IDisposable {
             LifestreamExecuteCommand("tp The Ostall Imperative");
         }
         EnqueuedWaypoints.AddRange(LakelandWaypoints);
+        WaypointCount = EnqueuedWaypoints.Count;
     }
 
     public void ScoutKholusia()
@@ -347,6 +409,7 @@ public class MovementManager : IDisposable {
             LifestreamExecuteCommand("tp Tomra");
         }
         EnqueuedWaypoints.AddRange(KholusiaWaypoints);
+        WaypointCount = EnqueuedWaypoints.Count;
     }
 
     public void ScoutAhmAhreng()
@@ -359,6 +422,7 @@ public class MovementManager : IDisposable {
             LifestreamExecuteCommand("tp Twine");
         }
         EnqueuedWaypoints.AddRange(AhmAhrengWaypoints);
+        WaypointCount = EnqueuedWaypoints.Count;
     }
 
     public void ScoutIlMheg()
@@ -371,6 +435,7 @@ public class MovementManager : IDisposable {
             LifestreamExecuteCommand("tp Lydha Lran");
         }
         EnqueuedWaypoints.AddRange(IlMhegWaypoints);
+        WaypointCount = EnqueuedWaypoints.Count;
     }
 
     public void ScoutRakTika()
@@ -383,6 +448,7 @@ public class MovementManager : IDisposable {
             LifestreamExecuteCommand("tp Slitherbough");
         }
         EnqueuedWaypoints.AddRange(RakTikaWaypoints);
+        WaypointCount = EnqueuedWaypoints.Count;
     }
 
     public void ScoutTempest()
@@ -395,6 +461,7 @@ public class MovementManager : IDisposable {
             LifestreamExecuteCommand("tp Ondo Cups");
         }
         EnqueuedWaypoints.AddRange(TempestWaypoints);
+        WaypointCount = EnqueuedWaypoints.Count;
     }
 
     public void ScoutLabyrinthos()
@@ -407,6 +474,7 @@ public class MovementManager : IDisposable {
             LifestreamExecuteCommand("tp The Archeion");
         }
         EnqueuedWaypoints.AddRange(LabyrinthosWaypoints);
+        WaypointCount = EnqueuedWaypoints.Count;
     }
 
     public void ScoutThavnair()
@@ -419,6 +487,7 @@ public class MovementManager : IDisposable {
             LifestreamExecuteCommand("tp Yedlihmad");
         }
         EnqueuedWaypoints.AddRange(ThavnairWaypoints);
+        WaypointCount = EnqueuedWaypoints.Count;
     }
 
     public void ScoutGarlemald()
@@ -431,6 +500,7 @@ public class MovementManager : IDisposable {
             LifestreamExecuteCommand("tp Camp Broken Glass");
         }
         EnqueuedWaypoints.AddRange(GarlemaldWaypoints);
+        WaypointCount = EnqueuedWaypoints.Count;
     }
 
     public void ScoutMareLamentorum()
@@ -443,6 +513,7 @@ public class MovementManager : IDisposable {
             LifestreamExecuteCommand("tp Sinus Lacrimarum");
         }
         EnqueuedWaypoints.AddRange(MareLamentorumWaypoints);
+        WaypointCount = EnqueuedWaypoints.Count;
     }
 
     public void ScoutUltimaThule()
@@ -455,6 +526,7 @@ public class MovementManager : IDisposable {
             LifestreamExecuteCommand("tp Reah Tahra");
         }
         EnqueuedWaypoints.AddRange(UltimaThuleWaypoints);
+        WaypointCount = EnqueuedWaypoints.Count;
     }
 
     public void ScoutElpis()
@@ -467,6 +539,7 @@ public class MovementManager : IDisposable {
             LifestreamExecuteCommand("tp The Twelve Wonders");
         }
         EnqueuedWaypoints.AddRange(ElpisWaypoints);
+        WaypointCount = EnqueuedWaypoints.Count;
     }
 
     private bool IsReady()

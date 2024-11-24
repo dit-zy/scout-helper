@@ -17,7 +17,8 @@ public class HuntHelperManager : IDisposable {
 	private readonly IPluginLog _log;
 	private readonly IChatGui _chat;
 	private readonly TurtleManager _turtleManager;
-	private readonly ICallGateSubscriber<uint> _cgGetVersion;
+    private readonly MovementManager _movementManager;
+    private readonly ICallGateSubscriber<uint> _cgGetVersion;
 	private readonly ICallGateSubscriber<uint, bool> _cgEnable;
 	private readonly ICallGateSubscriber<bool> _cgDisable;
 	private readonly ICallGateSubscriber<List<TrainMob>> _cgGetTrainList;
@@ -29,13 +30,15 @@ public class HuntHelperManager : IDisposable {
 		IDalamudPluginInterface pluginInterface,
 		IPluginLog log,
 		IChatGui chat,
-		TurtleManager turtleManager
+		TurtleManager turtleManager,
+		MovementManager movementManager
 	) {
 		_log = log;
 		_chat = chat;
 		_turtleManager = turtleManager;
+        _movementManager = movementManager;
 
-		_cgGetVersion = pluginInterface.GetIpcSubscriber<uint>("HH.GetVersion");
+        _cgGetVersion = pluginInterface.GetIpcSubscriber<uint>("HH.GetVersion");
 		_cgEnable = pluginInterface.GetIpcSubscriber<uint, bool>("HH.Enable");
 		_cgDisable = pluginInterface.GetIpcSubscriber<bool>("HH.Disable");
 		_cgGetTrainList = pluginInterface.GetIpcSubscriber<List<TrainMob>>("HH.GetTrainList");
@@ -83,6 +86,7 @@ public class HuntHelperManager : IDisposable {
 	}
 
 	private void OnMarkSeen(TrainMob mark) {
+		_movementManager.OnMarkSeen(mark);
 		if (!_turtleManager.IsTurtleCollabbing) return;
 
 		_turtleManager.UpdateCurrentSession(mark.AsSingletonList())
