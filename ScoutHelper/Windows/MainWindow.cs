@@ -476,6 +476,42 @@ public class MainWindow : Window, IDisposable {
         ImGuiPlus.Separator();
         ImGuiPlus.Heading("Endwalker", centered: true);
 
+        if (ImGui.Button("Scout Labyrinthos"))
+        {
+            _chat.TaggedPrint("Beginning to scout Laybrinthos");
+            _movementManager.ScoutLabyrinthos();
+        }
+
+        if (ImGui.Button("Scout Thavnair"))
+        {
+            _chat.TaggedPrint("Beginning to scout Thavnair");
+            _movementManager.ScoutThavnair();
+        }
+
+        if (ImGui.Button("Scout Garlemald"))
+        {
+            _chat.TaggedPrint("Beginning to scout Garlemald");
+            _movementManager.ScoutGarlemald();
+        }
+
+        if (ImGui.Button("Scout Mare Lamentorum"))
+        {
+            _chat.TaggedPrint("Beginning to scout Mare Lamentorum");
+            _movementManager.ScoutMareLamentorum();
+        }
+
+        if (ImGui.Button("Scout Ultima Thule"))
+        {
+            _chat.TaggedPrint("Beginning to scout Ultima Thule");
+            _movementManager.ScoutUltimaThule();
+        }
+
+        if (ImGui.Button("Scout Elpis"))
+        {
+            _chat.TaggedPrint("Beginning to scout Elpis");
+            _movementManager.ScoutElpis();
+        }
+
         ImGuiPlus.Separator();
         ImGuiPlus.Heading("Dawntrail", centered: true);
 

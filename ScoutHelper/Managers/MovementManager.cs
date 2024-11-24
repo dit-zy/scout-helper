@@ -139,6 +139,88 @@ public class MovementManager : IDisposable {
         new Vector3((float) 484.5,(float) 457.8,(float) -874.0) // "31.2, 4.0"
     };
 
+    public List<Vector3> LabyrinthosWaypoints = new()
+    {
+        new Vector3((float) 439.2,(float) 201.0,(float) -659.5), // "30.2, 8.4"
+        new Vector3((float) 639.9,(float) 200.0,(float) -399.7), // "34.3, 13.5"
+        new Vector3((float) 532.8,(float) 104.6,(float) 221.6), // "32.1, 26.0"
+        new Vector3((float) 176.3,(float) -4.0,(float) 194.8), // "25.2, 25.5"
+        new Vector3((float) -89.5,(float) 10.1,(float) 840.0), // "19.6, 38.4"
+        new Vector3((float) -469.2,(float) 5.6,(float) 690.9), // "12.0, 35.4"
+        new Vector3((float) -790.1,(float) 10.0,(float) 616.8), // "5.8, 33.9"
+        new Vector3((float) -541.3,(float) 6.6,(float) -119.9), // "10.6, 19.2"
+        new Vector3((float) -246.9,(float) 13.9,(float) -256.2), // "16.5, 16.3"
+        new Vector3((float) -224.0,(float) 110.9,(float) -602.0) // "17.1, 9.5"
+    };
+
+    public List<Vector3> ThavnairWaypoints = new()
+    {
+        new Vector3((float) -64.8,(float) 44.1,(float) 474.3), // "20.2 31.0"
+        new Vector3((float) -153.4,(float) 51.7,(float) 85.9), // "18.3, 23.2"
+        new Vector3((float) -164.8,(float) 102.1,(float) -255.9), // "18.2, 16.4"
+        new Vector3((float) -349.5,(float) 92.5,(float) -464.4), // "14.5, 12.2"
+        new Vector3((float) -141.9,(float) 104.6,(float) -496.7), // "18.6, 11.5"
+        new Vector3((float) 400.2,(float) 27.2,(float) -394.4), // "29.5, 13.6"
+        new Vector3((float) 564.1,(float) 34.4,(float) -59.9), // "32.8, 20.3"
+        new Vector3((float) 254.0,(float) 46.2,(float) -28.6), // "26.5, 20.9"
+        new Vector3((float) 308.5,(float) 30.5,(float) 214.7) // "27.7, 25.8"
+    };
+
+    public List<Vector3> GarlemaldWaypoints = new()
+    {
+        new Vector3((float) 294.6,(float) 9.0,(float) 624.4), // "27.4, 34.0"
+        new Vector3((float) 549.3,(float) 5.8,(float) 544.5), // "32.5, 32.4"
+        new Vector3((float) 574.3,(float) 35.0,(float) 20.1), // "33.0, 21.9"
+        new Vector3((float) 374.8,(float) 35.2,(float) -34.9), // "29.0, 20.8"
+        new Vector3((float) 85.0,(float) 20.9,(float) 204.7), // "23.2, 25.6"
+        new Vector3((float) -290.6,(float) 41.8,(float) -89.7), // "15.7, 19.7"
+        new Vector3((float) -479.4,(float) 45.1,(float) -204.8), // "11.9, 17.4"
+        new Vector3((float) -467.6,(float) 42.8,(float) -435.4), // "12.1, 12.7"
+        new Vector3((float) -589.3,(float) 43.3,(float) -494.5) // "9.7, 11.6"
+    };
+
+    public List<Vector3> MareLamentorumWaypoints = new()
+    {
+        new Vector3((float) -254.2,(float) 73.1,(float) 364.4), // "19.7, 23.6"
+        new Vector3((float) -559.4,(float) 159.5,(float) 129.9), // "10.3, 24.1"
+        new Vector3((float) -214.4,(float) 102.5,(float) 162.7), // "17.2, 24.7"
+        new Vector3((float) -154.9,(float) 94.6,(float) 0.2), // "18.4, 21.5"
+        new Vector3((float) 138.5,(float) 77.7,(float) 83.7), // "24.3, 23.4"
+        new Vector3((float) 344.0,(float) 83.7,(float) 254.7), // "28.3, 26.7"
+        new Vector3((float) 750.5,(float) 160.9,(float) 289.8), // "36.4, 27.2"
+        new Vector3((float) 413.0,(float) 122.4,(float) 412.0), // "29.8, 29.8"
+        new Vector3((float) 135.0,(float) 89.3,(float) 599.7), // "24.2, 33.5"
+        new Vector3((float) -19.9,(float) 94.5,(float) 659.3) // "21.1, 34.7"
+    };
+
+    public List<Vector3> UltimaThuleWaypoints = new()
+    {
+        new Vector3((float) -312.2,(float) 92.2,(float) 723.3), // "15.2, 36.0"
+        new Vector3((float) -5.2,(float) 82.4,(float) 624.4), // "21.3, 34.0"
+        new Vector3((float) -194.0,(float) 96.7,(float) 442.6), // "17.6, 30.4"
+        new Vector3((float) -252.2,(float) 102.4,(float) 219.7), // "16.4, 25.9"
+        new Vector3((float) -487.1,(float) 86.8,(float) 7.6), // "11.7, 21.7"
+        new Vector3((float) -666.6,(float) 99.5,(float) -42.8), // "8.2, 20.6"
+        new Vector3((float) -394.9,(float) 290.2,(float) -538.0), // "13.3, 10.5"
+        new Vector3((float) -102.3,(float) 310.7,(float) -577.6), // "19.4, 10.0"
+        new Vector3((float) 330.0,(float) 317.9,(float) -444.7) // "28.1, 12.6"
+    };
+
+    public List<Vector3> ElpisWaypoints = new()
+    {
+        new Vector3((float) -724.2,(float) -18.8,(float) 374.8), // "7.0, 29.0"
+        new Vector3((float) -436.0,(float) -23.0,(float) 524.7), // "12.8, 32.1"
+        new Vector3((float) -178.4,(float) -14.6,(float) 430.7), // "17.8, 30.1"
+        new Vector3((float) -149.1,(float) 10.5,(float) 155.2), // "18.5, 24.5"
+        new Vector3((float) 394.5,(float) 14.1,(float) 309.1), // "29.4, 27.7"
+        new Vector3((float) 548.3,(float) 164.8,(float) -147.4), // "32.6, 18.6"
+        new Vector3((float) 639.9,(float) 165.5,(float) -359.5), // "34.4, 14.3"
+        new Vector3((float) 627.6,(float) 211.8,(float) -531.5), // "34.0, 10.8"
+        new Vector3((float) -9.2,(float) 161.2,(float) -403.5), // "21.3, 13.5"
+        new Vector3((float) 10.2,(float) 163.4,(float) -774.2), // "21.7, 6.0"
+        new Vector3((float) -430.3,(float) 320.4,(float) -587.1) // "12.8, 9.8"
+    };
+
     private readonly IPluginLog _log;
     private readonly ICallGateSubscriber<bool> _vnavIsReady;
     private readonly ICallGateSubscriber<int> _vnavNumWaypoints;
@@ -313,6 +395,78 @@ public class MovementManager : IDisposable {
             LifestreamExecuteCommand("tp Ondo Cups");
         }
         EnqueuedWaypoints.AddRange(TempestWaypoints);
+    }
+
+    public void ScoutLabyrinthos()
+    {
+        if (EnqueuedWaypoints.Count > 0)
+            return;
+        _targetTerritory = 956;
+        if (Dalamud.ClientState.TerritoryType != 956)
+        {
+            LifestreamExecuteCommand("tp The Archeion");
+        }
+        EnqueuedWaypoints.AddRange(LabyrinthosWaypoints);
+    }
+
+    public void ScoutThavnair()
+    {
+        if (EnqueuedWaypoints.Count > 0)
+            return;
+        _targetTerritory = 957;
+        if (Dalamud.ClientState.TerritoryType != 957)
+        {
+            LifestreamExecuteCommand("tp Yedlihmad");
+        }
+        EnqueuedWaypoints.AddRange(ThavnairWaypoints);
+    }
+
+    public void ScoutGarlemald()
+    {
+        if (EnqueuedWaypoints.Count > 0)
+            return;
+        _targetTerritory = 958;
+        if (Dalamud.ClientState.TerritoryType != 958)
+        {
+            LifestreamExecuteCommand("tp Camp Broken Glass");
+        }
+        EnqueuedWaypoints.AddRange(GarlemaldWaypoints);
+    }
+
+    public void ScoutMareLamentorum()
+    {
+        if (EnqueuedWaypoints.Count > 0)
+            return;
+        _targetTerritory = 959;
+        if (Dalamud.ClientState.TerritoryType != 959)
+        {
+            LifestreamExecuteCommand("tp Sinus Lacrimarum");
+        }
+        EnqueuedWaypoints.AddRange(MareLamentorumWaypoints);
+    }
+
+    public void ScoutUltimaThule()
+    {
+        if (EnqueuedWaypoints.Count > 0)
+            return;
+        _targetTerritory = 960;
+        if (Dalamud.ClientState.TerritoryType != 960)
+        {
+            LifestreamExecuteCommand("tp Reah Tahra");
+        }
+        EnqueuedWaypoints.AddRange(UltimaThuleWaypoints);
+    }
+
+    public void ScoutElpis()
+    {
+        if (EnqueuedWaypoints.Count > 0)
+            return;
+        _targetTerritory = 961;
+        if (Dalamud.ClientState.TerritoryType != 961)
+        {
+            LifestreamExecuteCommand("tp The Twelve Wonders");
+        }
+        EnqueuedWaypoints.AddRange(ElpisWaypoints);
     }
 
     private bool IsReady()
