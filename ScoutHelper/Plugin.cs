@@ -40,8 +40,9 @@ public sealed class Plugin : IDalamudPlugin {
 
 		var conf = pluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
 		conf.Initialize(_log, pluginInterface);
+        Dalamud.Initialize(pluginInterface);
 
-		var serviceProvider = new ServiceCollection()
+        var serviceProvider = new ServiceCollection()
 			.AddSingleton(pluginInterface)
 			.AddSingleton(_log)
 			.AddSingleton(chatGui)
@@ -58,7 +59,7 @@ public sealed class Plugin : IDalamudPlugin {
 			)
 			.AddSingleton<MobManager>()
 			.AddSingleton<TerritoryManager>()
-            .AddSingleton<VNavMeshManager>()
+            .AddSingleton<MovementManager>()
             .AddSingleton<HuntHelperManager>()
 			.AddSingleton<BearManager>()
 			.AddSingleton<SirenManager>()

@@ -43,7 +43,7 @@ public class MainWindow : Window, IDisposable {
 	private readonly IClientState _clientState;
 	private readonly Configuration _conf;
 	private readonly IChatGui _chat;
-    private readonly VNavMeshManager _vNavMeshManager;
+    private readonly MovementManager _movementManager;
     private readonly HuntHelperManager _huntHelperManager;
 	private readonly BearManager _bearManager;
 	private readonly SirenManager _sirenManager;
@@ -75,7 +75,7 @@ public class MainWindow : Window, IDisposable {
 		IClientState clientState,
 		Configuration conf,
 		IChatGui chat,
-        VNavMeshManager vNavMeshManager,
+        MovementManager movementManager,
         HuntHelperManager huntHelperManager,
 		BearManager bearManager,
 		SirenManager sirenManager,
@@ -89,7 +89,7 @@ public class MainWindow : Window, IDisposable {
 		_clientState = clientState;
 		_conf = conf;
 		_chat = chat;
-        _vNavMeshManager = vNavMeshManager;
+        _movementManager = movementManager;
         _huntHelperManager = huntHelperManager;
 		_bearManager = bearManager;
 		_sirenManager = sirenManager;
@@ -416,64 +416,68 @@ public class MainWindow : Window, IDisposable {
         ImGui.PushTextWrapPos(contentWidth);
 
         ImGuiPlus.Heading("NAVIGATION", centered: true);
+        ImGuiPlus.Separator();
+        ImGuiPlus.Heading("Shadowbringers", centered: true);
 
-		if (ImGui.Button("Go!"))
+        if (ImGui.Button("Scout Kholusia"))
 		{
-            //_chat.TaggedPrint("Generating Siren link...");
-            _log.Debug("KLICK!");
-            _vNavMeshManager.SimpleMoveTo(new Vector3((float)-120.6, (float)2.1, (float)-141.3), false);
-            _log.Debug("KLACK!");
+            _chat.TaggedPrint("Beginning to scout Kholusia");
+			_movementManager.ScoutKholusia();
         }
 
-        if (ImGui.Button("Is run?"))
+        if (ImGui.Button("Scout Lakeland"))
         {
-            //_chat.TaggedPrint("Generating Siren link...");
-            _log.Debug("KLICK!");
-            _log.Debug("Are we running? "+_vNavMeshManager.IsRunning());
-            _log.Debug("KLACK!");
+            _chat.TaggedPrint("Beginning to scout Lakeland");
+            _movementManager.ScoutLakeland();
+        }
+
+        if (ImGui.Button("Scout Ahm Ahreng"))
+        {
+            _chat.TaggedPrint("Beginning to scout Ahm Ahreng");
+            _movementManager.ScoutAhmAhreng();
+        }
+
+        if (ImGui.Button("Scout Il Mheg"))
+        {
+            _chat.TaggedPrint("Beginning to scout Il Mheg");
+            _movementManager.ScoutIlMheg();
+        }
+
+        if (ImGui.Button("Scout Rak'tika Greatwood"))
+        {
+            _chat.TaggedPrint("Beginning to scout The Rak'tika Greatwood");
+            _movementManager.ScoutRakTika();
+        }
+
+        if (ImGui.Button("Scout Tempest"))
+        {
+            _chat.TaggedPrint("Beginning to scout Tempest");
+            _movementManager.ScoutTempest();
+        }
+
+        ImGuiPlus.Separator();
+
+        if (ImGui.Button("Get Territory"))
+        {
+            _log.Debug("I am in "+ Dalamud.ClientState.TerritoryType);
+        }
+
+        if (ImGui.Button("Get Position"))
+        {
+            _log.Debug("I am at " + Dalamud.ClientState.LocalPlayer.Position);
+        }
+
+        if (ImGui.Button("STOP"))
+        {
+            _chat.TaggedPrint("Stopping...");
+            _movementManager.Stop();
         }
 
         ImGuiPlus.Separator();
-        ImGuiPlus.Heading("NEW", centered: true);
-        ImGui.TextWrapped("start a new scout session on turtle for other scouters to join and contribute to.");
-        if (ImGui.Button("START NEW SESSION", _buttonSize.Value with { X = contentWidth }))
-        {
-            _turtleManager
-                .GenerateTurtleLink(new List<TrainMob>(), allowEmpty: true)
-                .Then(
-                    result => result.Match(
-                        linkData => {
-                            _collabInput = $"{linkData.Slug}/{linkData.CollabPassword}";
-                            if (JoinTurtleCollabSession(_collabInput)) _closeTurtleCollabPopup = true;
-                        },
-                        errorMessage => _chat.TaggedPrintError(errorMessage)
-                    )
-                );
-        }
-        if (ImGui.IsItemHovered())
-            ImGuiPlus.CreateTooltip(
-                "generate a link to a new session, and immediately join it so you can start contributing. share the link with other scouters so they can also contribute :3"
-            );
+        ImGuiPlus.Heading("Endwalker", centered: true);
 
         ImGuiPlus.Separator();
-        ImGuiPlus.Heading("CONTRIBUTE", centered: true);
-        ImGui.TextWrapped("contribute scouted marks to an existing turtle session.");
-        ImGui.SetNextItemWidth(contentWidth - ImGuiHelpers.GetButtonSize("JOIN").X - ImGui.GetStyle().ItemSpacing.X);
-        var linkInputted = ImGui.InputTextWithHint(
-            "",
-            "https://scout.wobbuffet.net/scout/2WAZMI3DeZ/e5b2ede5",
-            ref _collabInput,
-            256,
-            ImGuiInputTextFlags.AutoSelectAll | ImGuiInputTextFlags.EnterReturnsTrue
-        );
-        if (ImGui.IsItemHovered())
-            ImGuiPlus.CreateTooltip("paste a collaborator link here and join the session to start contributing marks.");
-        ImGui.SameLine();
-        linkInputted = linkInputted || ImGui.Button("JOIN");
-        if (linkInputted)
-        {
-            if (JoinTurtleCollabSession(_collabInput)) _closeTurtleCollabPopup = true;
-        }
+        ImGuiPlus.Heading("Dawntrail", centered: true);
 
         ImGui.PopTextWrapPos();
     }
