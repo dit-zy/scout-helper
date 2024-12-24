@@ -30,6 +30,8 @@ public sealed class Plugin : IDalamudPlugin {
 
 	public Plugin(
 		IDalamudPluginInterface pluginInterface,
+		IFramework framework,
+		IObjectTable objectTable,
 		IPluginLog log,
 		IChatGui chatGui,
 		ICommandManager commandManager,
@@ -43,7 +45,9 @@ public sealed class Plugin : IDalamudPlugin {
 
 		var serviceProvider = new ServiceCollection()
 			.AddSingleton(pluginInterface)
-			.AddSingleton(_log)
+            .AddSingleton(framework)
+            .AddSingleton(objectTable)
+            .AddSingleton(_log)
 			.AddSingleton(chatGui)
 			.AddSingleton(commandManager)
 			.AddSingleton(clientState)
@@ -58,8 +62,9 @@ public sealed class Plugin : IDalamudPlugin {
 			)
 			.AddSingleton<MobManager>()
 			.AddSingleton<TerritoryManager>()
-			.AddSingleton<HuntHelperManager>()
-			.AddSingleton<BearManager>()
+            .AddSingleton<HuntHelperManager>()
+            .AddSingleton<HuntMarkManager>()
+            .AddSingleton<BearManager>()
 			.AddSingleton<SirenManager>()
 			.AddSingleton<TurtleManager>()
 			.AddSingleton<ConfigWindow>()
