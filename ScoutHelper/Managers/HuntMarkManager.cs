@@ -23,6 +23,7 @@ public class HuntMarkManager : IDisposable {
     private TimeSpan _execDelay = new(0, 0, 1);
 
 	private List<uint> _ARankbNPCIds = new();
+	private List<uint> _sentARankIds = new();
 
     public event Action<ScoutHelper.Models.TrainMob> OnMarkFound;
 
@@ -52,7 +53,7 @@ public class HuntMarkManager : IDisposable {
             ConvertToMapCoordinate(pos.Z, mapScale)
         );
     }
-    private float GetMapZoneScale(ushort territoryId)
+    private float GetMapZoneScale(uint territoryId)
     {
         //EVERYTHING EXCEPT HEAVENSWARD HAS A SCALE OF 100, BUT FOR SOME REASON HW HAS 95
         if (territoryId is >= 397 and <= 402) return 95f;
@@ -73,6 +74,11 @@ public class HuntMarkManager : IDisposable {
 			
             if (_ARankbNPCIds.Contains(battlenpc.NameId))
             {
+				if(_sentARankIds.Contains(battlenpc.NameId))
+				{
+                    //_log.Debug($"Got that A already...");
+                    continue;
+				}
 				var trainMob = new ScoutHelper.Models.TrainMob();
 				
 				trainMob.Name = battlenpc.Name.ToString();
@@ -80,11 +86,12 @@ public class HuntMarkManager : IDisposable {
 				trainMob.TerritoryId = _clientState.TerritoryType;
 				//trainMob.MapId =
 				trainMob.Instance = GetCurrentInstance();
-                trainMob.Position = ConvertToMapCoordinate(battlenpc.Position, trainMob.TerritoryId);
+                trainMob.Position = ConvertToMapCoordinate(battlenpc.Position, GetMapZoneScale(trainMob.TerritoryId));
 				trainMob.Dead = battlenpc.IsDead;
                 //trainMob.LastSeenUtc = 
                 _log.Debug($"I spy with my little eye: {trainMob.Name} ({trainMob.MobId}) in {trainMob.TerritoryId} i{trainMob.Instance} @{trainMob.Position} Dead?{trainMob.Dead}");
 				OnMarkFound.Invoke(trainMob);
+				_sentARankIds.Add(trainMob.MobId);
             }
         }
     }
@@ -109,6 +116,7 @@ public class HuntMarkManager : IDisposable {
 	{
 		_log.Debug("HuntMarkManager: Start looking for Ranks");
         _ARankbNPCIds = MobIdToTurtleId.Keys.ToList();
+		_sentARankIds = new();
         _framework.Update += Tick;
     }
 
