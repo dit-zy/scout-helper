@@ -43,11 +43,7 @@ public static class Constants {
 		// "Something importanter we extra don't want the user forgetting for even longer.",
 	}.AsList();
 
-	public static readonly (Territory, uint)[] LatestPatchInstances = {
-		(Territory.Kozamauka, 3),
-		(Territory.Shaaloani, 2),
-		(Territory.HeritageFound, 2),
-	};
+	public static readonly (Territory, uint)[] LatestPatchInstances = [];
 
 	#endregion
 
