@@ -9,10 +9,13 @@ using System.Linq;
 using System.Numerics;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using static XIVHuntUtils.Utils.XivUtils;
+using Lumina.Excel.Sheets;
 
 namespace ScoutHelper.Managers;
 using MobDict = IDictionary<uint, (Patch patch, uint turtleMobId)>;
 public class HuntMarkManager : IDisposable {
+
+	private static readonly TimeSpan _execDelay = TimeSpan.FromSeconds(1);
 
 	private readonly IFramework _framework;
 	private readonly IObjectTable _objectTable;
@@ -20,8 +23,7 @@ public class HuntMarkManager : IDisposable {
 	private readonly IPluginLog _log;
 	private readonly IChatGui _chat;
 
-	private TimeSpan _lastUpdate = new(0);
-	private TimeSpan _execDelay = new(0, 0, 1);
+	private TimeSpan _lastUpdate = TimeSpan.FromSeconds(0);
 
 	private List<uint> _ARankbNPCIds = new();
 	private List<uint> _sentARankIds = new();
@@ -69,7 +71,7 @@ public class HuntMarkManager : IDisposable {
 				trainMob.TerritoryId = _clientState.TerritoryType;
 				//trainMob.MapId =
 				trainMob.Instance = GetCurrentInstance();
-				trainMob.Position = XIVHuntUtils.Utils.XivUtils.AsMapPosition(new Vector2(trainMob.Position.X, trainMob.Position.Z), IsHWTerritory(trainMob.TerritoryId));
+				trainMob.Position = XIVHuntUtils.Utils.XivUtils.AsMapPosition(new Vector2(battlenpc.Position.X, battlenpc.Position.Z), IsHWTerritory(trainMob.TerritoryId));
 				trainMob.Dead = battlenpc.IsDead;
 				//trainMob.LastSeenUtc = 
 				_log.Debug($"I spy with my little eye: {trainMob.Name} ({trainMob.MobId}) in {trainMob.TerritoryId} i{trainMob.Instance} @{trainMob.Position} Dead?{trainMob.Dead}");
@@ -106,33 +108,4 @@ public class HuntMarkManager : IDisposable {
 	public void Dispose() {
 		_framework.Update -= Tick;
 	}
-
-	/*
-private void OnMarkSeen(TrainMob mark) {
-	if (!_turtleManager.IsTurtleCollabbing) return;
-
-	_turtleManager.UpdateCurrentSession(mark.AsSingletonList())
-		.ContinueWith(
-			task => {
-				switch (task.Result) {
-					case TurtleHttpStatus.Success:
-						_chat.TaggedPrint($"added {mark.Name} to the turtle session.");
-						break;
-					case TurtleHttpStatus.NoSupportedMobs:
-						_chat.TaggedPrint($"{mark.Name} was seen, but is not supported by turtle and will not be added to the session.");
-						break;
-					case TurtleHttpStatus.HttpError:
-						_chat.TaggedPrintError($"something went wrong when adding {mark.Name} to the turtle session ;-;.");
-						break;
-				}
-			},
-			TaskContinuationOptions.OnlyOnRanToCompletion
-		)
-		.ContinueWith(
-			task => _log.Error(task.Exception, "failed to update turtle session"),
-			TaskContinuationOptions.OnlyOnFaulted
-		);
-}
-*/
-
 }
