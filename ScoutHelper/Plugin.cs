@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Dalamud.Game.Command;
@@ -29,14 +29,14 @@ public sealed class Plugin : IDalamudPlugin {
 	private readonly Action _dispose;
 
 	public Plugin(
-		IDalamudPluginInterface pluginInterface,
-		IFramework framework,
-		IObjectTable objectTable,
-		IPluginLog log,
-		IChatGui chatGui,
-		ICommandManager commandManager,
-		IClientState clientState,
-		IDataManager dataManager
+			IFramework framework,
+			IDalamudPluginInterface pluginInterface,
+			IPluginLog log,
+			IChatGui chatGui,
+			ICommandManager commandManager,
+			IClientState clientState,
+			IDataManager dataManager,
+			IObjectTable objectTable
 	) {
 		_log = log;
 
@@ -44,33 +44,33 @@ public sealed class Plugin : IDalamudPlugin {
 		conf.Initialize(_log, pluginInterface);
 
 		var serviceProvider = new ServiceCollection()
-			.AddSingleton(pluginInterface)
-            .AddSingleton(framework)
-            .AddSingleton(objectTable)
-            .AddSingleton(_log)
-			.AddSingleton(chatGui)
-			.AddSingleton(commandManager)
-			.AddSingleton(clientState)
-			.AddSingleton(dataManager)
-			.AddSingleton(conf)
-			.AddSingleton(
-				new ScoutHelperOptions(
-					pluginInterface.PluginFilePath(Constants.BearDataFile),
-					pluginInterface.PluginFilePath(Constants.SirenDataFile),
-					pluginInterface.PluginFilePath(Constants.TurtleDataFile)
+				.AddSingleton(framework)
+				.AddSingleton(pluginInterface)
+				.AddSingleton(_log)
+				.AddSingleton(chatGui)
+				.AddSingleton(commandManager)
+				.AddSingleton(clientState)
+				.AddSingleton(dataManager)
+				.AddSingleton(objectTable)
+				.AddSingleton(conf)
+				.AddSingleton(
+						new ScoutHelperOptions(
+								pluginInterface.PluginFilePath(Constants.BearDataFile),
+								pluginInterface.PluginFilePath(Constants.SirenDataFile),
+								pluginInterface.PluginFilePath(Constants.TurtleDataFile)
+						)
 				)
-			)
-			.AddSingleton<MobManager>()
-			.AddSingleton<TerritoryManager>()
-            .AddSingleton<HuntHelperManager>()
-            .AddSingleton<HuntMarkManager>()
-            .AddSingleton<BearManager>()
-			.AddSingleton<SirenManager>()
-			.AddSingleton<TurtleManager>()
-			.AddSingleton<ConfigWindow>()
-			.AddSingleton<MainWindow>()
-			.AddSingleton<InitializationManager>()
-			.BuildServiceProvider();
+				.AddSingleton<MobManager>()
+				.AddSingleton<TerritoryManager>()
+				.AddSingleton<HuntHelperManager>()
+				.AddSingleton<HuntMarkManager>()
+				.AddSingleton<BearManager>()
+				.AddSingleton<SirenManager>()
+				.AddSingleton<TurtleManager>()
+				.AddSingleton<ConfigWindow>()
+				.AddSingleton<MainWindow>()
+				.AddSingleton<InitializationManager>()
+				.BuildServiceProvider();
 
 		var initManager = serviceProvider.GetRequiredService<InitializationManager>();
 		initManager.InitializeNecessaryComponents();
@@ -84,8 +84,8 @@ public sealed class Plugin : IDalamudPlugin {
 		_windowSystem.AddWindow(_mainWindow);
 
 		CommandNames.ForEach(
-			commandName =>
-				commandManager.AddHandler(commandName, new CommandInfo(OnCommand) { HelpMessage = "Opens the main window." })
+				commandName =>
+						commandManager.AddHandler(commandName, new CommandInfo(OnCommand) { HelpMessage = "Opens the main window." })
 		);
 
 		pluginInterface.UiBuilder.Draw += DrawUi;
