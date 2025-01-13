@@ -16,7 +16,7 @@ namespace ScoutHelper.Managers;
 using MobDict = IDictionary<uint, (Patch patch, uint turtleMobId)>;
 
 public class HuntMarkManager : IDisposable {
-	private static readonly TimeSpan _execDelay = TimeSpan.FromSeconds(1);
+	private static readonly TimeSpan ExecDelay = TimeSpan.FromSeconds(1);
 
 	private readonly IFramework _framework;
 	private readonly IObjectTable _objectTable;
@@ -29,7 +29,7 @@ public class HuntMarkManager : IDisposable {
 	private List<uint> _ARankbNPCIds = new();
 	private List<uint> _sentARankIds = new();
 
-	public event Action<ScoutHelper.Models.TrainMob> OnMarkFound;
+	public event Action<ScoutHelper.Models.TrainMob>? OnMarkFound;
 
 	public HuntMarkManager(
 		IFramework framework,
@@ -81,7 +81,7 @@ public class HuntMarkManager : IDisposable {
 				_log.Debug(
 					$"I spy with my little eye: {trainMob.Name} ({trainMob.MobId}) in {trainMob.TerritoryId} i{trainMob.Instance} @{trainMob.Position} Dead?{trainMob.Dead}"
 				);
-				OnMarkFound.Invoke(trainMob);
+				OnMarkFound?.Invoke(trainMob);
 				_sentARankIds.Add(trainMob.MobId);
 			}
 		}
@@ -89,7 +89,7 @@ public class HuntMarkManager : IDisposable {
 
 	private void Tick(IFramework framework) {
 		_lastUpdate += framework.UpdateDelta;
-		if (_lastUpdate > _execDelay) {
+		if (_lastUpdate > ExecDelay) {
 			DoUpdate(framework);
 			_lastUpdate = new(0);
 		}
@@ -99,9 +99,9 @@ public class HuntMarkManager : IDisposable {
 		CheckObjectTable();
 	}
 
-	public void StartLooking(MobDict MobIdToTurtleId) {
+	public void StartLooking(MobDict mobIdToTurtleId) {
 		_log.Debug("HuntMarkManager: Start looking for Ranks");
-		_ARankbNPCIds = MobIdToTurtleId.Keys.ToList();
+		_ARankbNPCIds = mobIdToTurtleId.Keys.ToList();
 		_sentARankIds = new();
 		_framework.Update += Tick;
 	}

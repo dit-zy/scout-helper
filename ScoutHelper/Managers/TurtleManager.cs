@@ -69,11 +69,13 @@ public partial class TurtleManager : IDisposable {
 
 		(MobIdToTurtleId, TerritoryIdToTurtleData)
 			= LoadData(options.TurtleDataFile, territoryManager, mobManager);
-		huntMarkManager.OnMarkFound += OnMarkSeen;
+		_huntMarkManager.OnMarkFound += OnMarkSeen;
 	}
 
 	public void Dispose() {
 		_httpClientGenerator.Dispose();
+		_huntMarkManager.StopLooking();
+		_huntMarkManager.OnMarkFound -= OnMarkSeen;
 
 		GC.SuppressFinalize(this);
 	}
