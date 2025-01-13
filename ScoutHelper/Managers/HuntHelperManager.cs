@@ -26,10 +26,10 @@ public class HuntHelperManager : IDisposable {
 	public bool Available { get; private set; } = false;
 
 	public HuntHelperManager(
-			IDalamudPluginInterface pluginInterface,
-			IPluginLog log,
-			IChatGui chat,
-			TurtleManager turtleManager
+		IDalamudPluginInterface pluginInterface,
+		IPluginLog log,
+		IChatGui chat,
+		TurtleManager turtleManager
 	) {
 		_log = log;
 		_chat = chat;
@@ -70,9 +70,9 @@ public class HuntHelperManager : IDisposable {
 				Available = true;
 			} else {
 				_log.Warning(
-						"Hunt Helper IPC version {0} required, but version {1} detected. Disabling support.",
-						SupportedVersion,
-						version
+					"Hunt Helper IPC version {0} required, but version {1} detected. Disabling support.",
+					SupportedVersion,
+					version
 				);
 				Available = false;
 			}
@@ -95,7 +95,7 @@ public class HuntHelperManager : IDisposable {
 			return _cgGetTrainList.InvokeFunc();
 		} catch (IpcNotReadyError) {
 			_log.Warning(
-					"Hunt Helper appears to have disappeared ;-;. Can't get the train data ;-;. Disabling support until it comes back."
+				"Hunt Helper appears to have disappeared ;-;. Can't get the train data ;-;. Disabling support until it comes back."
 			);
 			Available = false;
 			return "Hunt Helper has disappeared from my sight ;-;";

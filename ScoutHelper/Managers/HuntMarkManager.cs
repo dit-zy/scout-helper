@@ -12,9 +12,10 @@ using static XIVHuntUtils.Utils.XivUtils;
 using Lumina.Excel.Sheets;
 
 namespace ScoutHelper.Managers;
-using MobDict = IDictionary<uint, (Patch patch, uint turtleMobId)>;
-public class HuntMarkManager : IDisposable {
 
+using MobDict = IDictionary<uint, (Patch patch, uint turtleMobId)>;
+
+public class HuntMarkManager : IDisposable {
 	private static readonly TimeSpan _execDelay = TimeSpan.FromSeconds(1);
 
 	private readonly IFramework _framework;
@@ -31,12 +32,12 @@ public class HuntMarkManager : IDisposable {
 	public event Action<ScoutHelper.Models.TrainMob> OnMarkFound;
 
 	public HuntMarkManager(
-				IFramework framework,
-				IPluginLog log,
-				IChatGui chat,
-				IClientState clientState,
-				IObjectTable objectTable
-		) {
+		IFramework framework,
+		IPluginLog log,
+		IChatGui chat,
+		IClientState clientState,
+		IObjectTable objectTable
+	) {
 		_framework = framework;
 		_log = log;
 		_chat = chat;
@@ -71,10 +72,15 @@ public class HuntMarkManager : IDisposable {
 				trainMob.TerritoryId = _clientState.TerritoryType;
 				//trainMob.MapId =
 				trainMob.Instance = GetCurrentInstance();
-				trainMob.Position = XIVHuntUtils.Utils.XivUtils.AsMapPosition(new Vector2(battlenpc.Position.X, battlenpc.Position.Z), IsHWTerritory(trainMob.TerritoryId));
+				trainMob.Position = XIVHuntUtils.Utils.XivUtils.AsMapPosition(
+					new Vector2(battlenpc.Position.X, battlenpc.Position.Z),
+					IsHWTerritory(trainMob.TerritoryId)
+				);
 				trainMob.Dead = battlenpc.IsDead;
-				//trainMob.LastSeenUtc = 
-				_log.Debug($"I spy with my little eye: {trainMob.Name} ({trainMob.MobId}) in {trainMob.TerritoryId} i{trainMob.Instance} @{trainMob.Position} Dead?{trainMob.Dead}");
+				//trainMob.LastSeenUtc =
+				_log.Debug(
+					$"I spy with my little eye: {trainMob.Name} ({trainMob.MobId}) in {trainMob.TerritoryId} i{trainMob.Instance} @{trainMob.Position} Dead?{trainMob.Dead}"
+				);
 				OnMarkFound.Invoke(trainMob);
 				_sentARankIds.Add(trainMob.MobId);
 			}
