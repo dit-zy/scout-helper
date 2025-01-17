@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Dalamud.Game.Command;
@@ -29,12 +29,14 @@ public sealed class Plugin : IDalamudPlugin {
 	private readonly Action _dispose;
 
 	public Plugin(
+		IFramework framework,
 		IDalamudPluginInterface pluginInterface,
 		IPluginLog log,
 		IChatGui chatGui,
 		ICommandManager commandManager,
 		IClientState clientState,
-		IDataManager dataManager
+		IDataManager dataManager,
+		IObjectTable objectTable
 	) {
 		_log = log;
 
@@ -42,12 +44,14 @@ public sealed class Plugin : IDalamudPlugin {
 		conf.Initialize(_log, pluginInterface);
 
 		var serviceProvider = new ServiceCollection()
+			.AddSingleton(framework)
 			.AddSingleton(pluginInterface)
 			.AddSingleton(_log)
 			.AddSingleton(chatGui)
 			.AddSingleton(commandManager)
 			.AddSingleton(clientState)
 			.AddSingleton(dataManager)
+			.AddSingleton(objectTable)
 			.AddSingleton(conf)
 			.AddSingleton(
 				new ScoutHelperOptions(
@@ -59,6 +63,7 @@ public sealed class Plugin : IDalamudPlugin {
 			.AddSingleton<MobManager>()
 			.AddSingleton<TerritoryManager>()
 			.AddSingleton<HuntHelperManager>()
+			.AddSingleton<HuntMarkManager>()
 			.AddSingleton<BearManager>()
 			.AddSingleton<SirenManager>()
 			.AddSingleton<TurtleManager>()

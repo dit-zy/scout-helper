@@ -1,4 +1,4 @@
-﻿using CSharpFunctionalExtensions;
+using CSharpFunctionalExtensions;
 using Dalamud.Plugin.Ipc;
 using Dalamud.Plugin.Ipc.Exceptions;
 using ScoutHelper.Models;
@@ -44,7 +44,7 @@ public class HuntHelperManager : IDisposable {
 		CheckVersion();
 		_cgEnable.Subscribe(OnEnable);
 		_cgDisable.Subscribe(OnDisable);
-		_cgMarkSeen.Subscribe(OnMarkSeen);
+		//_cgMarkSeen.Subscribe(OnMarkSeen);
 	}
 
 	public void Dispose() {
@@ -83,29 +83,7 @@ public class HuntHelperManager : IDisposable {
 	}
 
 	private void OnMarkSeen(TrainMob mark) {
-		if (!_turtleManager.IsTurtleCollabbing) return;
-
-		_turtleManager.UpdateCurrentSession(mark.AsSingletonList())
-			.ContinueWith(
-				task => {
-					switch (task.Result) {
-						case TurtleHttpStatus.Success:
-							_chat.TaggedPrint($"added {mark.Name} to the turtle session.");
-							break;
-						case TurtleHttpStatus.NoSupportedMobs:
-							_chat.TaggedPrint($"{mark.Name} was seen, but is not supported by turtle and will not be added to the session.");
-							break;
-						case TurtleHttpStatus.HttpError:
-							_chat.TaggedPrintError($"something went wrong when adding {mark.Name} to the turtle session ;-;.");
-							break;
-					}
-				},
-				TaskContinuationOptions.OnlyOnRanToCompletion
-			)
-			.ContinueWith(
-				task => _log.Error(task.Exception, "failed to update turtle session"),
-				TaskContinuationOptions.OnlyOnFaulted
-			);
+		_turtleManager.OnMarkSeen(mark);
 	}
 
 	public Result<List<TrainMob>, string> GetTrainList() {

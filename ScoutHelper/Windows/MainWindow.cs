@@ -392,11 +392,13 @@ public class MainWindow : Window, IDisposable {
 		ImGui.PushTextWrapPos(contentWidth);
 
 		ImGuiPlus.Heading("SESSION", centered: true);
-		
+
 		ImGui.Checkbox("include name", ref _conf.IncludeNameInTurtleSession);
 		ImGui.SameLine();
-		ImGuiComponents.HelpMarker("share your character name in the turtle session, so others can see that you contributed.");
-		
+		ImGuiComponents.HelpMarker(
+			"share your character name in the turtle session, so others can see that you contributed."
+		);
+
 		ImGui.BeginDisabled(!_turtleManager.IsTurtleCollabbing);
 		if (ImGui.Button("LEAVE SESSION")) _turtleManager.LeaveCollabSession();
 		ImGui.EndDisabled();

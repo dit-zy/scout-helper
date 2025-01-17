@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -31,8 +31,10 @@ public partial class TurtleManager : IDisposable {
 	private static partial Regex CollabLinkRegex();
 
 	private readonly IPluginLog _log;
+	private readonly IChatGui _chat;
 	private readonly Configuration _conf;
 	private readonly IClientState _clientState;
+	private readonly HuntMarkManager _huntMarkManager;
 	private readonly HttpClientGenerator _httpClientGenerator;
 
 	private MobDict MobIdToTurtleId { get; }
@@ -45,15 +47,19 @@ public partial class TurtleManager : IDisposable {
 
 	public TurtleManager(
 		IPluginLog log,
+		IChatGui chat,
 		Configuration conf,
 		IClientState clientState,
 		ScoutHelperOptions options,
 		TerritoryManager territoryManager,
+		HuntMarkManager huntMarkManager,
 		MobManager mobManager
 	) {
 		_log = log;
+		_chat = chat;
 		_conf = conf;
 		_clientState = clientState;
+		_huntMarkManager = huntMarkManager;
 
 		_httpClientGenerator = new HttpClientGenerator(
 			_log,
@@ -63,10 +69,13 @@ public partial class TurtleManager : IDisposable {
 
 		(MobIdToTurtleId, TerritoryIdToTurtleData)
 			= LoadData(options.TurtleDataFile, territoryManager, mobManager);
+		_huntMarkManager.OnMarkFound += OnMarkSeen;
 	}
 
 	public void Dispose() {
 		_httpClientGenerator.Dispose();
+		_huntMarkManager.StopLooking();
+		_huntMarkManager.OnMarkFound -= OnMarkSeen;
 
 		GC.SuppressFinalize(this);
 	}
@@ -78,16 +87,49 @@ public partial class TurtleManager : IDisposable {
 		_currentCollabSession = match.Groups["session"].Value;
 		_currentCollabPassword = match.Groups["password"].Value;
 		IsTurtleCollabbing = true;
+		_huntMarkManager.StartLooking(MobIdToTurtleId);
 		return (_currentCollabSession, _currentCollabPassword);
+	}
+
+	public void OnMarkSeen(TrainMob mark) {
+		if (!IsTurtleCollabbing) return;
+
+		UpdateCurrentSession(mark.AsSingletonList())
+			.ContinueWith(
+				task => {
+					switch (task.Result) {
+						case TurtleHttpStatus.Success:
+							_chat.TaggedPrint($"added {mark.Name} to the turtle session.");
+							break;
+						case TurtleHttpStatus.NoSupportedMobs:
+							_chat.TaggedPrint(
+								$"{mark.Name} was seen, but is not supported by turtle and will not be added to the session."
+							);
+							break;
+						case TurtleHttpStatus.HttpError:
+							_chat.TaggedPrintError($"something went wrong when adding {mark.Name} to the turtle session ;-;.");
+							break;
+					}
+				},
+				TaskContinuationOptions.OnlyOnRanToCompletion
+			)
+			.ContinueWith(
+				task => _log.Error(task.Exception, "failed to update turtle session"),
+				TaskContinuationOptions.OnlyOnFaulted
+			);
 	}
 
 	public void RejoinLastCollabSession() {
 		if (_currentCollabSession.IsNullOrEmpty() || _currentCollabPassword.IsNullOrEmpty())
 			throw new Exception("cannot rejoin the last turtle collab session as there is no last session.");
 		IsTurtleCollabbing = true;
+		_huntMarkManager.StartLooking(MobIdToTurtleId);
 	}
 
-	public void LeaveCollabSession() => IsTurtleCollabbing = false;
+	public void LeaveCollabSession() {
+		IsTurtleCollabbing = false;
+		_huntMarkManager.StopLooking();
+	}
 
 	public async Task<TurtleHttpStatus> UpdateCurrentSession(IList<TrainMob> train) {
 		var turtleSupportedMobs = train.Where(mob => MobIdToTurtleId.ContainsKey(mob.MobId)).AsList();
