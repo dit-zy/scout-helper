@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -11,6 +11,7 @@ using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
 using DitzyExtensions.Functional;
+using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using ImGuiNET;
 using ScoutHelper.Config;
 using ScoutHelper.Localization;
@@ -45,6 +46,7 @@ public class ConfigWindow : Window, IDisposable {
 	private bool _wasFocused = true;
 
 	public ConfigWindow(
+		IFramework framework,
 		IClientState clientState,
 		IPluginLog log,
 		Configuration conf,
@@ -61,8 +63,7 @@ public class ConfigWindow : Window, IDisposable {
 			MinimumSize = V2(384, 256),
 			MaximumSize = V2(float.MaxValue, float.MaxValue)
 		};
-
-		_previewFullText = ComputePreviewFullText();
+		framework.RunOnFrameworkThread(() => { _previewFullText = ComputePreviewFullText(); });
 	}
 
 	public void Dispose() {

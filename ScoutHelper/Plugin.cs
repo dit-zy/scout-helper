@@ -42,7 +42,6 @@ public sealed class Plugin : IDalamudPlugin {
 
 		var conf = pluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
 		conf.Initialize(_log, pluginInterface);
-
 		var serviceProvider = new ServiceCollection()
 			.AddSingleton(framework)
 			.AddSingleton(pluginInterface)
