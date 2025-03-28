@@ -41,7 +41,7 @@ public class ConfigWindow : Window, IDisposable {
 	private readonly TerritoryManager _territoryManager;
 
 	private string _fullTextTemplate;
-	private string _previewFullText;
+	private string _previewFullText = string.Empty;
 	private bool _wasFocused = true;
 
 	public ConfigWindow(
@@ -61,14 +61,16 @@ public class ConfigWindow : Window, IDisposable {
 			MinimumSize = V2(384, 256),
 			MaximumSize = V2(float.MaxValue, float.MaxValue)
 		};
-
-		_previewFullText = ComputePreviewFullText();
 	}
 
 	public void Dispose() {
 		UpdateConfig();
 
 		GC.SuppressFinalize(this);
+	}
+
+	public override void OnOpen() {
+		_previewFullText = ComputePreviewFullText();
 	}
 
 	public override void OnClose() {
