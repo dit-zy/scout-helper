@@ -50,7 +50,7 @@ jobs:
       deployment_type: ${{ steps.configure-inputs.outputs.deployment_type }}
 
   release-plugin:
-    uses: dit-zy/DalamudPluginDeploy/.github/workflows/create_release.yml@v1
+    uses: dit-zy/DalamudPluginDeploy/.github/workflows/create_release.yml@main
     needs: prepare-release
     with:
       public_name: ${{ env.public_name }}
@@ -68,7 +68,7 @@ jobs:
     env:
       repo_owner: dit-zy
       repo_name: DalamudPluginsD17
-      event_type: trigger-workflow
+      event_type: deploy-release
       new_version: ${{ needs.release-plugin.outputs.new_version }}
       release_sha: ${{ needs.release-plugin.outputs.release_sha }}
       deployment_type: ${{ needs.prepare-deploy.outputs.deployment_type }}
