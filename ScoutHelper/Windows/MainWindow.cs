@@ -39,6 +39,7 @@ public class MainWindow : Window, IDisposable {
 		(ImGuiCol.Text, DangerFgColor),
 	}.AsList();
 
+	private readonly IFramework _framework;
 	private readonly IPluginLog _log;
 	private readonly IClientState _clientState;
 	private readonly Configuration _conf;
@@ -68,6 +69,7 @@ public class MainWindow : Window, IDisposable {
 	private bool _closeTurtleCollabPopup = false;
 
 	public MainWindow(
+		IFramework framework,
 		IPluginLog log,
 		IClientState clientState,
 		Configuration conf,
@@ -81,6 +83,7 @@ public class MainWindow : Window, IDisposable {
 		Strings.MainWindowTitle,
 		ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoScrollbar
 	) {
+		_framework = framework;
 		_log = log;
 		_clientState = clientState;
 		_conf = conf;
@@ -539,15 +542,17 @@ public class MainWindow : Window, IDisposable {
 		return result;
 	}
 
-	private void CopyLink(IList<TrainMob> trainList, string tracker, Patch highestPatch, string link) {
+	private async void CopyLink(IList<TrainMob> trainList, string tracker, Patch highestPatch, string link) {
 		if (_isCopyModeFullText) {
-			var fullText = FormatTemplate(
-				_conf.CopyTemplate,
-				trainList,
-				tracker,
-				_clientState.WorldName(),
-				highestPatch,
-				link
+			var fullText = await _framework.RunOnFrameworkThread(
+				() => FormatTemplate(
+					_conf.CopyTemplate,
+					trainList,
+					tracker,
+					_clientState.WorldName(),
+					highestPatch,
+					link
+				)
 			);
 			ImGui.SetClipboardText(fullText);
 			_chat.TaggedPrint($"Copied full text to clipboard: {fullText}");
