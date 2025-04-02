@@ -1,0 +1,102 @@
+name: release plugin
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'what kind of release is this?'
+        type: choice
+        required: true
+        default: 'PATCH'
+        options:
+        - MAJOR
+        - MINOR
+        - PATCH
+        - promote to stable
+      open_pr:
+        description: 'should a pr be opened for the deployment?'
+        type: boolean
+        required: false
+        default: true
+
+env:
+  deploy_repo_owner: dit-zy
+  deploy_repo_name: DalamudPluginsD17
+  deploy_event_type: deploy-release
+
+jobs:
+  create-testing-release:
+    uses: dit-zy/DalamudPluginDeploy/.github/workflows/create_release.yml@v1
+    if: inputs.release_type != 'promote to stable'
+    secrets:
+      REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
+    with:
+      public_name: ${{ vars.PLOGON_PUBLIC_NAME }}
+      internal_name: ${{ vars.PLOGON_INTERNAL_NAME }}
+      project_dir: ${{ vars.PLOGON_PROJECT_DIR }}
+      project_name: ${{ vars.PLOGON_PROJECT_NAME }}
+      version_change: ${{ inputs.release_type }}
+      github_username: ${{ vars.WORKFLOW_GITHUB_USERNAME }}
+      github_email: ${{ vars.WORKFLOW_GITHUB_EMAIL }}
+      force_push: true
+
+  release-testing:
+    runs-on: ubuntu-latest
+    if: inputs.release_type != 'promote to stable'
+    needs: [ create-testing-release ]
+    env:
+      new_version: ${{ needs.create-testing-release.outputs.new_version }}
+      release_sha: ${{ needs.create-testing-release.outputs.release_sha }}
+    steps:
+    - name: trigger
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ secrets.REPO_TOKEN }}
+        script: |
+          github.rest.repos.createDispatchEvent({
+            owner: "${{ env.deploy_repo_owner }}",
+            repo: "${{ env.deploy_repo_name }}",
+            event_type: "${{ env.deploy_event_type }}",
+            client_payload: {
+              deployment_type: "testing",
+              release_details: {
+                project_name: "${{ vars.PLOGON_PROJECT_NAME }}",
+                project_repo: "${{ github.repository }}",
+                release_sha: "${{ env.release_sha }}",
+                release_version: "${{ env.new_version }}",
+                owners: "${{ vars.PLOGON_OWNERS }}",
+              },
+              deploy_details: {
+                public_name: "${{ vars.PLOGON_PUBLIC_NAME }}",
+                internal_name: "${{ vars.PLOGON_INTERNAL_NAME }}",
+                open_pr: ${{ inputs.open_pr }},
+                github_username: "${{ vars.WORKFLOW_GITHUB_USERNAME }}",
+                github_email: "${{ vars.WORKFLOW_GITHUB_EMAIL }}",
+              },
+            }
+          });
+
+  promote-to-stable:
+    runs-on: ubuntu-latest
+    if: inputs.release_type == 'promote to stable'
+    steps:
+    - name: trigger
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ secrets.REPO_TOKEN }}
+        script: |
+          github.rest.repos.createDispatchEvent({
+            owner: "${{ env.deploy_repo_owner }}",
+            repo: "${{ env.deploy_repo_name }}",
+            event_type: "${{ env.deploy_event_type }}",
+            client_payload: {
+              deployment_type: "stable",
+              deploy_details: {
+                public_name: "${{ vars.PLOGON_PUBLIC_NAME }}",
+                internal_name: "${{ vars.PLOGON_INTERNAL_NAME }}",
+                open_pr: ${{ inputs.open_pr }},
+                github_username: "${{ vars.WORKFLOW_GITHUB_USERNAME }}",
+                github_email: "${{ vars.WORKFLOW_GITHUB_EMAIL }}",
+              },
+            }
+          });
