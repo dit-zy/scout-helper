@@ -51,9 +51,9 @@ public partial class TurtleManager : IDisposable {
 		Configuration conf,
 		IClientState clientState,
 		ScoutHelperOptions options,
-		TerritoryManager territoryManager,
+		ITerritoryManager territoryManager,
 		HuntMarkManager huntMarkManager,
-		MobManager mobManager
+		IMobManager mobManager
 	) {
 		_log = log;
 		_chat = chat;
@@ -87,7 +87,7 @@ public partial class TurtleManager : IDisposable {
 		_currentCollabSession = match.Groups["session"].Value;
 		_currentCollabPassword = match.Groups["password"].Value;
 		IsTurtleCollabbing = true;
-		_huntMarkManager.StartLooking(MobIdToTurtleId);
+		_huntMarkManager.StartLooking();
 		return (_currentCollabSession, _currentCollabPassword);
 	}
 
@@ -123,7 +123,7 @@ public partial class TurtleManager : IDisposable {
 		if (_currentCollabSession.IsNullOrEmpty() || _currentCollabPassword.IsNullOrEmpty())
 			throw new Exception("cannot rejoin the last turtle collab session as there is no last session.");
 		IsTurtleCollabbing = true;
-		_huntMarkManager.StartLooking(MobIdToTurtleId);
+		_huntMarkManager.StartLooking();
 	}
 
 	public void LeaveCollabSession() {
@@ -229,8 +229,8 @@ public partial class TurtleManager : IDisposable {
 
 	private (MobDict, TerritoryDict) LoadData(
 		string dataFilePath,
-		TerritoryManager territoryManager,
-		MobManager mobManager
+		ITerritoryManager territoryManager,
+		IMobManager mobManager
 	) {
 		_log.Debug("Loading Turtle data...");
 
@@ -262,8 +262,8 @@ public partial class TurtleManager : IDisposable {
 
 	private static
 		AccumulatedResults<(MobDict, TerritoryDict), string> ParsePatchData(
-			TerritoryManager territoryManager,
-			MobManager mobManager,
+			ITerritoryManager territoryManager,
+			IMobManager mobManager,
 			KeyValuePair<string, TurtleJsonPatchData> patchData
 		) {
 		if (!Enum.TryParse(patchData.Key.Upper(), out Patch patch)) {

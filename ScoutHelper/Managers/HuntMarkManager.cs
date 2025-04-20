@@ -1,15 +1,14 @@
-using CSharpFunctionalExtensions;
 using System;
 using System.Collections.Generic;
-using Dalamud.Plugin;
-using Dalamud.Plugin.Services;
 using Dalamud.Game.ClientState.Objects.Types;
-using XIVHuntUtils.Models;
-using System.Linq;
-using System.Numerics;
+using Dalamud.Plugin.Services;
+using DitzyExtensions;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
+using ScoutHelper.Models;
+using XIVHuntUtils.Managers;
+using XIVHuntUtils.Models;
 using static XIVHuntUtils.Utils.XivUtils;
-using Lumina.Excel.Sheets;
+using TrainMob = ScoutHelper.Models.TrainMob;
 
 namespace ScoutHelper.Managers;
 
@@ -23,95 +22,83 @@ public class HuntMarkManager : IDisposable {
 	private readonly IClientState _clientState;
 	private readonly IPluginLog _log;
 	private readonly IChatGui _chat;
+	private readonly IMobManager _mobManager;
 
-	private TimeSpan _lastUpdate = TimeSpan.FromSeconds(0);
+	private readonly ISet<InstanceMob> _seenMobs = new HashSet<InstanceMob>();
 
-	private List<uint> _ARankbNPCIds = new();
-	private List<uint> _sentARankIds = new();
+	private DateTime _lastUpdate = DateTime.Now;
 
-	public event Action<ScoutHelper.Models.TrainMob>? OnMarkFound;
+	public event Action<TrainMob>? OnMarkFound;
 
 	public HuntMarkManager(
 		IFramework framework,
 		IPluginLog log,
 		IChatGui chat,
 		IClientState clientState,
-		IObjectTable objectTable
+		IObjectTable objectTable,
+		IMobManager mobManager
 	) {
 		_framework = framework;
 		_log = log;
 		_chat = chat;
 		_clientState = clientState;
 		_objectTable = objectTable;
+		_mobManager = mobManager;
 	}
 
-	private bool IsHWTerritory(uint territoryId) {
-		//EVERYTHING EXCEPT HEAVENSWARD HAS A SCALE OF 100, BUT FOR SOME REASON HW HAS 95
-		if (territoryId is >= 397 and <= 402) return true;
-		return false;
+	[Obsolete("this method is only needed until xiv hunt utils updates with an equivalent.")]
+	private bool IsHwTerritory(uint territoryId) {
+		return territoryId is >= 397 and <= 402;
 	}
 
-	private unsafe uint GetCurrentInstance() {
-		return UIState.Instance()->PublicInstance.InstanceId;
-	}
+	private unsafe uint CurrentInstance => UIState.Instance()->PublicInstance.InstanceId;
 
 	private void CheckObjectTable() {
 		foreach (var obj in _objectTable) {
 			if (obj is not IBattleNpc mob) continue;
-			var battlenpc = mob as IBattleNpc;
 
-			if (_ARankbNPCIds.Contains(battlenpc.NameId)) {
-				if (_sentARankIds.Contains(battlenpc.NameId)) {
-					//_log.Debug($"Got that A already...");
-					continue;
-				}
-				var trainMob = new ScoutHelper.Models.TrainMob();
+			if (_mobManager.FindMobName(mob.NameId).HasNoValue) continue;
+			if (_seenMobs.Contains(mob.AsInstanceMob(CurrentInstance))) continue;
 
-				trainMob.Name = battlenpc.Name.ToString();
-				trainMob.MobId = battlenpc.NameId;
-				trainMob.TerritoryId = _clientState.TerritoryType;
-				//trainMob.MapId =
-				trainMob.Instance = GetCurrentInstance();
-				trainMob.Position = XIVHuntUtils.Utils.XivUtils.AsMapPosition(
-					new Vector2(battlenpc.Position.X, battlenpc.Position.Z),
-					IsHWTerritory(trainMob.TerritoryId)
-				);
-				trainMob.Dead = battlenpc.IsDead;
-				//trainMob.LastSeenUtc =
-				_log.Debug(
-					$"I spy with my little eye: {trainMob.Name} ({trainMob.MobId}) in {trainMob.TerritoryId} i{trainMob.Instance} @{trainMob.Position} Dead?{trainMob.Dead}"
-				);
-				OnMarkFound?.Invoke(trainMob);
-				_sentARankIds.Add(trainMob.MobId);
-			}
+			var trainMob = new TrainMob();
+			trainMob.Name = mob.Name.ToString();
+			trainMob.MobId = mob.NameId;
+			trainMob.TerritoryId = _clientState.TerritoryType;
+			trainMob.Instance = CurrentInstance;
+			trainMob.Position = MathUtils.V2(
+				mob.Position.X,
+				mob.Position.Z
+			).AsMapPosition(IsHwTerritory(trainMob.TerritoryId));
+			trainMob.Dead = mob.IsDead;
+
+			_log.Debug("hunt mark spotted: {@mob}", trainMob);
+
+			OnMarkFound?.Invoke(trainMob);
+			_seenMobs.Add(trainMob.AsInstanceMob());
 		}
 	}
 
 	private void Tick(IFramework framework) {
-		_lastUpdate += framework.UpdateDelta;
-		if (_lastUpdate > ExecDelay) {
-			DoUpdate(framework);
-			_lastUpdate = new(0);
-		}
-	}
+		var now = DateTime.Now;
+		if (now - _lastUpdate <= ExecDelay) return;
 
-	private void DoUpdate(IFramework framework) {
 		CheckObjectTable();
+		_lastUpdate = now;
 	}
 
-	public void StartLooking(MobDict mobIdToTurtleId) {
-		_log.Debug("HuntMarkManager: Start looking for Ranks");
-		_ARankbNPCIds = mobIdToTurtleId.Keys.ToList();
-		_sentARankIds = new();
+	public void StartLooking() {
+		_log.Debug("start watching for hunt marks...");
+		_seenMobs.Clear();
 		_framework.Update += Tick;
 	}
 
 	public void StopLooking() {
-		_log.Debug("HuntMarkManager: Stop looking for Ranks");
+		_log.Debug("stop watching for hunt marks.");
 		_framework.Update -= Tick;
 	}
 
 	public void Dispose() {
-		_framework.Update -= Tick;
+		StopLooking();
+		GC.SuppressFinalize(this);
 	}
 }

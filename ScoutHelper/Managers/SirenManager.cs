@@ -34,8 +34,8 @@ public class SirenManager {
 		IPluginLog log,
 		Configuration conf,
 		ScoutHelperOptions options,
-		TerritoryManager territoryManager,
-		MobManager mobManager
+		ITerritoryManager territoryManager,
+		IMobManager mobManager
 	) {
 		_log = log;
 		_conf = conf;
@@ -112,8 +112,8 @@ public class SirenManager {
 
 	private (IDictionary<Patch, SirenPatchData> patchData, IDictionary<uint, Patch> mobToPatch) LoadData(
 		string dataFilePath,
-		TerritoryManager territoryManager,
-		MobManager mobManager
+		ITerritoryManager territoryManager,
+		IMobManager mobManager
 	) {
 		_log.Debug("Loading Siren data...");
 
@@ -146,8 +146,8 @@ public class SirenManager {
 	}
 
 	private static AccumulatedResults<(Patch patch, SirenPatchData), string> ParsePatchData(
-		TerritoryManager territoryManager,
-		MobManager mobManager,
+		ITerritoryManager territoryManager,
+		IMobManager mobManager,
 		KeyValuePair<string, SirenJsonPatchData> patchData
 	) {
 		if (!Enum.TryParse(patchData.Key.Upper(), out Patch patch)) {
