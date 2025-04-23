@@ -69,6 +69,7 @@ public partial class TurtleManager : IDisposable {
 
 		(MobIdToTurtleId, TerritoryIdToTurtleData)
 			= LoadData(options.TurtleDataFile, territoryManager, mobManager);
+
 		_huntMarkManager.OnMarkFound += OnMarkSeen;
 	}
 
