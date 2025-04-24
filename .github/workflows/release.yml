@@ -25,9 +25,38 @@ env:
   deploy_event_type: deploy-release
 
 jobs:
+  compute-inputs:
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_TYPE: ${{ inputs.release_type }}
+    outputs:
+      version_change: ${{ steps.compute-inputs.outputs.version_change }}
+      start_time: ${{ steps.compute-inputs.outputs.start_time }}
+    steps:
+    - name: compute inputs
+      id: compute-inputs
+      run: |
+        version_change="$RELEASE_TYPE"
+        if [[ "$version_change" == "promote to stable" ]]; then
+          version_change="NONE"
+        fi
+        echo "version_change=$version_change" >> $GITHUB_OUTPUT
+        start_time="$(date -Iminutes)"
+        echo "start time: $start_time"
+        echo "start_time=$start_time" >> $GITHUB_OUTPUT
+
+  determine-version:
+    uses: dit-zy/DalamudPluginDeploy/.github/workflows/determine_version.yml@main
+    needs: [ compute-inputs ]
+    with:
+      project_dir: ${{ vars.PLOGON_PROJECT_DIR }}
+      project_name: ${{ vars.PLOGON_PROJECT_NAME }}
+      version_change: ${{ needs.compute-inputs.outputs.version_change }}
+
   create-testing-release:
-    uses: dit-zy/DalamudPluginDeploy/.github/workflows/create_release.yml@v1
+    uses: dit-zy/DalamudPluginDeploy/.github/workflows/create_release.yml@main
     if: inputs.release_type != 'promote to stable'
+    needs: [ determine-version ]
     secrets:
       REPO_TOKEN: ${{ secrets.REPO_TOKEN }}
     with:
@@ -36,20 +65,21 @@ jobs:
       project_dir: ${{ vars.PLOGON_PROJECT_DIR }}
       project_name: ${{ vars.PLOGON_PROJECT_NAME }}
       version_change: ${{ inputs.release_type }}
+      new_version: ${{ needs.determine-version.outputs.version }}
       github_username: ${{ vars.WORKFLOW_GITHUB_USERNAME }}
       github_email: ${{ vars.WORKFLOW_GITHUB_EMAIL }}
       force_push: true
 
-  release-testing:
+  release-to-testing:
     runs-on: ubuntu-latest
     if: inputs.release_type != 'promote to stable'
-    needs: [ create-testing-release ]
-    env:
-      new_version: ${{ needs.create-testing-release.outputs.new_version }}
-      release_sha: ${{ needs.create-testing-release.outputs.release_sha }}
+    needs: [ determine-version, create-testing-release ]
     steps:
-    - name: trigger
+    - name: trigger deployment job
       uses: actions/github-script@v7
+      env:
+        version: ${{ needs.determine-version.outputs.version }}
+        release_sha: ${{ needs.create-testing-release.outputs.release_sha }}
       with:
         github-token: ${{ secrets.REPO_TOKEN }}
         script: |
@@ -63,7 +93,7 @@ jobs:
                 project_name: "${{ vars.PLOGON_PROJECT_NAME }}",
                 project_repo: "${{ github.repository }}",
                 release_sha: "${{ env.release_sha }}",
-                release_version: "${{ env.new_version }}",
+                release_version: "${{ env.version }}",
                 owners: "${{ vars.PLOGON_OWNERS }}",
               },
               deploy_details: {
@@ -79,8 +109,11 @@ jobs:
   promote-to-stable:
     runs-on: ubuntu-latest
     if: inputs.release_type == 'promote to stable'
+    needs: [ determine-version ]
+    env:
+      version: ${{ needs.determine-version.outputs.version }}
     steps:
-    - name: trigger
+    - name: trigger workflow
       uses: actions/github-script@v7
       with:
         github-token: ${{ secrets.REPO_TOKEN }}
@@ -91,6 +124,9 @@ jobs:
             event_type: "${{ env.deploy_event_type }}",
             client_payload: {
               deployment_type: "stable",
+              release_details: {
+                release_version: "${{ env.version }}",
+              },
               deploy_details: {
                 public_name: "${{ vars.PLOGON_PUBLIC_NAME }}",
                 internal_name: "${{ vars.PLOGON_INTERNAL_NAME }}",
@@ -100,3 +136,102 @@ jobs:
               },
             }
           });
+
+  summarize:
+    runs-on: ubuntu-latest
+    if: always()
+    needs: [ compute-inputs, release-to-testing, promote-to-stable ]
+    steps:
+    - name: wait for deployment
+      id: wait-for-deployment
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ secrets.REPO_TOKEN }}
+        retries: 5
+        script: |
+          const sleep = ms => new Promise(r => setTimeout(r, ms));
+          var workflow = null;
+          for (var i = 0; i < 12; i += 1) {
+            console.log('looking for workflow in queue...')
+            const workflows = await github.rest.actions.listWorkflowRuns({
+              owner: process.env.deploy_repo_owner,
+              repo: process.env.deploy_repo_name,
+              workflow_id: 'deploy_plugin.yml',
+              event: 'repository_dispatch',
+              branch: 'main',
+              created: '>=${{ needs.compute-inputs.outputs.start_time }}',
+            })
+            console.log('response:', workflows)
+            if (0 < workflows.data.total_count) {
+              workflow = workflows.data.workflow_runs[0]
+              break
+            }
+            console.log('no workflows found. retrying in 10s...')
+            await sleep(10000)
+          }
+
+          if (workflow == null) {
+            throw 'workflow run not found'
+          }
+
+          console.log('workflow found:', workflow)
+          core.summary.addLink('deploy workflow', workflow.html_url)
+          core.summary.addEOL()
+          core.summary.write()
+
+          const in_progress_statuses = ['in_progress', 'queued', 'requested', 'waiting', 'pending']
+          var conclusion = null
+          for (var i = 0; i < 12; i += 1) {
+            console.log('checking workflow status')
+            const workflow_run = await github.rest.actions.getWorkflowRun({
+              owner: process.env.deploy_repo_owner,
+              repo: process.env.deploy_repo_name,
+              run_id: workflow.id,
+            })
+            const status = workflow_run.data.status
+            console.log('workflow status:', status)
+            if (!in_progress_statuses.includes(status)) {
+              conclusion = workflow_run.data.conclusion
+              break
+            }
+            console.log('workflow in progress. retrying in 10s...')
+            await sleep(10000)
+          }
+
+          if (conclusion == null || conclusion == '') {
+            throw 'workflow run timed out'
+          }
+
+          core.summary.addRaw(`workflow result: ${conclusion}`)
+          core.summary.addEOL()
+          core.summary.write()
+          core.setOutput('conclusion', conclusion)
+
+    - name: check pr and summarize
+      uses: actions/github-script@v7
+      if: inputs.open_pr == true
+      env:
+        DEPLOYMENT_TYPE: ${{ inputs.release_type }}
+      with:
+        github-token: ${{ secrets.REPO_TOKEN }}
+        script: |
+          const branch = `${{ vars.PLOGON_PUBLIC_NAME }}/${process.env.DEPLOYMENT_TYPE == 'promote-to-stable' ? 'stable' : 'testing'}`.toLowerCase()
+          const head = `${{ github.repository_owner }}:${branch}`
+          const prs = await github.rest.pulls.list({
+            owner: 'goatcorp',
+            repo: 'DalamudPluginsD17',
+            state: 'all',
+            head: head,
+            sort: 'created',
+            direction: 'desc',
+          })
+          console.log('prs:', prs)
+          if (prs.data.length == 0) {
+            throw 'no PRs found'
+          }
+          console.log(`found ${prs.data.length} PRs`)
+          const pr = prs.data[0]
+          core.summary.addRaw('D17 PR: ')
+          core.summary.addLink(pr.title, pr.html_url)
+          core.summary.addEOL()
+          core.summary.write()
