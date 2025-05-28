@@ -18,7 +18,6 @@ using XIVHuntUtils.Managers;
 using XIVHuntUtils.Models;
 using static DitzyExtensions.MathUtils;
 using static ScoutHelper.Managers.TurtleHttpStatus;
-using static ScoutHelper.Utils.Utils;
 using TrainMob = ScoutHelper.Models.TrainMob;
 
 namespace ScoutHelper.Managers;
@@ -35,6 +34,7 @@ public partial class TurtleManager : IDisposable {
 	private readonly Configuration _conf;
 	private readonly IClientState _clientState;
 	private readonly HuntMarkManager _huntMarkManager;
+	private readonly IMobManager _mobManager;
 	private readonly HttpClientGenerator _httpClientGenerator;
 
 	private MobDict MobIdToTurtleId { get; }
@@ -60,6 +60,7 @@ public partial class TurtleManager : IDisposable {
 		_conf = conf;
 		_clientState = clientState;
 		_huntMarkManager = huntMarkManager;
+		_mobManager = mobManager;
 
 		_httpClientGenerator = new HttpClientGenerator(
 			_log,
@@ -95,14 +96,43 @@ public partial class TurtleManager : IDisposable {
 	public void OnMarkSeen(TrainMob mark) {
 		if (!IsTurtleCollabbing) return;
 
+		if (!MobIdToTurtleId.ContainsKey(mark.MobId)) {
+			if (!_conf.IncludeOccupiedSpawnsInTurtleSession) return;
+
+			var mobIsBRank = _mobManager
+				.FindMobRank(mark.MobId)
+				.Map(rank => rank == Rank.B)
+				.GetValueOrDefault(false);
+			if (!mobIsBRank) return;
+
+			_chat.TaggedPrint($"B-rank mark spotted at {mark.Position.AsEchoString()}. marking spawn as occupied.");
+			MarkSpawnAsOccupied(mark)
+				.ContinueWith(
+					task => {
+						if (task.Result == TurtleHttpStatus.HttpError) {
+							_chat.TaggedPrintError($"something went wrong while flagging spawn as occupied ;-;.");
+						}
+					},
+					TaskContinuationOptions.OnlyOnRanToCompletion
+				)
+				.ContinueWith(
+					task => {
+						_log.Error(task.Exception, "failed to update turtle session");
+						_chat.TaggedPrintError($"something went wrong when flagging spawn as occupied ;-;.");
+					},
+					TaskContinuationOptions.OnlyOnFaulted
+				);
+			return;
+		}
+
 		UpdateCurrentSession(mark.AsSingletonList())
 			.ContinueWith(
 				task => {
 					switch (task.Result) {
-						case TurtleHttpStatus.Success:
+						case Success:
 							_chat.TaggedPrint($"added {mark.Name} to the turtle session.");
 							break;
-						case TurtleHttpStatus.NoSupportedMobs:
+						case NoSupportedMobs:
 							_chat.TaggedPrint(
 								$"{mark.Name} was seen, but is not supported by turtle and will not be added to the session."
 							);
@@ -132,6 +162,33 @@ public partial class TurtleManager : IDisposable {
 		_huntMarkManager.StopLooking();
 	}
 
+	public async Task<TurtleHttpStatus> MarkSpawnAsOccupied(TrainMob mob) {
+		var httpResult = await
+			HttpUtils.DoRequest(
+				_log,
+				new TurtleTrainSpawnOccupiedRequest(
+					_currentCollabPassword,
+					_clientState.PlayerTag().Where(_ => _conf.IncludeNameInTurtleSession),
+					mob.TerritoryId,
+					mob.Instance.AsTurtleInstance(),
+					mob.Position,
+					true
+				),
+				content => _httpClientGenerator.Client.PatchAsync(
+					string.Format(_conf.TurtleApiSpawnOccupiedPath, _currentCollabSession),
+					content
+				)
+			).HandleHttpError(
+				_log,
+				"timed out while trying to mark a spawn as occupied.",
+				"operation canceled while trying to mark a spawn as occupied.",
+				"http exception while trying to mark a spawn as occupied.",
+				"unknown exception while trying to mark a spawn as occupied."
+			);
+
+		return httpResult.IsSuccess ? Success : TurtleHttpStatus.HttpError;
+	}
+
 	public async Task<TurtleHttpStatus> UpdateCurrentSession(IList<TrainMob> train) {
 		var turtleSupportedMobs = train.Where(mob => MobIdToTurtleId.ContainsKey(mob.MobId)).AsList();
 		if (turtleSupportedMobs.IsEmpty())
@@ -143,30 +200,23 @@ public partial class TurtleManager : IDisposable {
 				new TurtleTrainUpdateRequest(
 					_currentCollabPassword,
 					_clientState.PlayerTag().Where(_ => _conf.IncludeNameInTurtleSession),
-					turtleSupportedMobs.Select(
-						mob =>
-							(TerritoryIdToTurtleData[mob.TerritoryId].TurtleId,
-								mob.Instance.AsTurtleInstance(),
-								MobIdToTurtleId[mob.MobId].turtleMobId,
-								mob.Position)
+					turtleSupportedMobs.Select(mob =>
+						(TerritoryIdToTurtleData[mob.TerritoryId].TurtleId,
+							mob.Instance.AsTurtleInstance(),
+							MobIdToTurtleId[mob.MobId].turtleMobId,
+							mob.Position)
 					)
 				),
-				(content) => _httpClientGenerator.Client.PatchAsync(
+				content => _httpClientGenerator.Client.PatchAsync(
 					$"{_conf.TurtleApiTrainPath}/{_currentCollabSession}",
 					content
 				)
-			).TapError(
-				error => {
-					if (error.ErrorType == HttpErrorType.Timeout) {
-						_log.Warning("timed out while trying to post updates to turtle session.");
-					} else if (error.ErrorType == HttpErrorType.Canceled) {
-						_log.Warning("operation canceled while trying to post updates to turtle session.");
-					} else if (error.ErrorType == HttpErrorType.HttpException) {
-						_log.Error(error.Exception, "http exception while trying to post updates to turtle session.");
-					} else {
-						_log.Error(error.Exception, "unknown exception while trying to post updates to turtle session.");
-					}
-				}
+			).HandleHttpError(
+				_log,
+				"timed out while trying to post updates to turtle session.",
+				"operation canceled while trying to post updates to turtle session.",
+				"http exception while trying to post updates to turtle session.",
+				"unknown exception while trying to post updates to turtle session."
 			);
 
 		return httpResult.IsSuccess ? Success : TurtleHttpStatus.HttpError;
@@ -205,27 +255,24 @@ public partial class TurtleManager : IDisposable {
 	private Maybe<(uint mapId, uint instance, uint pointId, uint mobId)> GetRequestInfoForMob(TrainMob mob) =>
 		TerritoryIdToTurtleData
 			.MaybeGet(mob.TerritoryId)
-			.SelectMany(
-				mapData => GetNearestSpawnPoint(mob)
-					.Select(
-						nearestSpawnPoint => (
-							mapData.TurtleId,
-							mob.Instance.AsTurtleInstance(),
-							nearestSpawnPoint,
-							MobIdToTurtleId[mob.MobId].turtleMobId
-						)
+			.SelectMany(mapData => GetNearestSpawnPoint(mob)
+				.Select(nearestSpawnPoint => (
+						mapData.TurtleId,
+						mob.Instance.AsTurtleInstance(),
+						nearestSpawnPoint,
+						MobIdToTurtleId[mob.MobId].turtleMobId
 					)
+				)
 			);
 
 	private Maybe<uint> GetNearestSpawnPoint(TrainMob mob) =>
 		TerritoryIdToTurtleData
 			.MaybeGet(mob.TerritoryId)
-			.Select(
-				territoryData => territoryData
-					.SpawnPoints
-					.AsPairs()
-					.MinBy(spawnPoint => (spawnPoint.val - mob.Position).LengthSquared())
-					.key
+			.Select(territoryData => territoryData
+				.SpawnPoints
+				.AsPairs()
+				.MinBy(spawnPoint => (spawnPoint.val - mob.Position).LengthSquared())
+				.key
 			);
 
 	private (MobDict, TerritoryDict) LoadData(
@@ -274,34 +321,30 @@ public partial class TurtleManager : IDisposable {
 		var parsedMobs = patchData
 			.Value
 			.Mobs
-			.SelectResults(
-				patchMob => mobManager
-					.GetMobId(patchMob.Key)
-					.Map(mobId => (mobId, (patch, patchMob.Value)))
+			.SelectResults(patchMob => mobManager
+				.GetMobId(patchMob.Key)
+				.Map(mobId => (mobId, (patch, patchMob.Value)))
 			)
 			.WithValue(mobs => mobs.ToDict());
 
 		var parsedTerritories = patchData
 			.Value
 			.Maps
-			.SelectResults(
-				mapData => territoryManager
-					.FindTerritoryId(mapData.Key)
-					.ToResult<uint, string>($"No mapId found for mapName: {mapData.Key}")
-					.Map(
-						territoryId => {
-							var points = mapData
-								.Value
-								.Points
-								.Select(
-									pointData =>
-										(pointData.Key, V2(pointData.Value.X.AsFloat(), pointData.Value.Y.AsFloat()))
-								)
-								.ToDict();
+			.SelectResults(mapData => territoryManager
+				.FindTerritoryId(mapData.Key)
+				.ToResult<uint, string>($"No mapId found for mapName: {mapData.Key}")
+				.Map(territoryId => {
+						var points = mapData
+							.Value
+							.Points
+							.Select(pointData =>
+								(pointData.Key, V2(pointData.Value.X.AsFloat(), pointData.Value.Y.AsFloat()))
+							)
+							.ToDict();
 
-							return (territoryId, new TurtleMapData(mapData.Value.Id, points));
-						}
-					)
+						return (territoryId, new TurtleMapData(mapData.Value.Id, points));
+					}
+				)
 			)
 			.WithValue(territoriesAsPairs => territoriesAsPairs.ToDict());
 
@@ -330,10 +373,4 @@ public record struct TurtleLinkData(
 			response.CollaborateUrl,
 			highestPatch
 		);
-}
-
-public static class TurtleExtensions {
-	public static uint AsTurtleInstance(this uint? instance) {
-		return instance is null or 0 ? 1 : (uint)instance;
-	}
 }

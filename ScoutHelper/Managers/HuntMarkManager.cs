@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
 using DitzyExtensions;
+using DitzyExtensions.Collection;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using ScoutHelper.Models;
 using XIVHuntUtils.Managers;
@@ -16,6 +18,7 @@ using MobDict = IDictionary<uint, (Patch patch, uint turtleMobId)>;
 
 public class HuntMarkManager : IDisposable {
 	private static readonly TimeSpan ExecDelay = TimeSpan.FromSeconds(1);
+	private static readonly TimeSpan MobPermanenceDuration = TimeSpan.FromSeconds(2);
 
 	private readonly IFramework _framework;
 	private readonly IObjectTable _objectTable;
@@ -24,7 +27,7 @@ public class HuntMarkManager : IDisposable {
 	private readonly IChatGui _chat;
 	private readonly IMobManager _mobManager;
 
-	private readonly ISet<InstanceMob> _seenMobs = new HashSet<InstanceMob>();
+	private readonly Dictionary<InstanceMob, DateTime> _seenMobs = new();
 
 	private DateTime _lastUpdate = DateTime.Now;
 
@@ -46,19 +49,24 @@ public class HuntMarkManager : IDisposable {
 		_mobManager = mobManager;
 	}
 
-	[Obsolete("this method is only needed until xiv hunt utils updates with an equivalent.")]
-	private bool IsHwTerritory(uint territoryId) {
-		return territoryId is >= 397 and <= 402;
-	}
-
 	private unsafe uint CurrentInstance => UIState.Instance()->PublicInstance.InstanceId;
 
 	private void CheckObjectTable() {
+		var now = DateTime.Now;
+
+		_seenMobs
+			.AsPairs()
+			.Where(entry => MobPermanenceDuration < now - entry.val)
+			.ForEach(entry => _seenMobs.Remove(entry.key));
+
 		foreach (var obj in _objectTable) {
 			if (obj is not IBattleNpc mob) continue;
 
 			if (_mobManager.FindMobName(mob.NameId).HasNoValue) continue;
-			if (_seenMobs.Contains(mob.AsInstanceMob(CurrentInstance))) continue;
+			if (_seenMobs.ContainsKey(mob.AsInstanceMob(CurrentInstance))) {
+				_seenMobs.Put(mob.AsInstanceMob(CurrentInstance), now);
+				continue;
+			}
 
 			var trainMob = new TrainMob();
 			trainMob.Name = mob.Name.ToString();
@@ -68,13 +76,13 @@ public class HuntMarkManager : IDisposable {
 			trainMob.Position = MathUtils.V2(
 				mob.Position.X,
 				mob.Position.Z
-			).AsMapPosition(IsHwTerritory(trainMob.TerritoryId));
+			).AsMapPosition(trainMob.TerritoryId);
 			trainMob.Dead = mob.IsDead;
 
 			_log.Debug("hunt mark spotted: {@mob}", trainMob);
 
 			OnMarkFound?.Invoke(trainMob);
-			_seenMobs.Add(trainMob.AsInstanceMob());
+			_seenMobs.Add(trainMob.AsInstanceMob(), now);
 		}
 	}
 

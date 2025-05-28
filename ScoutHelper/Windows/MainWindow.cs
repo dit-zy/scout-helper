@@ -18,6 +18,7 @@ using ScoutHelper.Localization;
 using ScoutHelper.Managers;
 using ScoutHelper.Utils;
 using XIVHuntUtils.Models;
+using XIVHuntUtils.Utils;
 using static DitzyExtensions.MathUtils;
 using static ScoutHelper.Utils.Utils;
 using TrainMob = ScoutHelper.Models.TrainMob;
@@ -400,6 +401,12 @@ public class MainWindow : Window, IDisposable {
 		ImGui.SameLine();
 		ImGuiComponents.HelpMarker(
 			"share your character name in the turtle session, so others can see that you contributed."
+		);
+
+		ImGui.Checkbox("include occupied spawns", ref _conf.IncludeOccupiedSpawnsInTurtleSession);
+		ImGui.SameLine();
+		ImGuiComponents.HelpMarker(
+			"if a B-rank mark is spotted, mark that spawn location as 'occupied' in the scout tracker."
 		);
 
 		ImGui.BeginDisabled(!_turtleManager.IsTurtleCollabbing);

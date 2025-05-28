@@ -1,7 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Globalization;
-using FFXIVClientStructs.FFXIV.Common.Math;
+﻿using FFXIVClientStructs.FFXIV.Common.Math;
 using Newtonsoft.Json;
+using ScoutHelper.Utils;
 
 namespace ScoutHelper.Models.Http;
 
@@ -16,7 +15,7 @@ public record struct TurtleTrainUpdateMark {
 		ZoneId = zoneId;
 		Instance = (uint)((instance ?? 0) < 1 ? 1 : instance!);
 		MobId = mobId;
-		X = position.X.ToString("F2", CultureInfo.InvariantCulture);
-		Y = position.Y.ToString("F2", CultureInfo.InvariantCulture);
+		X = position.X.AsTurtleApiString();
+		Y = position.Y.AsTurtleApiString();
 	}
 }

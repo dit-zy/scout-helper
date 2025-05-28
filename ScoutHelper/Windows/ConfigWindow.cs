@@ -140,6 +140,7 @@ public class ConfigWindow : Window, IDisposable {
 			_conf.SirenBaseUrl = DefaultConf.SirenBaseUrl;
 			_conf.TurtleApiBaseUrl = DefaultConf.TurtleApiBaseUrl;
 			_conf.TurtleApiTrainPath = DefaultConf.TurtleApiTrainPath;
+			_conf.TurtleApiSpawnOccupiedPath = DefaultConf.TurtleApiSpawnOccupiedPath;
 			_conf.TurtleBaseUrl = DefaultConf.TurtleBaseUrl;
 			_conf.TurtleTrainPath = DefaultConf.TurtleTrainPath;
 		}
@@ -161,6 +162,7 @@ public class ConfigWindow : Window, IDisposable {
 		if (ImGui.TreeNode("TURTLE")) {
 			DrawConfigTextInput(nameof(Configuration.TurtleApiBaseUrl), ref _conf.TurtleApiBaseUrl);
 			DrawConfigTextInput(nameof(Configuration.TurtleApiTrainPath), ref _conf.TurtleApiTrainPath);
+			DrawConfigTextInput(nameof(Configuration.TurtleApiSpawnOccupiedPath), ref _conf.TurtleApiSpawnOccupiedPath);
 			DrawConfigTextInput(nameof(Configuration.TurtleBaseUrl), ref _conf.TurtleBaseUrl);
 			DrawConfigTextInput(nameof(Configuration.TurtleTrainPath), ref _conf.TurtleTrainPath);
 			ImGui.TreePop();
