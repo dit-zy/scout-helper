@@ -8,13 +8,10 @@ using DitzyExtensions.Collection;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using ScoutHelper.Models;
 using XIVHuntUtils.Managers;
-using XIVHuntUtils.Models;
 using static XIVHuntUtils.Utils.XivUtils;
 using TrainMob = ScoutHelper.Models.TrainMob;
 
 namespace ScoutHelper.Managers;
-
-using MobDict = IDictionary<uint, (Patch patch, uint turtleMobId)>;
 
 public class HuntMarkManager : IDisposable {
 	private static readonly TimeSpan ExecDelay = TimeSpan.FromSeconds(1);
@@ -24,7 +21,6 @@ public class HuntMarkManager : IDisposable {
 	private readonly IObjectTable _objectTable;
 	private readonly IClientState _clientState;
 	private readonly IPluginLog _log;
-	private readonly IChatGui _chat;
 	private readonly IMobManager _mobManager;
 
 	private readonly Dictionary<InstanceMob, DateTime> _seenMobs = new();
@@ -36,14 +32,12 @@ public class HuntMarkManager : IDisposable {
 	public HuntMarkManager(
 		IFramework framework,
 		IPluginLog log,
-		IChatGui chat,
 		IClientState clientState,
 		IObjectTable objectTable,
 		IMobManager mobManager
 	) {
 		_framework = framework;
 		_log = log;
-		_chat = chat;
 		_clientState = clientState;
 		_objectTable = objectTable;
 		_mobManager = mobManager;
@@ -81,8 +75,8 @@ public class HuntMarkManager : IDisposable {
 
 			_log.Debug("hunt mark spotted: {@mob}", trainMob);
 
-			OnMarkFound?.Invoke(trainMob);
 			_seenMobs.Add(trainMob.AsInstanceMob(), now);
+			OnMarkFound?.Invoke(trainMob);
 		}
 	}
 

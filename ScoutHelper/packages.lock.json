@@ -62,9 +62,9 @@
       },
       "XIVHuntUtils": {
         "type": "Direct",
-        "requested": "[1.5.0, )",
-        "resolved": "1.5.0",
-        "contentHash": "WJumnbJgeOW5wy8h9ltYbiOS9vuHyMeRftx2Tpa3pcmRvwi8yWpD+llIBQZHFpzI3gfigg5eI8nDT25kforAsw==",
+        "requested": "[1.5.1, )",
+        "resolved": "1.5.1",
+        "contentHash": "/7Lvz3ujSuNWPBGYvBQfu/DEyZlvjLnmCHKrejkNRipUdKwMaCMGYjvRMRIN2dcc2SqyUF69wgbs4tUPuLhizw==",
         "dependencies": {
           "CSharpFunctionalExtensions": "3.5.1",
           "DitzyExtensions": "2.0.0",

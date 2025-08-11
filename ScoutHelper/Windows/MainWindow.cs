@@ -439,7 +439,7 @@ public class MainWindow : Window, IDisposable {
 		ImGui.TextWrapped("contribute scouted marks to an existing turtle session.");
 		ImGui.SetNextItemWidth(contentWidth - ImGuiHelpers.GetButtonSize("JOIN").X - ImGui.GetStyle().ItemSpacing.X);
 		var linkInputted = ImGui.InputTextWithHint(
-			"",
+			"##",
 			"https://scout.wobbuffet.net/scout/2WAZMI3DeZ/e5b2ede5",
 			ref _collabInput,
 			256,
