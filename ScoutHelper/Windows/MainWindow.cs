@@ -11,7 +11,7 @@ using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
 using Dalamud.Utility.Numerics;
 using DitzyExtensions.Functional;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using OtterGui.Widgets;
 using ScoutHelper.Config;
 using ScoutHelper.Localization;
@@ -122,7 +122,7 @@ public class MainWindow : Window, IDisposable {
 						}
 						.Select(
 							labels => labels
-								.Select(ImGuiHelpers.GetButtonSize)
+								.Select(s => ImGuiHelpers.GetButtonSize(s))
 								.Aggregate((a, b) => new Vector2(Math.Max(a.X, b.X), Math.Max(a.Y, b.Y)))
 						)
 						.MaxBy(size => size.X);
@@ -156,7 +156,7 @@ public class MainWindow : Window, IDisposable {
 				_notices
 					.Select(
 						notice =>
-							ImGui.CalcTextSize(notice, _noticeFrameWrap.Value).Y
+							ImGui.CalcTextSize(notice, wrapWidth: _noticeFrameWrap.Value).Y
 							+ ImGui.GetStyle().ItemSpacing.Y
 					)
 					.Sum(),
@@ -466,6 +466,8 @@ public class MainWindow : Window, IDisposable {
 					_collabLink = $"{_conf.TurtleBaseUrl}{_conf.TurtleTrainPath}/{sessionInfo.slug}/{sessionInfo.password}";
 					_chat.TaggedPrint($"joined turtle session: {_collabLink}");
 					_alreadyContributedMobs.Clear();
+					ImGui.SetClipboardText(_collabLink);
+					_chat.TaggedPrint($"copied turtle link to clipboard.");
 				},
 				() => _chat.TaggedPrintError($"failed to parse collab link. please ensure it is a valid link.\n{collabLink}")
 			);

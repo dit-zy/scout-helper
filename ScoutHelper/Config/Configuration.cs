@@ -5,6 +5,7 @@ using Dalamud.Configuration;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using ScoutHelper.Models;
+using XIVHuntUtils;
 using XIVHuntUtils.Models;
 using static ScoutHelper.Utils.Utils;
 
@@ -45,7 +46,7 @@ public class Configuration : IPluginConfiguration {
 	public DateTime LastInstancePatchUpdate = DateTime.UnixEpoch;
 
 	[NotManaged] public Dictionary<uint, uint> Instances = new();
-	[NotManaged] public (Territory, uint)[] LatestPatchInstances = Constants.LatestPatchInstances;
+	[NotManaged] public (Territory, uint)[] LatestPatchInstances = HuntConstants.LatestPatchIncreasedInstances.Instances.ToArray();
 
 	[NotManaged] public Dictionary<string, string?> ConfigDefaults = new();
 

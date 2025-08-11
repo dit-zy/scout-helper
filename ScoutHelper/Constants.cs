@@ -31,7 +31,7 @@ public static class Constants {
 	public const string BearDataFile = @"Data\Bear.json";
 	public const string SirenDataFile = @"Data\Siren.json";
 	public const string TurtleDataFile = @"Data\Turtle.json";
-	
+
 	#endregion
 
 	#region patch update constants
@@ -42,8 +42,6 @@ public static class Constants {
 		// "Something important we don't want the user forgetting.",
 		// "Something importanter we extra don't want the user forgetting for even longer.",
 	}.AsList();
-
-	public static readonly (Territory, uint)[] LatestPatchInstances = [];
 
 	#endregion
 

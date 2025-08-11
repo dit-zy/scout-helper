@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using Dalamud.Plugin.Services;
 using ScoutHelper.Config;
+using XIVHuntUtils;
 using XIVHuntUtils.Managers;
 using XIVHuntUtils.Models;
 using static ScoutHelper.Utils.Utils;
@@ -38,7 +39,7 @@ public class InitializationManager {
 	private void InitializeInstanceMap() {
 		var patchUpdateNotYetApplied = !ActualValuesEqualBecauseMicrosoftHasBrainDamage(
 			_conf.LatestPatchInstances,
-			Constants.LatestPatchInstances
+			HuntConstants.LatestPatchIncreasedInstances.Instances
 		);
 		_log.Debug("initializing instance map. patch instances updated since last update: {0}", patchUpdateNotYetApplied);
 
@@ -46,7 +47,7 @@ public class InitializationManager {
 			.Where(map => patchUpdateNotYetApplied || !_conf.Instances.ContainsKey(map.territoryId))
 			.UseToUpdate(_conf.Instances);
 
-		if (patchUpdateNotYetApplied) _conf.LatestPatchInstances = Constants.LatestPatchInstances;
+		if (patchUpdateNotYetApplied) _conf.LatestPatchInstances = HuntConstants.LatestPatchIncreasedInstances.Instances.ToArray();
 		_conf.Save();
 	}
 

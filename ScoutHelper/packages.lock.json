@@ -10,9 +10,9 @@
       },
       "DalamudPackager": {
         "type": "Direct",
-        "requested": "[12.0.0, )",
-        "resolved": "12.0.0",
-        "contentHash": "J5TJLV3f16T/E2H2P17ClWjtfEBPpq3yxvqW46eN36JCm6wR+EaoaYkqG9Rm5sHqs3/nK/vKjWWyvEs/jhKoXw=="
+        "requested": "[13.0.0, )",
+        "resolved": "13.0.0",
+        "contentHash": "Mb3cUDSK/vDPQ8gQIeuCw03EMYrej1B4J44a1AvIJ9C759p9XeqdU9Hg4WgOmlnlPe0G7ILTD32PKSUpkQNa8w=="
       },
       "DitzyExtensions": {
         "type": "Direct",
@@ -62,12 +62,13 @@
       },
       "XIVHuntUtils": {
         "type": "Direct",
-        "requested": "[1.4.0, )",
-        "resolved": "1.4.0",
-        "contentHash": "GA2sqUM4lm2xcsjwkzqJ/FSHGNGWJHAvK3tNwpDGpr94d5OJWJUJLb3W1WbnCa3254AdlEBExuWJ1ALNaDZR3Q==",
+        "requested": "[1.5.0, )",
+        "resolved": "1.5.0",
+        "contentHash": "WJumnbJgeOW5wy8h9ltYbiOS9vuHyMeRftx2Tpa3pcmRvwi8yWpD+llIBQZHFpzI3gfigg5eI8nDT25kforAsw==",
         "dependencies": {
           "CSharpFunctionalExtensions": "3.5.1",
-          "DitzyExtensions": "2.0.0"
+          "DitzyExtensions": "2.0.0",
+          "System.Numerics.Vectors": "4.6.1"
         }
       },
       "JetBrains.Annotations": {

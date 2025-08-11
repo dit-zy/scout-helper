@@ -11,7 +11,7 @@ using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
 using DitzyExtensions.Functional;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using ScoutHelper.Config;
 using ScoutHelper.Localization;
 using ScoutHelper.Utils;
@@ -233,12 +233,12 @@ public class ConfigWindow : Window, IDisposable {
 				map => _territoryManager
 					.FindTerritoryId(map.Name())
 					.Select(
-						mapId => ImGui.InputScalar(
+						mapId => ImGui.InputScalar<uint>(
 							" " + _territoryManager.GetTerritoryName(mapId).Value,
 							ImGuiDataType.U8,
 							_conf.Instances.GetValuePointer(mapId),
-							stepSizePointer,
-							IntPtr.Zero,
+							in stepSize,
+							0U,
 							"%d"
 						)
 					)
@@ -296,6 +296,7 @@ public class ConfigWindow : Window, IDisposable {
 }
 
 internal static class ConfigWindowExtensions {
-	public static unsafe IntPtr GetValuePointer<K>(this Dictionary<K, uint> source, K key) where K : notnull =>
-		(IntPtr)Unsafe.AsPointer(ref CollectionsMarshal.GetValueRefOrNullRef(source, key));
+	public static Span<uint> GetValuePointer<K>(this Dictionary<K, uint> source, K key) where K : notnull {
+		return new Span<uint>(ref CollectionsMarshal.GetValueRefOrNullRef(source, key));
+	}
 }

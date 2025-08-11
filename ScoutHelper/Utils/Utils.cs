@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using CSharpFunctionalExtensions;
 using Lumina.Text;
+using Lumina.Text.ReadOnly;
 using Newtonsoft.Json;
 using XIVHuntUtils.Models;
 using static DitzyExtensions.MathUtils;
@@ -130,7 +131,7 @@ public static partial class Utils {
 
 	public static string Join(this IEnumerable<string> source, string? separator) => string.Join(separator, source);
 
-	public static SeString ToSeString(this string str) => new(str);
+	public static ReadOnlySeString ToSeString(this string str) => new(str);
 
 	public static float AsFloat(this string str) => float.Parse(str, CultureInfo.InvariantCulture);
 
