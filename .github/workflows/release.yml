@@ -215,7 +215,7 @@ jobs:
       with:
         github-token: ${{ secrets.REPO_TOKEN }}
         script: |
-          const branch = `${{ vars.PLOGON_PUBLIC_NAME }}/${process.env.DEPLOYMENT_TYPE == 'promote-to-stable' ? 'stable' : 'testing'}`.toLowerCase()
+          const branch = `${{ vars.PLOGON_PUBLIC_NAME }}/${process.env.DEPLOYMENT_TYPE == 'promote to stable' ? 'stable' : 'testing'}`.toLowerCase()
           const head = `${{ github.repository_owner }}:${branch}`
           const prs = await github.rest.pulls.list({
             owner: 'goatcorp',
