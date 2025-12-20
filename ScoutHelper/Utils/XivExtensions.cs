@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using CSharpFunctionalExtensions;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
+using DitzyExtensions.Functional;
 using ScoutHelper.Models;
 
 namespace ScoutHelper.Utils;
@@ -14,25 +15,23 @@ namespace ScoutHelper.Utils;
 public static partial class XivExtensions {
 	[GeneratedRegex(@" \d{1,2}$")] private static partial Regex InstanceRegex();
 
-	public static string WorldName(this IClientState clientState) =>
-		clientState.LocalPlayer?.CurrentWorld.ValueNullable?.Name.ToString() ?? "Not Found";
+	public static string WorldName(this IPlayerState playerState) =>
+		playerState.CurrentWorld.ValueNullable?.Name.ToString() ?? "Not Found";
 
-	public static Maybe<string> PlayerTag(this IClientState clientState) =>
-		clientState
-			.LocalPlayer
-			.AsMaybe()
-			.Select(
-				player => {
-					var playerName = player.Name.TextValue;
+	public static string PlayerTag(this IPlayerState playerState) =>
+		playerState
+			.Let(player => {
+					var playerName = player.CharacterName;
 					var worldName = player.HomeWorld.ValueNullable?.Name.ToString() ?? "Unknown World";
 					return $"{playerName}@{worldName}";
 				}
 			);
 
-	public static string PluginFilePath(this IDalamudPluginInterface pluginInterface, string dataFilename) => Path.Combine(
-		pluginInterface.AssemblyLocation.Directory?.FullName!,
-		dataFilename
-	);
+	public static string PluginFilePath(this IDalamudPluginInterface pluginInterface, string dataFilename) =>
+		Path.Combine(
+			pluginInterface.AssemblyLocation.Directory?.FullName!,
+			dataFilename
+		);
 
 	public static void TaggedPrint(this IChatGui chatGui, string message) {
 		chatGui.Print(message, Plugin.Name);

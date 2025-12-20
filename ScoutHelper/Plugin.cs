@@ -35,6 +35,7 @@ public sealed class Plugin : IDalamudPlugin {
 		IChatGui chatGui,
 		ICommandManager commandManager,
 		IClientState clientState,
+		IPlayerState playerState,
 		IDataManager dataManager,
 		IObjectTable objectTable
 	) {
@@ -50,6 +51,7 @@ public sealed class Plugin : IDalamudPlugin {
 			.AddSingleton(chatGui)
 			.AddSingleton(commandManager)
 			.AddSingleton(clientState)
+			.AddSingleton(playerState)
 			.AddSingleton(dataManager)
 			.AddSingleton(objectTable)
 			.AddSingleton(conf)

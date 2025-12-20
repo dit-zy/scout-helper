@@ -42,7 +42,7 @@ public class MainWindow : Window, IDisposable {
 
 	private readonly IFramework _framework;
 	private readonly IPluginLog _log;
-	private readonly IClientState _clientState;
+	private readonly IPlayerState _playerState;
 	private readonly Configuration _conf;
 	private readonly IChatGui _chat;
 	private readonly HuntHelperManager _huntHelperManager;
@@ -72,7 +72,7 @@ public class MainWindow : Window, IDisposable {
 	public MainWindow(
 		IFramework framework,
 		IPluginLog log,
-		IClientState clientState,
+		IPlayerState playerState,
 		Configuration conf,
 		IChatGui chat,
 		HuntHelperManager huntHelperManager,
@@ -86,7 +86,7 @@ public class MainWindow : Window, IDisposable {
 	) {
 		_framework = framework;
 		_log = log;
-		_clientState = clientState;
+		_playerState = playerState;
 		_conf = conf;
 		_chat = chat;
 		_huntHelperManager = huntHelperManager;
@@ -301,7 +301,7 @@ public class MainWindow : Window, IDisposable {
 		if (ImGui.Button(Strings.BearButton, _buttonSize.Value)) {
 			_chat.TaggedPrint("Generating Bear link...");
 			GenerateLinkAsync(
-				train => _bearManager.GenerateBearLink(_clientState.WorldName(), train),
+				train => _bearManager.GenerateBearLink(_playerState.WorldName(), train),
 				(trainList, bearTrainLink) => {
 					_chat.TaggedPrint($"Bear train link: {bearTrainLink.Url}");
 					_chat.TaggedPrint($"Train admin password: {bearTrainLink.Password}");
@@ -558,7 +558,7 @@ public class MainWindow : Window, IDisposable {
 					_conf.CopyTemplate,
 					trainList,
 					tracker,
-					_clientState.WorldName(),
+					_playerState.WorldName(),
 					highestPatch,
 					link
 				)

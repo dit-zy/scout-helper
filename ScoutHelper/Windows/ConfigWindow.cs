@@ -35,8 +35,8 @@ public class ConfigWindow : Window, IDisposable {
 	private static readonly uint InputScalarStep = 1U;
 	private static readonly Configuration DefaultConf = new();
 
-	private readonly IClientState _clientState;
 	private readonly IPluginLog _log;
+	private readonly IPlayerState _playerState;
 	private readonly Configuration _conf;
 	private readonly ITerritoryManager _territoryManager;
 
@@ -45,13 +45,13 @@ public class ConfigWindow : Window, IDisposable {
 	private bool _wasFocused = true;
 
 	public ConfigWindow(
-		IClientState clientState,
 		IPluginLog log,
+		IPlayerState playerState,
 		Configuration conf,
 		ITerritoryManager territoryManager
 	) : base(Strings.ConfigWindowTitle) {
-		_clientState = clientState;
 		_log = log;
+		_playerState = playerState;
 		_conf = conf;
 		_territoryManager = territoryManager;
 
@@ -289,7 +289,7 @@ public class ConfigWindow : Window, IDisposable {
 		_fullTextTemplate,
 		PreviewTrainList,
 		"bear",
-		_clientState.WorldName(),
+		_playerState.WorldName(),
 		Patch.SHB,
 		"https://example.com"
 	);

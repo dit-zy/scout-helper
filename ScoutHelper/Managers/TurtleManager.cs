@@ -32,7 +32,7 @@ public partial class TurtleManager : IDisposable {
 	private readonly IPluginLog _log;
 	private readonly IChatGui _chat;
 	private readonly Configuration _conf;
-	private readonly IClientState _clientState;
+	private readonly IPlayerState _playerState;
 	private readonly HuntMarkManager _huntMarkManager;
 	private readonly IMobManager _mobManager;
 	private readonly HttpClientGenerator _httpClientGenerator;
@@ -49,7 +49,7 @@ public partial class TurtleManager : IDisposable {
 		IPluginLog log,
 		IChatGui chat,
 		Configuration conf,
-		IClientState clientState,
+		IPlayerState playerState,
 		ScoutHelperOptions options,
 		ITerritoryManager territoryManager,
 		HuntMarkManager huntMarkManager,
@@ -58,7 +58,7 @@ public partial class TurtleManager : IDisposable {
 		_log = log;
 		_chat = chat;
 		_conf = conf;
-		_clientState = clientState;
+		_playerState = playerState;
 		_huntMarkManager = huntMarkManager;
 		_mobManager = mobManager;
 
@@ -168,7 +168,7 @@ public partial class TurtleManager : IDisposable {
 				_log,
 				new TurtleTrainSpawnOccupiedRequest(
 					_currentCollabPassword,
-					_clientState.PlayerTag().Where(_ => _conf.IncludeNameInTurtleSession),
+					_playerState.PlayerTag().AsMaybe().Where(_ => _conf.IncludeNameInTurtleSession),
 					mob.TerritoryId,
 					mob.Instance.AsTurtleInstance(),
 					mob.Position,
@@ -199,7 +199,7 @@ public partial class TurtleManager : IDisposable {
 				_log,
 				new TurtleTrainUpdateRequest(
 					_currentCollabPassword,
-					_clientState.PlayerTag().Where(_ => _conf.IncludeNameInTurtleSession),
+					_playerState.PlayerTag().AsMaybe().Where(_ => _conf.IncludeNameInTurtleSession),
 					turtleSupportedMobs.Select(mob =>
 						(TerritoryIdToTurtleData[mob.TerritoryId].TurtleId,
 							mob.Instance.AsTurtleInstance(),
