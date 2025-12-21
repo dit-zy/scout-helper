@@ -5,6 +5,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text.RegularExpressions;
 using CSharpFunctionalExtensions;
+using Dalamud.Game.Text;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using DitzyExtensions.Functional;
@@ -33,13 +34,16 @@ public static partial class XivExtensions {
 			dataFilename
 		);
 
-	public static void TaggedPrint(this IChatGui chatGui, string message) {
-		chatGui.Print(message, Plugin.Name);
-	}
+	public static void TaggedPrint(this IChatGui chatGui, string message) =>
+		chatGui.Print(
+			new XivChatEntry {
+				Type = XivChatType.Echo,
+				Message = $"[{Plugin.Name}] {message}",
+			}
+		);
 
-	public static void TaggedPrintError(this IChatGui chatGui, string message) {
+	public static void TaggedPrintError(this IChatGui chatGui, string message) =>
 		chatGui.PrintError(message, Plugin.Name);
-	}
 
 	public static Maybe<TrainMob> FindMob(this IEnumerable<TrainMob> mobList, uint mobId, uint? instance = null) =>
 		Maybe.From(mobList.FirstOrDefault(mob => mob.MobId == mobId && mob.Instance == instance));
